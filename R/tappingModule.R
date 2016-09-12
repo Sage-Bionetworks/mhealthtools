@@ -18,10 +18,8 @@ process_medicationChoiceAnswers <- function(json_file) {
     })
 }
 
-
 shapeTappingData <- function(tapData) {
-    tapData <- tapData %>%
-      dplyr::mutate(TapCoordinate = str_replace_all(TapCoordinate,"[{}}]", "")) %>%
+    tapData <- dplyr::mutate(tapData, TapCoordinate = stringr::str_replace_all(TapCoordinate,"[{}}]", "")) %>%
       tidyr::separate(TapCoordinate,into = c("X", "Y"), sep = ",") %>%
       dplyr::mutate(X = as.numeric(X),Y = as.numeric(Y)) %>%
       dplyr::mutate(time = TapTimeStamp,buttonid = TappedButtonId) %>%
@@ -29,15 +27,13 @@ shapeTappingData <- function(tapData) {
     return(tapData)
 }
 
-GetLeftRightEventsAndTapIntervals <- function(tapData,
-    depressThr = 0) {
+GetLeftRightEventsAndTapIntervals <- function(tapData, depressThr = 0) {
     tapTime <- tapData$time - tapData$time[1]
     ## calculate X offset
     tapX <- tapData$X - mean(tapData$X)
     ## find left/right finger 'depress' event
     dX <- diff(tapX)
-    i <- c(1, which(abs(dX) > depressThr) +
-        1)
+    i <- c(1, which(abs(dX) > depressThr) + 1)
     ## filter data
     tapData <- tapData[i, ]
     tapTime <- tapTime[i]
@@ -83,10 +79,8 @@ ComputeTappingFeatures <- function(tapData,
     meanX <- mean(tapData$X)
     iL <- tapData$X < meanX
     iR <- tapData$X >= meanX
-    driftLeft <- calculateDrift(tapData[iL,
-        "X"], tapData[iL, "Y"])
-    driftRight <- calculateDrift(tapData[iR,
-        "X"], tapData[iR, "Y"])
+    driftLeft <- calculateDrift(tapData[iL,"X"], tapData[iL, "Y"])
+    driftRight <- calculateDrift(tapData[iR,"X"], tapData[iR, "Y"])
 
     # determine Autocorrelation
     auxAcf <- try(acf(tapInter, lag.max = 2,
@@ -97,17 +91,18 @@ ComputeTappingFeatures <- function(tapData,
     auxFatigue <- Fatigue(tapInter)
 
     # other features
-    data.frame(meanTapInter = mean(tapInter,
-        na.rm = TRUE), medianTapInter = median(tapInter,
-        na.rm = TRUE), iqrTapInter = IQR(tapInter,
-        type = 7, na.rm = TRUE), minTapInter = min(tapInter,
-        na.rm = TRUE), maxTapInter = max(tapInter,
-        na.rm = TRUE), skewTapInter = Skewness(tapInter),
-        kurTapInter = Kurtosis(tapInter), sdTapInter = sd(tapInter,
-            na.rm = TRUE), madTapInter = mad(tapInter,
-            na.rm = TRUE), cvTapInter = Cv(tapInter),
-        rangeTapInter = diff(range(tapInter,
-            na.rm = TRUE)), tkeoTapInter = MeanTkeo(tapInter),
+    data.frame(meanTapInter = mean(tapInter,na.rm = TRUE),
+        medianTapInter = median(tapInter, na.rm = TRUE),
+        iqrTapInter = IQR(tapInter, type = 7, na.rm = TRUE),
+        minTapInter = min(tapInter,na.rm = TRUE),
+        maxTapInter = max(tapInter, na.rm = TRUE),
+        skewTapInter = Skewness(tapInter),
+        kurTapInter = Kurtosis(tapInter),
+        sdTapInter = sd(tapInter,na.rm = TRUE),
+        madTapInter = mad(tapInter, na.rm = TRUE),
+        cvTapInter = Cv(tapInter),
+        rangeTapInter = diff(range(tapInter,na.rm = TRUE)),
+        tkeoTapInter = MeanTkeo(tapInter),
         ar1TapInter = auxAcf[[2]], ar2TapInter = auxAcf[[3]],
         fatigue10TapInter = auxFatigue[[1]],
         fatigue25TapInter = auxFatigue[[2]],
@@ -183,8 +178,7 @@ createErrorResult <- function(error) {
 #' sample_Tapping_File <-'syn7067514'
 #' tappingJsonFile <- synGet(sample_Tapping_File)@filePath
 #' getTappingFeatures(tappingJsonFile)
-getTappingFeatures <- function(tappingJsonFile,
-    depressThr = 20) {
+getTappingFeatures <- function(tappingJsonFile, depressThr = 20) {
     tapData <- readTappingFile(tappingJsonFile)
     error <- tapData$error
     tapData <- tapData$data
@@ -198,8 +192,7 @@ getTappingFeatures <- function(tappingJsonFile,
         # shape data
         tapData <- shapeTappingData(tapData)
         # compute the tapping features
-        tapFeatures <- ComputeTappingFeatures(tapData,
-            depressThr)
+        tapFeatures <- ComputeTappingFeatures(tapData,depressThr)
     }
     tapFeatures
 }

@@ -4,8 +4,8 @@ Title: mPowerTools - Modules for processing data from mPower apps
 Version: 0.1.0
 Author: c(
           person("Abhishek", "Pratap", email = "apratap@sagebase.org", role = c("aut", "cre"))
-          person("Elias", "Chaibub Neto", email = "elias.chaibub.neto@sagebase.org", role = c("aut"))
-          person("Thanneer", "Perumal", email = "thanneer.perumal@sagebase.org", role = c("aut"))
+          person("Elias", "Chaibub Neto", email = "elias.chaibub.neto@sagebase.org", role = c("ctb"))
+          person("Thanneer", "Perumal", email = "thanneer.perumal@sagebase.org", role = c("ctb"))
 Maintainer: Abhishek Pratap <apratap@sagebase.org>
 Description: More about what it does (maybe more than one line)
 License: GPL-3
@@ -21,5 +21,7 @@ Imports: plyr,
          fractal,
          lomb,
          changepoint,
-         pracma
+         pracma,
+         stringr
+URL: http://www.sagebase.org
 RoxygenNote: 5.0.1.9000

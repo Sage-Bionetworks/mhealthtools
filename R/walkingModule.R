@@ -71,6 +71,12 @@ ShapeGaitData <- function(dat) {
 #' @param walking_json_file path to walking accelerometer json file
 #' @return data frame of walking features
 #' @export
+#' @examples
+#' library(synapseClient)
+#' synapseLogin()
+#' sample_walking_File <-'syn7077340'
+#' walkingJsonFile <- synGet(sample_walking_File)@filePath
+#' getWalkFeatures(walkingJsonFile)
 
 getWalkFeatures <- function(walking_json_file) {
     if (is.na(walking_json_file) == T) {
@@ -100,7 +106,7 @@ getWalkFeatures <- function(walking_json_file) {
         return(null_result)
     }
 
-    dat <- fromJSON(walking_json_file)
+    dat <- jsonlite::fromJSON(walking_json_file)
     dat <- ShapeGaitData(dat)
     x <- dat$x
     y <- dat$y

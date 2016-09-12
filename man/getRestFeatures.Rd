@@ -2,7 +2,7 @@
 % Please edit documentation in R/restModule.R
 \name{getRestFeatures}
 \alias{getRestFeatures}
-\title{extracts features from accelerometer data file}
+\title{extracts features from accelerometer rest data file}
 \usage{
 getRestFeatures(restAccel_json_file)
 }
@@ -13,6 +13,15 @@ getRestFeatures(restAccel_json_file)
 data frame of rest features
 }
 \description{
-extracts features from accelerometer data file
+extracts features from accelerometer rest data file
+}
+\examples{
+library(synapseClient)
+synapseLogin()
+walkingTable = synTableQuery("SELECT * FROM syn5713119")
+walkingTable = walkingTable@values
+sampleRow = rownames(walkingTable)[10]
+sample_restAccel_jsonFile <- synDownloadTableFile('syn5713119',sampleRow, 'accel_walking_rest.json.items')
+getRestFeatures(sample_restAccel_jsonFile)
 }
 

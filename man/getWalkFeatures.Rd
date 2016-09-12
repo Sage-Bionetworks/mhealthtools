@@ -15,4 +15,11 @@ data frame of walking features
 \description{
 extracts walking features from walking accelerometer JSON data file
 }
+\examples{
+library(synapseClient)
+synapseLogin()
+sample_walking_File <-'syn7077340'
+walkingJsonFile <- synGet(sample_walking_File)@filePath
+getWalkFeatures(walkingJsonFile)
+}
 

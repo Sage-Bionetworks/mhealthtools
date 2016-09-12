@@ -2,8 +2,10 @@
 
 shapeRestData <- function(restData) {
     timestamp <- restData$timestamp - restData$timestamp[1]
-    accel <- restData$userAcceleration * 9.8
-    data <- cbind(timestamp, accel)
+    x <- restData$x * 9.8
+    y <- restData$y * 9.8
+    z <- restData$z * 9.8
+    data <- cbind(timestamp, x, y, z)
     data
 }
 
@@ -24,7 +26,7 @@ Turning <- function(dat, Q = 30, msl = 100) {
     list(dat = dat, turningTime = turningTime)
 }
 
-
+#dat <- restData
 GetBalanceFeatures <- function(dat) {
     dat <- Turning(dat)
     turningTime <- dat$turningTime
@@ -36,42 +38,33 @@ GetBalanceFeatures <- function(dat) {
     ###############################
     meanAA <- mean(aa, na.rm = TRUE)
     sdAA <- sd(aa, na.rm = TRUE)
-    modeAA <- Mode(aa)
+    modeAA <- pracma::Mode(aa)
     skewAA <- Skewness(aa)
     kurAA <- Kurtosis(aa)
-    auxAA <- quantile(aa, probs = c(0, 0.25,
-        0.5, 0.75, 1), na.rm = TRUE)
+    auxAA <- quantile(aa, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
     q1AA <- auxAA[[2]]
     medianAA <- auxAA[[3]]
     q3AA <- auxAA[[4]]
     iqrAA <- q3AA - q1AA
     rangeAA <- auxAA[[5]] - auxAA[[1]]
-    acfAA <- acf(aa, lag.max = 1, plot = FALSE)$acf[2,
-        1, 1]
+    acfAA <- acf(aa, lag.max = 1, plot = FALSE)$acf[2, 1, 1]
     zcrAA <- ZCR(aa)
-    dfaAA <- DFA(aa, sum.order = 1)[[1]]
-    out <- c(meanAA, sdAA, modeAA, skewAA, kurAA,
-        q1AA, medianAA, q3AA, iqrAA, rangeAA,
-        acfAA, zcrAA, dfaAA, turningTime)
-    names(out) <- c("meanAA", "sdAA", "modeAA",
-        "skewAA", "kurAA", "q1AA", "medianAA",
-        "q3AA", "iqrAA", "rangeAA", "acfAA",
-        "zcrAA", "dfaAA", "turningTime")
+    dfaAA <- fractal::DFA(aa, sum.order = 1)[[1]]
+    out <- c(meanAA, sdAA, modeAA, skewAA, kurAA, q1AA, medianAA, q3AA, iqrAA, rangeAA,
+            acfAA, zcrAA, dfaAA, turningTime)
+    names(out) <- c("meanAA", "sdAA", "modeAA","skewAA", "kurAA", "q1AA", "medianAA",
+        "q3AA", "iqrAA", "rangeAA", "acfAA", "zcrAA", "dfaAA", "turningTime")
     bpa <- FeaturesBpa(dat)
     dis <- BoxVolumeFeature(dat)
-    df <- do.call(cbind, list(out, bpa, dis))
-    # colNames <- names(df) df <- data.frame(df)
-    # colnames(df) <- names(colNames) df
-    df
+    c(out,bpa,dis)
 }
-
 
 Turning <- function(dat, Q = 30, msl = 100) {
     aa <- sqrt(dat[, "x"]^2 + dat[, "y"]^2 +
         dat[, "z"]^2)
-    aux <- cpt.mean(aa, Q = Q, minseglen = msl,
+    aux <- changepoint::cpt.mean(aa, Q = Q, minseglen = msl,
         penalty = "BIC", method = "BinSeg")
-    cp <- cpts(aux)
+    cp <- changepoint::cpts(aux)
     if (length(cp) > 0) {
         cp <- cp[length(cp)]
         dat <- dat[-seq(cp), ]
@@ -91,28 +84,23 @@ FeaturesBpa <- function(post) {
     # Orientation
     mg <- apply(post, 2, mean)
     # Orientation-corrected force signals
-    postforce <- post - matrix(rep(mg, N), N,
-        3, byrow = TRUE)
+    postforce <- post - matrix(rep(mg, N), N, 3, byrow = TRUE)
     # Scaled velocity signals
     dt <- diff(time)
     dt <- c(dt, dt[length(dt)])
-    postvel <- apply(postforce * matrix(rep(dt,
-        3), ncol = 3), 2, cumsum)
+    postvel <- apply(postforce * matrix(rep(dt, 3), ncol = 3), 2, cumsum)
     # Average scaled power X, Y, Z
-    postpower <- mean(apply(0.5 * 70 * postvel^2,
-        2, sum)/dTime)/10000
+    postpower <- mean(apply(0.5 * 70 * postvel^2, 2, sum)/dTime)/10000
     # Force vector magnitude signal
     postmag <- sqrt(apply(postforce^2, 1, sum))
     # Maximum force
-    postpeak <- as.numeric(quantile(postmag,
-        0.95))/10
+    postpeak <- as.numeric(quantile(postmag, 0.95))/10
     # Detrended fluctuation analysis scaling
     # exponent
-    alpha <- DFA(postmag, sum.order = 1)[[1]]
+    alpha <- fractal::DFA(postmag, sum.order = 1)[[1]]
     # Output posture test feature vector
     ft <- c(postpeak, postpower, alpha)
-    names(ft) <- c("postpeak", "postpower",
-        "alpha")
+    names(ft) <- c("postpeak", "postpower","alpha")
     ft
 }
 
@@ -171,28 +159,27 @@ BoxVolumeFeature <- function(x) {
 
 
 createErrorResult <- function(error) {
-    df <- data.frame(t(c(rep(NA, 42), error)))
-    colnames(df) <- c("meanAA", "sdAA", "modeAA",
-        "skewAA", "kurAA", "q1AA", "medianAA",
-        "q3AA", "iqrAA", "rangeAA", "acfAA",
-        "zcrAA", "dfaAA", "turningTime", "postpeak",
-        "postpower", "alpha", "dVol", "ddVol",
-        "error")
-    df
+    error <- c(rep(NA, 42), error)
+    names(error) <- c("meanAA", "sdAA", "modeAA", "skewAA", "kurAA", "q1AA", "medianAA",
+        "q3AA", "iqrAA", "rangeAA", "acfAA", "zcrAA", "dfaAA", "turningTime", "postpeak",
+        "postpower", "alpha", "dVol", "ddVol", "error")
+    error
 }
 
-# results <- shapeData(restAccel_json_file)
-# restData <- results$data error <-
-# results$error
-
-
 ####### MAIN
-#' extracts features from accelerometer data file
-#'
+#' extracts features from accelerometer rest data file
 #'
 #' @param restAccel_json_file path to accelerometer json file
 #' @return data frame of rest features
 #' @export
+#' @examples
+#' library(synapseClient)
+#' synapseLogin()
+#' walkingTable = synTableQuery("SELECT * FROM syn5713119")
+#' walkingTable = walkingTable@values
+#' sampleRow = rownames(walkingTable)[10]
+#' sample_restAccel_jsonFile <- synDownloadTableFile('syn5713119',sampleRow, 'accel_walking_rest.json.items')
+#' getRestFeatures(sample_restAccel_jsonFile)
 getRestFeatures <- function(restAccel_json_file) {
     results <- readJsonFile(restAccel_json_file)
     restData <- results$data
@@ -209,7 +196,6 @@ getRestFeatures <- function(restAccel_json_file) {
         # compute the Rest features
         restFeatures <- GetBalanceFeatures(restData)
     }
-    restFeatures
 }
 
 

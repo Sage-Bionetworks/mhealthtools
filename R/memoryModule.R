@@ -14,7 +14,7 @@ processCoordLine <- function(x) {
 }
 
 getFlowerCenters <- function(iphone_coord_list) {
-    res <- ldply(iphone_coord_list, function(x) {
+    res <- plyr::ldply(iphone_coord_list, function(x) {
         r <- processCoordLine(x)
         # iphone coordinate system ref:
         # http://www.idev101.com/code/User_Interface/view_frames_bounds.html
@@ -36,45 +36,54 @@ getFlowerCenters <- function(iphone_coord_list) {
 process_subseq_in_a_game <- function(game_subsequence) {
     flowerCenters <- getFlowerCenters(game_subsequence$TargetRects[[1]])
     userTouchInfo <- game_subsequence$TouchSamples[[1]]
-    colnames(userTouchInfo) <- gsub("MemoryGameTouchSample",
-        "", colnames(userTouchInfo))
-    userTouchInfo$TargetIndex = userTouchInfo$TargetIndex +
-        1  #convert C 0-based indices to R 1-based
+    colnames(userTouchInfo) <- gsub("MemoryGameTouchSample","", colnames(userTouchInfo))
+    userTouchInfo$TargetIndex = userTouchInfo$TargetIndex + 1  #convert C 0-based indices to R 1-based
     userTouchInfo$userSequence <- userTouchInfo$TargetIndex
     userTouchInfo$TargetIndex <- NULL
-    origSeqeunce <- unlist(strsplit(game_subsequence$Sequence,
-        ","))
+    origSeqeunce <- unlist(strsplit(game_subsequence$Sequence,","))
     # ref //
     # http://www.inside-r.org/packages/cran/qpcR/docs/cbind.na
     # and
     # https://stackoverflow.com/questions/28080881/could-not-find-function-cbind-na
-    userTouchInfo <- qpcR:::cbind.na(origSeqeunce,
-        userTouchInfo)
+    userTouchInfo <- qpcR:::cbind.na(origSeqeunce,userTouchInfo)
 
-    temp_coords <- t(sapply(userTouchInfo$Location,
-        processCoordLine))
-    userTouchInfo["user_x_coord"] = as.numeric(temp_coords[,
-        1])
-    userTouchInfo["user_y_coord"] = as.numeric(temp_coords[,
-        2])
+    temp_coords <- t(sapply(userTouchInfo$Location,processCoordLine))
+    userTouchInfo["user_x_coord"] = as.numeric(temp_coords[,1])
+    userTouchInfo["user_y_coord"] = as.numeric(temp_coords[,2])
     userTouchInfo["game_subseqeunce_order"] = seq(1:nrow(userTouchInfo))
-    userTouchInfo <- merge(flowerCenters, userTouchInfo,
-        by.x = "flower_num", by.y = "origSeqeunce",
-        all.y = T, sort = F) %>% arrange(game_subseqeunce_order)
-    userTouchInfo["distance"] = sqrt((userTouchInfo$x_midpoint -
-        userTouchInfo$user_x_coord)^2 + (userTouchInfo$y_midpoint -
+    userTouchInfo <- merge(flowerCenters, userTouchInfo, by.x = "flower_num",
+                           by.y = "origSeqeunce", all.y = T, sort = F) %>%
+      dplyr::arrange(game_subseqeunce_order)
+    userTouchInfo["distance"] = sqrt( (userTouchInfo$x_midpoint - userTouchInfo$user_x_coord)^2 + (userTouchInfo$y_midpoint -
         userTouchInfo$user_y_coord)^2)
     # calculate time delta between flower
     # touches
-    oneOffTimeStamps <- c(0, userTouchInfo$Timestamp[1:nrow(userTouchInfo) -
-        1])
-    userTouchInfo$deltaTime <- userTouchInfo$Timestamp -
-        oneOffTimeStamps
+    oneOffTimeStamps <- c(0, userTouchInfo$Timestamp[1:nrow(userTouchInfo) - 1])
+    userTouchInfo$deltaTime <- userTouchInfo$Timestamp - oneOffTimeStamps
     userTouchInfo
 }
 
 
-process_memoryGame_module <- function(game_json_file) {
+####### MAIN
+#' extracts memory game features from mPower game JSON data file
+#'
+#'
+#' @param game_json_file path to game records json file
+#' @return data frame of memory game features
+#' @export
+#' @examples
+#' library(synapseClient)
+#' synapseLogin()
+#' memoryTable = synTableQuery("SELECT * FROM syn5713115")
+#' memoryTable = memoryTable@values
+#' sampleRow = rownames(memoryTable)[1]
+#' sample_gameRecord_File <- synDownloadTableFile('syn5713115', sampleRow,
+#' "MemoryGameResults.json.MemoryGameGameRecords")
+#' getMemoryGameFeatures(sample_gameRecord_File)
+
+
+
+getMemoryGameFeatures <- function(game_json_file) {
     return_colnames <- c("flowerMatrixSize",
         "GameSize", "GameScore", "Seed", "Sequence",
         "Status", "flower_num", "x_cord", "y_cord",
@@ -94,29 +103,24 @@ process_memoryGame_module <- function(game_json_file) {
     tryCatch({
         game <- jsonlite::fromJSON(game_json_file)
     }, error = function(err) {
-        print(paste("Error: unable to read game JSON file: ",
-            game_json_file))
+        print(paste("Error: unable to read game JSON file: ", game_json_file))
         null_result <- as.data.frame(t(null_result))
         colnames(null_result) <- return_colnames
         return(null_result)
     })
     tryCatch({
-        game <- game %>% filter(!MemoryGameStatus ==
-            "MemoryGameStatusTimeout")
-        colnames(game) <- gsub("MemoryGameRecord",
-            "", colnames(game))
-        colnames(game) <- gsub("MemoryGameStatus",
-            "Status", colnames(game))
+        game <- game %>% dplyr::filter(!MemoryGameStatus == "MemoryGameStatusTimeout")
+        colnames(game) <- gsub("MemoryGameRecord", "", colnames(game))
+        colnames(game) <- gsub("MemoryGameStatus", "Status", colnames(game))
         game["flowerMatrixSize"] = game$GameSize
         game["GameSize"] = unlist(lapply(game$Sequence,
             length))
         game$Sequence <- unlist(lapply(game$Sequence,
             function(x) paste(x + 1, collapse = ",")))
-        df <- ddply(.data = game, .variables = c("flowerMatrixSize",
+        df <- plyr::ddply(.data = game, .variables = c("flowerMatrixSize",
             "GameSize", "GameScore", "Seed",
             "Sequence", "Status"), .fun = process_subseq_in_a_game) %>%
-            arrange(flowerMatrixSize, GameSize,
-                game_subseqeunce_order)
+            dplyr::arrange(flowerMatrixSize, GameSize, game_subseqeunce_order)
     }, error = function(err) {
         print(paste("Error: ", err))
         null_result <- c(rep(NA, 23), "unable to process game record from JSON file")
@@ -128,15 +132,5 @@ process_memoryGame_module <- function(game_json_file) {
 }
 
 
-process_medicationChoiceAnswers <- function(json_file) {
-    tryCatch({
-        d <- jsonlite::fromJSON(json_file)
-        data.frame(medication = paste(unique(d$identifier),
-            collapse = "+"), medicationTime = paste(unique(d$answer),
-            collapse = "+"))
-    }, error = function(err) {
-        data.frame(medication = "NA", medicationTime = "NA")
-    })
-}
 
 

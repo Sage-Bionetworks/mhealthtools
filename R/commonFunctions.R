@@ -1,6 +1,39 @@
 ######## utility functions
 
 
+process_medicationChoiceAnswers <- function(json_file) {
+  tryCatch({
+    d <- jsonlite::fromJSON(json_file)
+    data.frame(medication = paste(unique(d$identifier),
+                                  collapse = "+"), medicationTime = paste(unique(d$answer),
+                                                                          collapse = "+"))
+  }, error = function(err) {
+    data.frame(medication = "NA", medicationTime = "NA")
+  })
+}
+
+
+
+synapse_downLoadTableFile <- function(table, row, column){
+  tryCatch({
+    return(synDownloadTableFile(table, row, column))
+  }, error=function(err){
+    print(paste('Error: ',err))
+    print(row)
+    return(NA)
+  })
+}
+
+readJsonFile <- function(jsonFile){
+  tryCatch({
+    data <- jsonlite::fromJSON(jsonFile)
+    list(data=data, error=FALSE)
+  }, error = function(err){
+    #print('Unable to read JSON file')
+    list(data=NA, error=TRUE)
+  })
+}
+
 calculateDrift <- function(x, y) {
   dx <- diff(x, lag = 1)
   dy <- diff(y, lag = 1)
