@@ -37,10 +37,14 @@ GetBalanceFeatures <- function(dat) {
         "q3AA", "iqrAA", "rangeAA", "acfAA", "zcrAA", "dfaAA", "turningTime")
     bpa <- FeaturesBpa(dat)
     dis <- BoxVolumeFeature(dat)
-    res <- c(out,bpa,dis)
-    df <-data.frame(t(res))
-    colnames(df) <- names(res)
-    df
+
+    # features
+    features <- c(out, bpa, dis, 'error'='None')
+    # df <- data.frame(t(features))
+    # colnames(df) <- names(features)
+    # df['error'] = 'None'
+    # df
+
 }
 
 Turning <- function(dat, Q = 30, msl = 100) {
@@ -139,14 +143,13 @@ BoxVolumeFeature <- function(x) {
     vols
 }
 
-createErrorResult <- function(error) {
-    error <- data.frame(t(c(rep(NA, 19), error)))
-    colnames(error) <- c("meanAA", "sdAA", "modeAA", "skewAA", "kurAA", "q1AA", "medianAA",
+createRestFeaturesErrorResult <- function(error) {
+    features <- c(rep(NA, 19), error)
+    names(features) <- c("meanAA", "sdAA", "modeAA", "skewAA", "kurAA", "q1AA", "medianAA",
          "q3AA", "iqrAA", "rangeAA", "acfAA", "zcrAA", "dfaAA", "turningTime", "postpeak",
          "postpower", "alpha", "dVol", "ddVol", "error")
-    error
+    features
 }
-
 
 ####### MAIN
 #' extracts features from accelerometer rest data file
@@ -167,11 +170,11 @@ getRestFeatures <- function(restAccel_json_file) {
     restData <- results$data
     error <- results$error
     if (error == T) {
-        restFeatures <- createErrorResult("unable to read JSON file")
+        restFeatures <- createRestFeaturesErrorResult("unable to read JSON file")
     } else if (is.data.frame(restData) == F) {
-        restFeatures <- createErrorResult("expected data frame after reading rest accelerator json file")
+        restFeatures <- createRestFeaturesErrorResult("expected data frame after reading rest accelerator json file")
     } else if (nrow(restData) < 5) {
-        restFeatures <- createErrorResult("rest features data frame has less than 5 rows")
+        restFeatures <- createRestFeaturesErrorResult("rest features data frame has less than 5 rows")
     } else {
         # shape data
         restData <- shapeRestData(restData)

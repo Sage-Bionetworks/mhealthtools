@@ -144,7 +144,7 @@ readTappingFile <- function(tappingJsonFile) {
 }
 
 
-createErrorResult <- function(error) {
+createTappingFeaturesErrorResult <- function(error) {
     df <- data.frame(t(c(rep(NA, 42), error)))
     colnames(df) <- c("meanTapInter", "medianTapInter",
         "iqrTapInter", "minTapInter", "maxTapInter",
@@ -183,11 +183,11 @@ getTappingFeatures <- function(tappingJsonFile, depressThr = 20) {
     error <- tapData$error
     tapData <- tapData$data
     if (error == T) {
-        tapFeatures <- createErrorResult("unable to read JSON file")
+        tapFeatures <- createTappingFeaturesErrorResult("unable to read JSON file")
     } else if (is.data.frame(tapData) == F) {
-        tapFeatures <- createErrorResult("expected data frame after reading tapping json file")
+        tapFeatures <- createTappingFeaturesErrorResult("expected data frame after reading tapping json file")
     } else if (nrow(tapData) < 5) {
-        tapFeatures <- createErrorResult("tapping data frame has less than 5 rows")
+        tapFeatures <- createTappingFeaturesErrorResult("tapping data frame has less than 5 rows")
     } else {
         # shape data
         tapData <- shapeTappingData(tapData)
