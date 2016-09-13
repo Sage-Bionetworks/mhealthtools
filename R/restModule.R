@@ -7,22 +7,6 @@ shapeRestData <- function(restData){
   data
 }
 
-Turning <- function(dat, Q = 30, msl = 100) {
-    aa <- sqrt(dat[, "x"]^2 + dat[, "y"]^2 +
-        dat[, "z"]^2)
-    aux <- cpt.mean(aa, Q = Q, minseglen = msl,
-        penalty = "BIC", method = "BinSeg")
-    cp <- cpts(aux)
-    if (length(cp) > 0) {
-        cp <- cp[length(cp)]
-        dat <- dat[-seq(cp), ]
-        turningTime <- cp/100
-    } else {
-        turningTime <- 0
-    }
-    list(dat = dat, turningTime = turningTime)
-}
-
 #dat <- restData
 GetBalanceFeatures <- function(dat) {
     dat <- Turning(dat)
@@ -53,12 +37,14 @@ GetBalanceFeatures <- function(dat) {
         "q3AA", "iqrAA", "rangeAA", "acfAA", "zcrAA", "dfaAA", "turningTime")
     bpa <- FeaturesBpa(dat)
     dis <- BoxVolumeFeature(dat)
-    c(out,bpa,dis)
+    res <- c(out,bpa,dis)
+    df <-data.frame(t(res))
+    colnames(df) <- names(res)
+    df
 }
 
 Turning <- function(dat, Q = 30, msl = 100) {
-    aa <- sqrt(dat[, "x"]^2 + dat[, "y"]^2 +
-        dat[, "z"]^2)
+    aa <- sqrt(dat[, "x"]^2 + dat[, "y"]^2 + dat[, "z"]^2)
     aux <- changepoint::cpt.mean(aa, Q = Q, minseglen = msl,
         penalty = "BIC", method = "BinSeg")
     cp <- changepoint::cpts(aux)
@@ -100,7 +86,6 @@ FeaturesBpa <- function(post) {
     names(ft) <- c("postpeak", "postpower","alpha")
     ft
 }
-
 
 GetDisplacement <- function(time, accel) {
     deltaTime <- diff(time)
@@ -154,14 +139,14 @@ BoxVolumeFeature <- function(x) {
     vols
 }
 
-
 createErrorResult <- function(error) {
-    error <- c(rep(NA, 42), error)
-    names(error) <- c("meanAA", "sdAA", "modeAA", "skewAA", "kurAA", "q1AA", "medianAA",
-        "q3AA", "iqrAA", "rangeAA", "acfAA", "zcrAA", "dfaAA", "turningTime", "postpeak",
-        "postpower", "alpha", "dVol", "ddVol", "error")
+    error <- data.frame(t(c(rep(NA, 19), error)))
+    colnames(error) <- c("meanAA", "sdAA", "modeAA", "skewAA", "kurAA", "q1AA", "medianAA",
+         "q3AA", "iqrAA", "rangeAA", "acfAA", "zcrAA", "dfaAA", "turningTime", "postpeak",
+         "postpower", "alpha", "dVol", "ddVol", "error")
     error
 }
+
 
 ####### MAIN
 #' extracts features from accelerometer rest data file

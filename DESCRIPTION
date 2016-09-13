@@ -22,6 +22,7 @@ Imports: plyr,
          lomb,
          changepoint,
          pracma,
-         stringr
+         stringr,
+         magrittr
 URL: http://www.sagebase.org
 RoxygenNote: 5.0.1.9000
