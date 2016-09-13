@@ -72,7 +72,7 @@ ComputeTappingFeatures <- function(tapData,
     # check error - if after cleaning tapping
     # data less than 5 points remains
     if (error == TRUE) {
-        tapFeatures <- createErrorResult("post cleaning less than 5 tap points remain")
+        tapFeatures <- createTappingFeaturesErrorResult("post cleaning less than 5 tap points remain")
         return(tapFeatures)
     }
 
