@@ -1,14 +1,11 @@
 ############################### balance and turn functions
 
-shapeRestData <- function(restData) {
-    timestamp <- restData$timestamp - restData$timestamp[1]
-    x <- restData$x * 9.8
-    y <- restData$y * 9.8
-    z <- restData$z * 9.8
-    data <- cbind(timestamp, x, y, z)
-    data
+shapeRestData <- function(restData){
+  timestamp <- restData$timestamp - restData$timestamp[1]
+  accel <- restData$userAcceleration * 9.8
+  data <- cbind(timestamp, accel)
+  data
 }
-
 
 Turning <- function(dat, Q = 30, msl = 100) {
     aa <- sqrt(dat[, "x"]^2 + dat[, "y"]^2 +
