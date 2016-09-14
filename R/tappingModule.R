@@ -55,10 +55,9 @@ Fatigue <- function(x) {
     top10 <- round(0.1 * n)
     top25 <- round(0.25 * n)
     top50 <- floor(0.5 * n)
-    list(fatigue10 = mean(x[1:top10]) - mean(x[(n -
-        top10):n]), fatigue25 = mean(x[1:top25]) -
-        mean(x[(n - top25):n]), fatigue50 = mean(x[1:top50]) -
-        mean(x[(n - top50):n]))
+    list(fatigue10 = mean(x[1:top10]) - mean(x[(n -top10):n]),
+         fatigue25 = mean(x[1:top25]) - mean(x[(n - top25):n]),
+         fatigue50 = mean(x[1:top50]) - mean(x[(n - top50):n]))
 }
 
 ComputeTappingFeatures <- function(tapData,

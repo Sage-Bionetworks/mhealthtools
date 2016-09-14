@@ -40,11 +40,6 @@ GetBalanceFeatures <- function(dat) {
 
     # features
     features <- c(out, bpa, dis, 'error'='None')
-    # df <- data.frame(t(features))
-    # colnames(df) <- names(features)
-    # df['error'] = 'None'
-    # df
-
 }
 
 Turning <- function(dat, Q = 30, msl = 100) {
