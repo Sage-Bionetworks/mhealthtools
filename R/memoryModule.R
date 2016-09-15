@@ -63,6 +63,37 @@ process_subseq_in_a_game <- function(game_subsequence) {
     userTouchInfo
 }
 
+createMemoryFeaturesErrorResult <- function(error) {
+  features <- data.frame(t(c(rep(NA, 22), error)))
+  colnames(features) <- c("flowerMatrixSize", "GameSize", "GameScore", "Seed", "Sequence",
+                           "Status", "flower_num", "x_cord", "y_cord",
+                           "width", "height", "x_midpoint", "y_midpoint",
+                           "Timestamp", "Location", "IsCorrect",
+                           "userSequence", "user_x_coord", "user_y_coord",
+                           "game_subseqeunce_order", "distance",
+                           "deltaTime", "error")
+
+  features
+}
+
+processGame <- function(game){
+  game <- game %>% dplyr::filter(!MemoryGameStatus == "MemoryGameStatusTimeout")
+  colnames(game) <- gsub("MemoryGameRecord", "", colnames(game))
+  colnames(game) <- gsub("MemoryGameStatus", "Status", colnames(game))
+  game["flowerMatrixSize"] = game$GameSize
+  game["GameSize"] = unlist(lapply(game$Sequence,
+                                   length))
+  game$Sequence <- unlist(lapply(game$Sequence,
+                                 function(x) paste(x + 1, collapse = ",")))
+  df <- plyr::ddply(.data = game, .variables = c("flowerMatrixSize",
+                                                 "GameSize", "GameScore", "Seed",
+                                                 "Sequence", "Status"), .fun = process_subseq_in_a_game) %>%
+    dplyr::arrange(flowerMatrixSize, GameSize, game_subseqeunce_order)
+
+  return(df)
+}
+
+
 
 ####### MAIN
 #' extracts memory game features from mPower game JSON data file
@@ -80,52 +111,25 @@ process_subseq_in_a_game <- function(game_subsequence) {
 #' sample_gameRecord_File <- synDownloadTableFile('syn5713115', sampleRow,
 #' "MemoryGameResults.json.MemoryGameGameRecords")
 #' getMemoryGameFeatures(sample_gameRecord_File)
-
-
-
 getMemoryGameFeatures <- function(game_json_file) {
-    return_colnames <- c("flowerMatrixSize",
-        "GameSize", "GameScore", "Seed", "Sequence",
-        "Status", "flower_num", "x_cord", "y_cord",
-        "width", "height", "x_midpoint", "y_midpoint",
-        "Timestamp", "Location", "IsCorrect",
-        "userSequence", "user_x_coord", "user_y_coord",
-        "game_subseqeunce_order", "distance",
-        "deltaTime", "error")
 
     if (is.na(game_json_file) == T) {
-        null_result <- c(rep(NA, 23), "No JSON file present")
-        null_result <- as.data.frame(t(null_result))
-        colnames(null_result) <- return_colnames
+        null_result <- createMemoryFeaturesErrorResult("No JSON file present")
         return(null_result)
     }
 
     tryCatch({
         game <- jsonlite::fromJSON(game_json_file)
     }, error = function(err) {
-        print(paste("Error: unable to read game JSON file: ", game_json_file))
-        null_result <- as.data.frame(t(null_result))
-        colnames(null_result) <- return_colnames
-        return(null_result)
+      null_result = createMemoryFeaturesErrorResult('unable to read game JSON file')
+      return(null_result)
     })
+
     tryCatch({
-        game <- game %>% dplyr::filter(!MemoryGameStatus == "MemoryGameStatusTimeout")
-        colnames(game) <- gsub("MemoryGameRecord", "", colnames(game))
-        colnames(game) <- gsub("MemoryGameStatus", "Status", colnames(game))
-        game["flowerMatrixSize"] = game$GameSize
-        game["GameSize"] = unlist(lapply(game$Sequence,
-            length))
-        game$Sequence <- unlist(lapply(game$Sequence,
-            function(x) paste(x + 1, collapse = ",")))
-        df <- plyr::ddply(.data = game, .variables = c("flowerMatrixSize",
-            "GameSize", "GameScore", "Seed",
-            "Sequence", "Status"), .fun = process_subseq_in_a_game) %>%
-            dplyr::arrange(flowerMatrixSize, GameSize, game_subseqeunce_order)
+      gameFeatures <- processGame(game)
+      return(gameFeatures)
     }, error = function(err) {
-        print(paste("Error: ", err))
-        null_result <- c(rep(NA, 23), "unable to process game record from JSON file")
-        null_result <- as.data.frame(t(null_result))
-        colnames(null_result) <- return_colnames
+       null_result <- createMemoryFeaturesErrorResult("unable to process game record from JSON file")
         return(null_result)
     })
     return(df)
