@@ -1,4 +1,4 @@
-############################### balance and turn functions
+################## balance and turn functions
 
 shapeRestData <- function(restData){
   timestamp <- restData$timestamp - restData$timestamp[1]
@@ -31,9 +31,8 @@ GetBalanceFeatures <- function(dat) {
     acfAA <- acf(aa, lag.max = 1, plot = FALSE)$acf[2, 1, 1]
     zcrAA <- ZCR(aa)
 
-    tryCatch({
-      dfaAA <- fractal::DFA(aa, sum.order = 1)[[1]] },
-      error = function(err){ dfaAA = NA })
+    dfaAA <- tryCatch({ fractal::DFA(aa, sum.order = 1)[[1]] },
+                      error = function(err){ NA })
 
     out <- c(meanAA, sdAA, modeAA, skewAA, kurAA, q1AA, medianAA, q3AA, iqrAA, rangeAA,
             acfAA, zcrAA, dfaAA, turningTime)
@@ -84,7 +83,8 @@ FeaturesBpa <- function(post) {
     postpeak <- as.numeric(quantile(postmag, 0.95))/10
     # Detrended fluctuation analysis scaling
     # exponent
-    alpha <- fractal::DFA(postmag, sum.order = 1)[[1]]
+    alpha <- tryCatch({ fractal::DFA(postmag, sum.order = 1)[[1]] },
+                      error = function(err){ NA })
     # Output posture test feature vector
     ft <- c(postpeak, postpower, alpha)
     names(ft) <- c("postpeak", "postpower","alpha")
