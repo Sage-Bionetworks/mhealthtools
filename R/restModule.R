@@ -30,7 +30,11 @@ GetBalanceFeatures <- function(dat) {
     rangeAA <- auxAA[[5]] - auxAA[[1]]
     acfAA <- acf(aa, lag.max = 1, plot = FALSE)$acf[2, 1, 1]
     zcrAA <- ZCR(aa)
-    dfaAA <- fractal::DFA(aa, sum.order = 1)[[1]]
+
+    tryCatch({
+      dfaAA <- fractal::DFA(aa, sum.order = 1)[[1]] },
+      error = function(err){ dfaAA = NA })
+
     out <- c(meanAA, sdAA, modeAA, skewAA, kurAA, q1AA, medianAA, q3AA, iqrAA, rangeAA,
             acfAA, zcrAA, dfaAA, turningTime)
     names(out) <- c("meanAA", "sdAA", "modeAA","skewAA", "kurAA", "q1AA", "medianAA",
@@ -39,7 +43,8 @@ GetBalanceFeatures <- function(dat) {
     dis <- BoxVolumeFeature(dat)
 
     # features
-    features <- c(out, bpa, dis, 'error'='None')
+    restFeatures <- c(out, bpa, dis, 'error'='None')
+    return(restFeatures)
 }
 
 Turning <- function(dat, Q = 30, msl = 100) {
@@ -177,5 +182,8 @@ getRestFeatures <- function(restAccel_json_file) {
         restFeatures <- GetBalanceFeatures(restData)
     }
 }
+
+#######
+#######
 
 
