@@ -2,6 +2,7 @@
 
 export("%>%")
 export(getMemoryGameFeatures)
+export(getPedometerFeatures)
 export(getRestFeatures)
 export(getTappingFeatures)
 export(getWalkFeatures)

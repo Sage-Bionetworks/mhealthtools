@@ -131,25 +131,38 @@ getWalkFeatures <- function(walking_json_file) {
         error = NA)
 }
 
+
+
+####### MAIN
+#' extracts pedometer features from walking pedometer JSON data file
+#'
+#'
+#' @param pedo_json_file path to pedometerjson file
+#' @return data frame of pedometer features
+#' @export
+#' @examples
+#' library(synapseClient)
+#' synapseLogin()
+#' sample_walking_pedometer_json_file <-'syn7315780'
+#' pedometerJsonFile <- synGet(sample_walking_pedometer_json_file)@filePath
+#' getPedometerFeatures(pedometerJsonFile)
+
 getPedometerFeatures <- function(pedo_json_file) {
     if (is.na(pedo_json_file) == T) {
-        null_result = c(rep(NA, 5), error = "no json data file")
-        names(null_result) = c("floorsAscended",
-            "floorsDescended", "steps_time_in_seconds",
-            "numberOfSteps", "distance", "error")
+        null_result = c(rep(NA, 3), error = "no json data file")
+        names(null_result) = c("steps_time_in_seconds","numberOfSteps",
+                               "distance", "error")
         return(null_result)
     }
 
     pedoDat <- jsonlite::fromJSON(pedo_json_file)
     if (is.data.frame(pedoDat) == F) {
-        return(c(rep(NA, 5), error = "expected data frame after reading pedometer json file"))
+        return(c(rep(NA, 3), error = "expected data frame after reading pedometer json file"))
     }
 
     pedoDat <- pedoDat %>% mutate(steps_time_in_seconds = as.numeric(ymd_hms(endDate) -
         ymd_hms(startDate))) %>% arrange(steps_time_in_seconds) %>%
-        dplyr::select(floorsAscended, floorsDescended,
-            steps_time_in_seconds, numberOfSteps,
-            distance)
+        dplyr::select(steps_time_in_seconds, numberOfSteps,distance)
     res <- pedoDat[nrow(pedoDat), , drop = T]
     res["error"] = NA
     unlist(res)  # so return type is a character vector in each case
