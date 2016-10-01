@@ -36,19 +36,22 @@ SingleAxisFeatures <- function(x, t, varName) {
     acfX <- acf(x, lag.max = 1, plot = FALSE)$acf[2,
         1, 1]
     zcrX <- ZCR(x)
-    dfaX <- fractal::DFA(x, sum.order = 1)[[1]]
+    dfaX <- tryCatch({ fractal::DFA(x, sum.order = 1)[[1]] },
+                      error = function(err){ NA })
     cvX <- Cv(x)
     tkeoX <- MeanTkeo(x)
-    lspX <- lomb::lsp(cbind(t, x), plot = FALSE)
-    F0X <- lspX$peak.at[1]
-    P0X <- lspX$peak
+    lspX <- tryCatch({ lomb::lsp(cbind(time, x), plot = FALSE)},
+                     error = function(err) {NA})
+    F0X <- tryCatch({ lspX$peak.at[1]},
+                    error=function(err) {NA})
+    P0X <- tryCatch({ lspX$peak},
+                    error=function(err) {NA})
     out <- c(meanX, sdX, modeX, skewX, kurX,
         q1X, medianX, q3X, iqrX, rangeX, acfX,
         zcrX, dfaX, cvX, tkeoX, F0X, P0X)
     nms <- c("mean", "sd", "mode", "skew", "kur",
         "q1", "median", "q3", "iqr", "range",
-        "acf", "zcr", "dfa", "cv", "tkeo", "F0",
-        "P0")
+        "acf", "zcr", "dfa", "cv", "tkeo", "F0","P0")
     names(out) <- paste(nms, varName, sep = "")
     out
 }
