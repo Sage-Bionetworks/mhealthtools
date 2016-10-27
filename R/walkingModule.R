@@ -1,5 +1,3 @@
-
-
 ########################## functions to extract tapping features from
 ########################## tapping module Computes tapping time
 ########################## series (tapping interval and tapping
@@ -20,27 +18,25 @@ process_medicationChoiceAnswers <- function(json_file) {
     })
 }
 
-SingleAxisFeatures <- function(x, t, varName) {
+SingleAxisFeatures <- function(x, tmp_time, varName) {
     meanX <- mean(x, na.rm = TRUE)
     sdX <- sd(x, na.rm = TRUE)
     modeX <- pracma::Mode(x)
     skewX <- Skewness(x)
     kurX <- Kurtosis(x)
-    auxX <- quantile(x, probs = c(0, 0.25, 0.5,
-        0.75, 1), na.rm = TRUE)
+    auxX <- quantile(x, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
     q1X <- auxX[[2]]
     medianX <- auxX[[3]]
     q3X <- auxX[[4]]
     iqrX <- q3X - q1X
     rangeX <- auxX[[5]] - auxX[[1]]
-    acfX <- acf(x, lag.max = 1, plot = FALSE)$acf[2,
-        1, 1]
+    acfX <- acf(x, lag.max = 1, plot = FALSE)$acf[2, 1, 1]
     zcrX <- ZCR(x)
     dfaX <- tryCatch({ fractal::DFA(x, sum.order = 1)[[1]] },
                       error = function(err){ NA })
     cvX <- Cv(x)
     tkeoX <- MeanTkeo(x)
-    lspX <- tryCatch({ lomb::lsp(cbind(time, x), plot = FALSE)},
+    lspX <- tryCatch({ lomb::lsp(cbind(tmp_time, x), plot = FALSE)},
                      error = function(err) {NA})
     F0X <- tryCatch({ lspX$peak.at[1]},
                     error=function(err) {NA})
@@ -49,8 +45,8 @@ SingleAxisFeatures <- function(x, t, varName) {
     out <- c(meanX, sdX, modeX, skewX, kurX,
         q1X, medianX, q3X, iqrX, rangeX, acfX,
         zcrX, dfaX, cvX, tkeoX, F0X, P0X)
-    nms <- c("mean", "sd", "mode", "skew", "kur",
-        "q1", "median", "q3", "iqr", "range",
+    nms <- c("mean", "sd", "mode", "skew", "kur", "q1",
+             "median", "q3", "iqr", "range",
         "acf", "zcr", "dfa", "cv", "tkeo", "F0","P0")
     names(out) <- paste(nms, varName, sep = "")
     out
@@ -116,22 +112,20 @@ getWalkFeatures <- function(walking_json_file) {
     z <- dat$z
     aa <- sqrt(x^2 + y^2 + z^2)
     aj <- sqrt(diff(x)^2 + diff(y)^2 + diff(z)^2)
-    time <- dat$timestamp
+    
     ###############################
-    outX <- SingleAxisFeatures(x, time, varName = "X")
-    outY <- SingleAxisFeatures(y, time, varName = "Y")
-    outZ <- SingleAxisFeatures(z, time, varName = "Z")
-    outAA <- SingleAxisFeatures(aa, time, varName = "AA")
-    outAJ <- SingleAxisFeatures(aj, time[-1],
-        varName = "AJ")
+    outX <- SingleAxisFeatures(x, dat$timestamp, varName = "X")
+    outY <- SingleAxisFeatures(y, dat$timestamp, varName = "Y")
+    outZ <- SingleAxisFeatures(z, dat$timestamp, varName = "Z")
+    outAA <- SingleAxisFeatures(aa,  dat$timestamp, varName = "AA")
+    outAJ <- SingleAxisFeatures(aj,  dat$timestamp[-1], varName = "AJ")
     ###############################
     corXY <- cor(x, y, use = "p")
     corXZ <- cor(x, z, use = "p")
     corYZ <- cor(z, y, use = "p")
     cors <- c(corXY, corXZ, corYZ)
     names(cors) <- c("corXY", "corXZ", "corYZ")
-    c(outX, outY, outZ, outAA, outAJ, cors,
-        error = NA)
+    c(outX, outY, outZ, outAA, outAJ, cors, error = NA)
 }
 
 
