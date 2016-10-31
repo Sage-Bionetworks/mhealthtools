@@ -64,11 +64,10 @@ process_subseq_in_a_game <- function(game_subsequence) {
 }
 
 createMemoryFeaturesErrorResult <- function(error) {
-  features <- data.frame(t(c(rep(NA, 17), error)))
-  colnames(features) <- c("totalDistance", "totalTime", "totalCorrectFlowers", "avg_wrongflowerNum", "total_newFlowers_touched",
-                          "varTime", "meanTime", "medTime", "meanDist", "medDist", "varDist", "flower1_meanTime", "flower1_medTime",
-                          "flower1_varTime", "flower1_meanDist", "flower1_medDist", "flower1_varDist","error")
-
+  features <- c(rep(NA, 17), error)
+  names(features) <- c("totalDistance", "totalTime", "totalCorrectFlowers", "avg_wrongflowerNum", "total_newFlowers_touched",
+                        "varTime", "meanTime", "medTime", "meanDist", "medDist", "varDist", "flower1_meanTime", "flower1_medTime",
+                        "flower1_varTime", "flower1_meanDist", "flower1_medDist", "flower1_varDist","error")
   features
 }
 
