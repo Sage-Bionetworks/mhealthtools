@@ -5,8 +5,6 @@
 ########################## the researchKit app - mPower SEE WORKING
 ########################## EXAMPLE at the END
 
-
-
 process_medicationChoiceAnswers <- function(json_file) {
     tryCatch({
         d <- jsonlite::fromJSON(json_file)
@@ -112,7 +110,7 @@ getWalkFeatures <- function(walking_json_file) {
     z <- dat$z
     aa <- sqrt(x^2 + y^2 + z^2)
     aj <- sqrt(diff(x)^2 + diff(y)^2 + diff(z)^2)
-    
+
     ###############################
     outX <- SingleAxisFeatures(x, dat$timestamp, varName = "X")
     outY <- SingleAxisFeatures(y, dat$timestamp, varName = "Y")
