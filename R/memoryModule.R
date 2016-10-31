@@ -64,14 +64,10 @@ process_subseq_in_a_game <- function(game_subsequence) {
 }
 
 createMemoryFeaturesErrorResult <- function(error) {
-  features <- data.frame(t(c(rep(NA, 22), error)))
-  colnames(features) <- c("flowerMatrixSize", "GameSize", "GameScore", "Seed", "Sequence",
-                           "Status", "flower_num", "x_cord", "y_cord",
-                           "width", "height", "x_midpoint", "y_midpoint",
-                           "Timestamp", "Location", "IsCorrect",
-                           "userSequence", "user_x_coord", "user_y_coord",
-                           "game_subseqeunce_order", "distance",
-                           "deltaTime", "error")
+  features <- data.frame(t(c(rep(NA, 17), error)))
+  colnames(features) <- c("totalDistance", "totalTime", "totalCorrectFlowers", "avg_wrongflowerNum", "total_newFlowers_touched",
+                          "varTime", "meanTime", "medTime", "meanDist", "medDist", "varDist", "flower1_meanTime", "flower1_medTime",
+                          "flower1_varTime", "flower1_meanDist", "flower1_medDist", "flower1_varDist","error")
 
   features
 }
@@ -92,6 +88,44 @@ processGame <- function(game){
     mutate(order = 1:length(Seed))
   return(df)
 }
+
+memoryGame_generateSummaryStats <- function(memoryGame){
+  totalDistance <- sum(memoryGame$distance, na.rm=T)
+  totalTime <- sum(memoryGame$deltaTime, na.rm=T)
+  totalCorrectFlowers <- sum(memoryGame$IsCorrect, na.rm=T)
+  avg_wrongflowerNum <- memoryGame %>% dplyr::filter(IsCorrect == FALSE) %>% .$game_subseqeunce_order %>% mean()
+
+  #calculating #flowers touched that were not shown to the user in each game
+  total_newFlowers_touched <- memoryGame %>% dplyr::group_by(Seed) %>% dplyr::summarize(n=length(setdiff(userSequence,flower_num))) %>% .$n %>% sum
+
+  # second flower onwards stats
+  flowers_except1 <- memoryGame %>% dplyr::filter(game_subseqeunce_order != 1)
+  varTime <- var(flowers_except1$deltaTime, na.rm=T)
+  meanTime <- mean(flowers_except1$deltaTime, na.rm=T)
+  medTime <- median(flowers_except1$deltaTime, na.rm=T)
+  meanDist <- mean(flowers_except1$distance, na.rm=T)
+  medDist <- median(flowers_except1$distance, na.rm=T)
+  varDist <- var(flowers_except1$distance, na.rm=T)
+
+  #flower1 stats
+  flower1 <- memoryGame %>% dplyr::filter(game_subseqeunce_order == 1)
+  flower1_meanTime <- mean(flower1$deltaTime, na.rm=T)
+  flower1_medTime <- median(flower1$deltaTime, na.rm=T)
+  flower1_varTime <- var(flower1$deltaTime, na.rm=T)
+  flower1_meanDist <- mean(flower1$distance, na.rm=T)
+  flower1_medDist <- median(flower1$distance, na.rm=T)
+  flower1_varDist <- var(flower1$distance, na.rm=T)
+
+  memoryGameStats <- c(totalDistance, totalTime, totalCorrectFlowers, avg_wrongflowerNum, total_newFlowers_touched,
+                       varTime, meanTime, medTime, meanDist, medDist, varDist, flower1_meanTime, flower1_medTime,
+                       flower1_varTime, flower1_meanDist, flower1_medDist, flower1_varDist)
+  names(memoryGameStats) <- c("totalDistance", "totalTime", "totalCorrectFlowers", "avg_wrongflowerNum", "total_newFlowers_touched",
+                              "varTime", "meanTime", "medTime", "meanDist", "medDist", "varDist", "flower1_meanTime", "flower1_medTime",
+                              "flower1_varTime", "flower1_meanDist", "flower1_medDist", "flower1_varDist")
+
+  memoryGameStats
+}
+
 
 
 
@@ -119,22 +153,21 @@ getMemoryGameFeatures <- function(game_json_file) {
     }
 
     tryCatch({
-        game <- jsonlite::fromJSON(game_json_file)
+        gameData <- jsonlite::fromJSON(game_json_file)
     }, error = function(err) {
       null_result = createMemoryFeaturesErrorResult('unable to read game JSON file')
       return(null_result)
     })
 
     tryCatch({
-      gameFeatures <- processGame(game)
-      return(gameFeatures)
+      memoryGame <- processGame(gameData)
+      memoryGameFeatures <- memoryGame_generateSummaryStats(memoryGame)
+      return(memoryGameFeatures)
     }, error = function(err) {
        null_result <- createMemoryFeaturesErrorResult("unable to process game record from JSON file")
         return(null_result)
     })
     return(df)
 }
-
-
 
 
