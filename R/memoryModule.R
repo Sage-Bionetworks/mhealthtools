@@ -85,13 +85,11 @@ processGame <- function(game){
                                    length))
   game$Sequence <- unlist(lapply(game$Sequence,
                                  function(x) paste(x + 1, collapse = ",")))
-  df <- plyr::ddply(.data = game, .variables = c("flowerMatrixSize",
-                                                 "GameSize", "GameScore", "Seed",
-                                                 "Sequence", "Status"), .fun = process_subseq_in_a_game)
-
-  # %>%
-  #   dplyr::arrange(flowerMatrixSize, GameSize, game_subseqeunce_order)
-
+  df <- plyr::ddply(.data = game, .variables = c("flowerMatrixSize", "GameSize",
+                                                 "GameScore", "Seed",
+                                                 "Sequence", "Status"),
+                    .fun = process_subseq_in_a_game) %>%
+    mutate(order = 1:length(Seed))
   return(df)
 }
 
