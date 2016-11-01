@@ -125,7 +125,7 @@ memoryGame_generateSummaryStats <- function(memoryGame){
   memoryGameStats <- c(totalDistance, totalTime, totalCorrectFlowers, avg_wrongflowerNum, total_newFlowers_touched,
                        varTime, meanTime, medTime, meanDist, medDist, varDist, flower1_meanTime, flower1_medTime,
                        flower1_varTime, flower1_meanDist, flower1_medDist, flower1_varDist)
-  names(memoryGameStats) <- c("totalDistance", "totalTime", "totalCorrectFlowers", "avg_wrongflowerNum", "total_newFlowers_touched",
+  colnames(memoryGameStats) <- c("totalDistance", "totalTime", "totalCorrectFlowers", "avg_wrongflowerNum", "total_newFlowers_touched",
                               "varTime", "meanTime", "medTime", "meanDist", "medDist", "varDist", "flower1_meanTime", "flower1_medTime",
                               "flower1_varTime", "flower1_meanDist", "flower1_medDist", "flower1_varDist")
   memoryGameStats['error'] = 'None'
