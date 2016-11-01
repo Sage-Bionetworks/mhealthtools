@@ -74,7 +74,7 @@ createMemoryFeaturesErrorResult <- function(error) {
 processGame <- function(game){
   game <- game %>% dplyr::filter(!MemoryGameStatus == "MemoryGameStatusTimeout")
   if(nrow(game) == 0){
-    return(createMemoryFeaturesErrorResult('Got 0 rows after MemoryGameStatusTimeout filtering'))
+    return(NA)
   }
   colnames(game) <- gsub("MemoryGameRecord", "", colnames(game))
   colnames(game) <- gsub("MemoryGameStatus", "Status", colnames(game))
@@ -92,6 +92,10 @@ processGame <- function(game){
 }
 
 memoryGame_generateSummaryStats <- function(memoryGame){
+  if(is.na(memoryGame) == TRUE){
+    return(createMemoryFeaturesErrorResult('Got 0 rows after MemoryGameStatusTimeout filtering'))  
+  }
+  
   totalDistance <- sum(memoryGame$distance, na.rm=T)
   totalTime <- sum(memoryGame$deltaTime, na.rm=T)
   totalCorrectFlowers <- sum(memoryGame$IsCorrect, na.rm=T)
