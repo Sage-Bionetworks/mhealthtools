@@ -93,9 +93,9 @@ processGame <- function(game){
 
 memoryGame_generateSummaryStats <- function(memoryGame){
   if(is.na(memoryGame) == TRUE){
-    return(createMemoryFeaturesErrorResult('Got 0 rows after MemoryGameStatusTimeout filtering'))  
+    return(createMemoryFeaturesErrorResult('Got 0 rows after MemoryGameStatusTimeout filtering'))
   }
-  
+
   totalDistance <- sum(memoryGame$distance, na.rm=T)
   totalTime <- sum(memoryGame$deltaTime, na.rm=T)
   totalCorrectFlowers <- sum(memoryGame$IsCorrect, na.rm=T)
@@ -128,7 +128,7 @@ memoryGame_generateSummaryStats <- function(memoryGame){
   names(memoryGameStats) <- c("totalDistance", "totalTime", "totalCorrectFlowers", "avg_wrongflowerNum", "total_newFlowers_touched",
                               "varTime", "meanTime", "medTime", "meanDist", "medDist", "varDist", "flower1_meanTime", "flower1_medTime",
                               "flower1_varTime", "flower1_meanDist", "flower1_medDist", "flower1_varDist")
-  
+  memoryGameStats['error'] = 'None'
   memoryGameStats
 }
 
