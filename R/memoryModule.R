@@ -72,10 +72,6 @@ createMemoryFeaturesErrorResult <- function(error) {
 }
 
 processGame <- function(game){
-  game <- game %>% dplyr::filter(!MemoryGameStatus == "MemoryGameStatusTimeout")
-  if(nrow(game) == 0){
-    return(NA)
-  }
   colnames(game) <- gsub("MemoryGameRecord", "", colnames(game))
   colnames(game) <- gsub("MemoryGameStatus", "Status", colnames(game))
   game["flowerMatrixSize"] = game$GameSize
@@ -92,9 +88,6 @@ processGame <- function(game){
 }
 
 memoryGame_generateSummaryStats <- function(memoryGame){
-  if(is.na(memoryGame) == TRUE){
-    return(createMemoryFeaturesErrorResult('Got 0 rows after MemoryGameStatusTimeout filtering'))
-  }
 
   totalDistance <- sum(memoryGame$distance, na.rm=T)
   totalTime <- sum(memoryGame$deltaTime, na.rm=T)
@@ -124,11 +117,10 @@ memoryGame_generateSummaryStats <- function(memoryGame){
 
   memoryGameStats <- c(totalDistance, totalTime, totalCorrectFlowers, avg_wrongflowerNum, total_newFlowers_touched,
                        varTime, meanTime, medTime, meanDist, medDist, varDist, flower1_meanTime, flower1_medTime,
-                       flower1_varTime, flower1_meanDist, flower1_medDist, flower1_varDist)
-  colnames(memoryGameStats) <- c("totalDistance", "totalTime", "totalCorrectFlowers", "avg_wrongflowerNum", "total_newFlowers_touched",
+                       flower1_varTime, flower1_meanDist, flower1_medDist, flower1_varDist, 'None')
+  names(memoryGameStats) <- c("totalDistance", "totalTime", "totalCorrectFlowers", "avg_wrongflowerNum", "total_newFlowers_touched",
                               "varTime", "meanTime", "medTime", "meanDist", "medDist", "varDist", "flower1_meanTime", "flower1_medTime",
-                              "flower1_varTime", "flower1_meanDist", "flower1_medDist", "flower1_varDist")
-  memoryGameStats['error'] = 'None'
+                              "flower1_varTime", "flower1_meanDist", "flower1_medDist", "flower1_varDist", "error")
   memoryGameStats
 }
 
@@ -160,10 +152,17 @@ getMemoryGameFeatures <- function(game_json_file) {
 
     tryCatch({
         gameData <- jsonlite::fromJSON(game_json_file)
+        gameData <- gameData %>% dplyr::filter(!MemoryGameStatus == "MemoryGameStatusTimeout")
     }, error = function(err) {
       null_result = createMemoryFeaturesErrorResult('unable to read game JSON file')
       return(null_result)
     })
+
+    # if post filterting data.frame has 0 rows
+    if(nrow(gameData) == 0){
+      null_result = createMemoryFeaturesErrorResult('0 games completed')
+      return(null_result)
+    }
 
     tryCatch({
       memoryGame <- processGame(gameData)
@@ -173,7 +172,6 @@ getMemoryGameFeatures <- function(game_json_file) {
        null_result <- createMemoryFeaturesErrorResult("unable to process game record from JSON file")
         return(null_result)
     })
-    return(df)
 }
 
 
