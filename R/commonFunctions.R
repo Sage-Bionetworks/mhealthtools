@@ -38,12 +38,10 @@ Kurtosis <- function(x) {
   mean((x - mu)^4)/(mean((x - mu)^2)^2)
 }
 
-
 Cv <- function(x) {
   x <- x[!is.na(x)]
   (sd(x)/mean(x)) * 100
 }
-
 
 ZCR <- function(x) {
   x <- x[!is.na(x)]
@@ -53,6 +51,20 @@ ZCR <- function(x) {
   sum(aux.x[-n] * aux.x[-1] < 0)/(n - 1)
 }
 
+getMedianF0 <- function(tmp_time, y, nframe = 30){
+  n = length(y)
+  dt = round(n/(nframe+1))
+  F0 = as.numeric()
+  for(i in 1:nframe){
+    nstart = (i-1)*dt+1
+    nend = (i+1)*dt
+    F0[i] = lomb::lsp(y[nstart:nend], tmp_time[nstart:nend], plot = FALSE)$peak.at[1]
+  }
+  medianF0 = median(F0, na.rm = T)
+  sdF0 = sd(F0, na.rm = T)
+  return(c(medianF0 = medianF0,
+           sdF0 = sdF0))
+}
 
 ## Mean Teager-Kaiser energy operator of
 ## inter-taps intervals (from TKEO function
@@ -65,12 +77,10 @@ MeanTkeo <- function(x) {
   mean(y, na.rm = TRUE)
 }
 
-
 CountDataPoints <- function(fnms) {
   dat <- fromJSON(fnms)
   length(dat)
 }
-
 
 RemoveNAs <- function(x) {
   nc <- ncol(x)
@@ -78,4 +88,3 @@ RemoveNAs <- function(x) {
   tokeep <- nacounts != nc
   x[tokeep, ]
 }
-
