@@ -97,7 +97,7 @@ ShapeGaitData <- function(dat) {
 
 getWalkFeatures <- function(walking_json_file) {
   if (is.na(walking_json_file) == T) {
-    null_result = c(rep(NA, 114), error = "no json data file")
+    null_result = c(rep(NA, 113), error = "no json data file")
     names(null_result) = c("meanX", "sdX", "modeX", "skewX", "kurX", "q1X",
                            "medianX", "q3X", "iqrX", "rangeX", "acfX", "zcrX", 
                            "dfaX", "cvX", "tkeoX", "F0X", "P0X","F0FX", "P0FX", 
