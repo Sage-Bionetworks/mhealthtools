@@ -1,9 +1,6 @@
-########################## functions to extract tapping features from
-########################## tapping module Computes tapping time
-########################## series (tapping interval and tapping
-########################## position) Inputs: tapping json file from
-########################## the researchKit app - mPower SEE WORKING
-########################## EXAMPLE at the END
+#### Functions to extract features from walking module ####
+## Inputs: walking json file from the researchKit app - mPower 
+## SEE WORKING EXAMPLE at the END
 
 process_medicationChoiceAnswers <- function(json_file) {
   tryCatch({
@@ -14,6 +11,22 @@ process_medicationChoiceAnswers <- function(json_file) {
   }, error = function(err) {
     data.frame(medication = "NA", medicationTime = "NA")
   })
+}
+
+
+getMedianF0 <- function(tmp_time, y, nframe = 10){
+  n = length(y)
+  dt = round(n/(nframe+1))
+  F0 = as.numeric()
+  for(i in 1:nframe){
+    nstart = (i-1)*dt+1
+    nend = (i+1)*dt
+    F0[i] = lomb::lsp(y[nstart:nend], tmp_time[nstart:nend], plot = FALSE, from = 0.2, to = 5)$peak.at[1]
+  }
+  medianF0 = median(F0, na.rm = T)
+  sdF0 = sd(F0, na.rm = T)
+  return(c(medianF0 = medianF0,
+           sdF0 = sdF0))
 }
 
 
@@ -46,7 +59,7 @@ SingleAxisFeatures <- function(x, tmp_time, varName) {
     lspX$peak
   }, error=function(err) { NA })
   lspXF <- tryCatch({ 
-    lomb::lsp(cbind(tmp_time, x), plot = FALSE, from = 0, to = 5)
+    lomb::lsp(cbind(tmp_time, x), plot = FALSE, from = 0.2, to = 5)
   },error = function(err) { NA })
   F0XF <- tryCatch({ 
     lspXF$peak.at[1]
@@ -65,7 +78,7 @@ SingleAxisFeatures <- function(x, tmp_time, varName) {
   nms <- c("mean", "sd", "mode", "skew", "kur", "q1",
            "median", "q3", "iqr", "range",
            "acf", "zcr", "dfa", "cv", "tkeo", "F0","P0",
-           "F0F", "P0F", "medianF0", "sdF0", "tlag")
+           "F0F", "P0F", "medianF0F", "sdF0F", "tlag")
   
   names(out) <- paste(nms, varName, sep = "")
   return(out)
@@ -101,20 +114,20 @@ getWalkFeatures <- function(walking_json_file) {
     names(null_result) = c("meanX", "sdX", "modeX", "skewX", "kurX", "q1X",
                            "medianX", "q3X", "iqrX", "rangeX", "acfX", "zcrX", 
                            "dfaX", "cvX", "tkeoX", "F0X", "P0X","F0FX", "P0FX", 
-                           "medianF0X", "sdF0X", "tlagX", "meanY", "sdY", "modeY",
+                           "medianF0FX", "sdF0FX", "tlagX", "meanY", "sdY", "modeY",
                            "skewY", "kurY", "q1Y", "medianY", "q3Y", "iqrY", 
                            "rangeY", "acfY", "zcrY", "dfaY", "cvY", "tkeoY",
-                           "F0Y", "P0Y", "F0FY", "P0FY", "medianF0Y", "sdF0Y", 
+                           "F0Y", "P0Y", "F0FY", "P0FY", "medianF0FY", "sdF0FY", 
                            "tlagY", "meanZ", "sdZ", "modeZ", "skewZ", "kurZ", "q1Z",
                            "medianZ", "q3Z", "iqrZ", "rangeZ", "acfZ", "zcrZ", "dfaZ", 
-                           "cvZ", "tkeoZ", "F0Z", "P0Z", "F0FZ", "P0FZ", "medianF0Z", 
-                           "sdF0Z", "tlagZ", "meanAA", "sdAA", "modeAA", "skewAA", "kurAA",
+                           "cvZ", "tkeoZ", "F0Z", "P0Z", "F0FZ", "P0FZ", "medianF0FZ", 
+                           "sdF0FZ", "tlagZ", "meanAA", "sdAA", "modeAA", "skewAA", "kurAA",
                            "q1AA", "medianAA", "q3AA", "iqrAA", "rangeAA", "acfAA", "zcrAA",
                            "dfaAA", "cvAA", "tkeoAA", "F0AA", "P0AA", "F0FAA", "P0FAA", 
-                           "medianF0AA", "sdF0AA", "tlagAA","meanAJ", "sdAJ", "modeAJ", 
+                           "medianF0FAA", "sdF0FAA", "tlagAA","meanAJ", "sdAJ", "modeAJ", 
                            "skewAJ", "kurAJ", "q1AJ", "medianAJ", "q3AJ", "iqrAJ", "rangeAJ", 
                            "acfAJ", "zcrAJ", "dfaAJ", "cvAJ", "tkeoAJ", "F0AJ", "P0AJ",
-                           "F0FAJ", "P0FAJ", "medianF0AJ", "sdF0AJ", "tlagAJ",
+                           "F0FAJ", "P0FAJ", "medianF0FAJ", "sdF0FAJ", "tlagAJ",
                            "corXY", "corXZ", "corYZ", "error")
     return(null_result)
   }
