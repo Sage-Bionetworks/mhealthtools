@@ -23,7 +23,7 @@ getMedianF0 <- function(tmp_time, y, nframe = 10){
     for (i in 1:nframe) {
       nstart = (i - 1) * dt + 1
       nend = (i + 1) * dt
-      F0[i] = lomb::lsp(c(y[nstart:nend-1]), tmp_time[nstart:nend], 
+      F0[i] = lomb::lsp(y[nstart:nend], tmp_time[nstart:nend], 
                         plot = FALSE, from = 0.2, to = 5)$peak.at[1]
     }
     medianF0 = median(F0, na.rm = T)
@@ -75,7 +75,7 @@ SingleAxisFeatures <- function(x, tmp_time, varName) {
   }, error=function(err) { NA })
   summaryF0X <- tryCatch({
     as.numeric(getMedianF0(tmp_time, x))
-  }, error = function(err){ NA })
+  }, error = function(err){ c(NA, NA) })
   tlagX <- tryCatch({
     tmp_time[fractal::timeLag(x, method = 'acfdecor')]
   }, error = function(err){ NA })
