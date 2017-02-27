@@ -27,6 +27,24 @@ shapeTappingData <- function(tapData) {
     return(tapData)
 }
 
+
+CleanTappedButtonNone <- function(x) {
+  il <- x$buttonid == "TappedButtonLeft" ## get indexes of taps on left button
+  ir <- x$buttonid == "TappedButtonRight" ## get indexes of taps on right button
+  ino <- x$buttonid == "TappedButtonNone" ## get indexes of taps outside the button
+  xx <- rbind(x[il,], x[ir,], x[ino,]) ## create new matrix where the data from taps outside the button is at the bottom
+  dupli <- duplicated(cbind(xx$X, xx$Y)) ## determine which data is duplicated
+  ## we only want to drop TappedButtonNone duplications
+  ## so we force a FALSE for data corresponding to taps on the right and left buttons
+  nlr <- sum(il) + sum(ir)
+  dupli[seq(nlr)] <- FALSE
+  ############################
+  xx <- xx[which(!dupli),] ## now we remove on the duplicated data from taps outside the buttons
+  xx[order(xx[, 1]),] ## order the data according to time
+}
+
+
+
 GetLeftRightEventsAndTapIntervals <- function(tapData, depressThr = 0) {
     tapTime <- tapData$time - tapData$time[1]
     ## calculate X offset
@@ -164,6 +182,9 @@ createTappingFeaturesErrorResult <- function(error) {
     df
 }
 
+
+
+
 ####### MAIN
 #' extracts tapping features from Tapping JSON data file
 #'
@@ -190,6 +211,8 @@ getTappingFeatures <- function(tappingJsonFile, depressThr = 20) {
     } else {
         # shape data
         tapData <- shapeTappingData(tapData)
+        #remove duplicate data points
+        tapData <- CleanTappedButtonNone(tapData)
         # compute the tapping features
         tapFeatures <- ComputeTappingFeatures(tapData,depressThr)
     }
