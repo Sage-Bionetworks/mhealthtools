@@ -9,8 +9,14 @@ shapeRestData <- function(restData){
 
 #dat <- restData
 GetBalanceFeatures <- function(dat) {
-  dat <- Turning(dat)
-  turningTime <- dat$turningTime
+
+  tryCatch({
+    dat <- Turning(dat)
+    turningTime <- dat$turningTime
+  },error=function(e){
+    turningTime <- 0
+  })
+
   dat <- dat$dat
   x <- dat[, "x"]
   y <- dat[, "y"]
