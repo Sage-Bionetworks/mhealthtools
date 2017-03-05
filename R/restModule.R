@@ -10,14 +10,20 @@ shapeRestData <- function(restData){
 #dat <- restData
 GetBalanceFeatures <- function(dat) {
 
-  tryCatch({
-    dat <- Turning(dat)
-    turningTime <- dat$turningTime
+  error = 'None'
+
+  res <- tryCatch({
+      tmp <- Turning(dat)
+      list(dat=tmp$dat, turnTime = tmp$turningTime, error='None')
   },error=function(e){
-    turningTime <- 0
+      error="unable to process turning time"
+      list(dat=dat, turnTime = NA, error=error)
   })
 
-  dat <- dat$dat
+  dat <- res$dat
+  turningTime <- res$turnTime
+  error=res$error
+
   x <- dat[, "x"]
   y <- dat[, "y"]
   z <- dat[, "z"]
@@ -48,7 +54,7 @@ GetBalanceFeatures <- function(dat) {
   dis <- BoxVolumeFeature(dat)
 
   # features
-  restFeatures <- c(out, bpa, dis, 'error'='None')
+  restFeatures <- c(out, bpa, dis, 'error'=error)
   return(restFeatures)
 }
 
