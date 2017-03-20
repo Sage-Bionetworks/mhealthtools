@@ -99,8 +99,7 @@ SingleAxisFeatures <- function(x, tmp_time, varName) {
 #######
 # Function to rotate the user acceleration
 #######
-get_quaternary_rotated_userAccel <- function(df){
-
+get_quaternary_rotated_userAccel <- function(dat){
   attitude <- dat$attitude
   userAccel <- dat$userAcceleration
   colnames(userAccel) <- paste0('a_',colnames(userAccel))
