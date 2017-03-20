@@ -73,3 +73,22 @@ RemoveNAs <- function(x) {
   tokeep <- nacounts != nc
   x[tokeep, ]
 }
+
+
+#####
+## Given a quaternion - the following function will return a rotation matrix
+####
+QuaternionRotationMatrix <- function(q) {
+  r11 <- q["w"]^2 + q["x"]^2 - q["y"]^2 - q["z"]^2
+  r12 <- 2 * q["x"] * q["y"] + 2 * q["w"] * q["z"]
+  r13 <- 2 * q["x"] * q["z"] - 2 * q["w"] * q["y"]
+  r21 <- 2 * q["x"] * q["y"] - 2 * q["w"] * q["z"]
+  r22 <- q["w"]^2 - q["x"]^2 + q["y"]^2 - q["z"]^2
+  r23 <- 2 * q["y"] * q["z"] + 2 * q["w"] * q["x"]
+  r31 <- 2 * q["x"] * q["z"] + 2 * q["w"] * q["y"]
+  r32 <- 2 * q["y"] * q["z"] - 2 * q["w"] * q["x"]
+  r33 <- q["w"]^2 - q["x"]^2 - q["y"]^2 + q["z"]^2
+  matrix(as.numeric(c(r11, r12, r13,r21, r22, r23, r31, r32, r33)),
+         nrow = 3,ncol = 3, byrow = TRUE)
+}
+

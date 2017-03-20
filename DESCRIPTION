@@ -23,6 +23,7 @@ Imports: plyr,
          changepoint,
          pracma,
          stringr,
-         magrittr
+         magrittr,
+         lubridate
 URL: http://www.sagebase.org
 RoxygenNote: 5.0.1.9000
