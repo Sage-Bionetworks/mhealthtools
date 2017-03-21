@@ -150,7 +150,7 @@ ShapeGaitData <- function(dat) {
 
 getWalkFeatures <- function(walking_json_file) {
   if (is.na(walking_json_file) == T) {
-    null_result = c(rep(NA, 113), error = "no json data file")
+    null_result = c(rep(NA, 226), error = "no json data file")
     names(null_result) = c("meanX", "sdX", "modeX", "skewX", "kurX", "q1X",
                            "medianX", "q3X", "iqrX", "rangeX", "acfX", "zcrX",
                            "dfaX", "cvX", "tkeoX", "F0X", "P0X","F0FX", "P0FX",
@@ -168,7 +168,36 @@ getWalkFeatures <- function(walking_json_file) {
                            "skewAJ", "kurAJ", "q1AJ", "medianAJ", "q3AJ", "iqrAJ", "rangeAJ",
                            "acfAJ", "zcrAJ", "dfaAJ", "cvAJ", "tkeoAJ", "F0AJ", "P0AJ",
                            "F0FAJ", "P0FAJ", "medianF0FAJ", "sdF0FAJ", "tlagAJ",
-                           "corXY", "corXZ", "corYZ", "error")
+                           "corXY", "corXZ", "corYZ",
+
+                           "meanX_rot", "sdX_rot", "modeX_rot", "skewX_rot",
+                           "kurX_rot", "q1X_rot", "medianX_rot", "q3X_rot",
+                           "iqrX_rot", "rangeX_rot", "acfX_rot", "zcrX_rot",
+                           "dfaX_rot", "cvX_rot", "tkeoX_rot", "F0X_rot", "P0X_rot",
+                           "F0FX_rot", "P0FX_rot", "medianF0FX_rot", "sdF0FX_rot",
+                           "tlagX_rot", "meanY_rot", "sdY_rot", "modeY_rot", "skewY_rot",
+                           "kurY_rot", "q1Y_rot", "medianY_rot", "q3Y_rot", "iqrY_rot",
+                           "rangeY_rot", "acfY_rot", "zcrY_rot", "dfaY_rot", "cvY_rot",
+                           "tkeoY_rot", "F0Y_rot", "P0Y_rot", "F0FY_rot", "P0FY_rot",
+                           "medianF0FY_rot", "sdF0FY_rot", "tlagY_rot", "meanZ_rot",
+                           "sdZ_rot", "modeZ_rot", "skewZ_rot", "kurZ_rot", "q1Z_rot",
+                           "medianZ_rot", "q3Z_rot", "iqrZ_rot", "rangeZ_rot", "acfZ_rot",
+                           "zcrZ_rot", "dfaZ_rot", "cvZ_rot", "tkeoZ_rot", "F0Z_rot",
+                           "P0Z_rot", "F0FZ_rot", "P0FZ_rot", "medianF0FZ_rot",
+                           "sdF0FZ_rot", "tlagZ_rot", "meanAA_rot", "sdAA_rot",
+                           "modeAA_rot", "skewAA_rot", "kurAA_rot", "q1AA_rot",
+                           "medianAA_rot", "q3AA_rot", "iqrAA_rot", "rangeAA_rot",
+                           "acfAA_rot", "zcrAA_rot", "dfaAA_rot","cvAA_rot",
+                           "tkeoAA_rot", "F0AA_rot", "P0AA_rot", "F0FAA_rot",
+                           "P0FAA_rot", "medianF0FAA_rot", "sdF0FAA_rot", "tlagAA_rot",
+                           "meanAJ_rot", "sdAJ_rot", "modeAJ_rot", "skewAJ_rot",
+                           "kurAJ_rot", "q1AJ_rot", "medianAJ_rot", "q3AJ_rot",
+                           "iqrAJ_rot", "rangeAJ_rot", "acfAJ_rot", "zcrAJ_rot",
+                           "dfaAJ_rot", "cvAJ_rot", "tkeoAJ_rot", "F0AJ_rot",
+                            "P0AJ_rot", "F0FAJ_rot", "P0FAJ_rot", "medianF0FAJ_rot",
+                            "sdF0FAJ_rot", "tlagAJ_rot", "corXY_rot", "corXZ_rot",
+                           "corYZ_rot", "error")
+
     return(null_result)
   }
 
