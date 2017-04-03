@@ -197,25 +197,36 @@ createTappingFeaturesErrorResult <- function(error) {
 #' synapseLogin()
 #' sample_Tapping_File <-'syn7067514'
 #' tappingJsonFile <- synGet(sample_Tapping_File)@filePath
-#' getTappingFeatures(tappingJsonFile)
-getTappingFeatures <- function(tappingJsonFile, depressThr = 20) {
+#' getTappingFeatures(tappingJsonFile, depressThr = 0, removeDups=T)
+getTappingFeatures <- function(tappingJsonFile, depressThr=20, removeDups=T) {
     tapData <- readTappingFile(tappingJsonFile)
     error <- tapData$error
     tapData <- tapData$data
     if (error == T) {
         tapFeatures <- createTappingFeaturesErrorResult("unable to read JSON file")
     } else if (is.data.frame(tapData) == F) {
-        tapFeatures <- createTappingFeaturesErrorResult("expected data frame after reading tapping json file")
+        tapFeatures <- createTappingFeaturesErrorResult("expected data frame object after reading tapping json file")
     } else if (nrow(tapData) < 5) {
-        tapFeatures <- createTappingFeaturesErrorResult("tapping data frame has less than 5 rows")
+        tapFeatures <- createTappingFeaturesErrorResult("raw tapping data has less than 5 rows")
     } else {
+
         # shape data
         tapData <- shapeTappingData(tapData)
-        #remove duplicate data points
-        tapData <- CleanTappedButtonNone(tapData)
-        # compute the tapping features
-        tapFeatures <- ComputeTappingFeatures(tapData,depressThr)
+
+        #remove duplicate data points // if selected
+        if (removeDups == TRUE){
+          tapData <- CleanTappedButtonNone(tapData)
+        }
+
+        #check if cleaned data has < 5 rows
+        if (nrow(tapData) < 5) {
+          tapFeatures <- createTappingFeaturesErrorResult("post duplication removal tapping data has less than 5 rows")
+        } else {
+          # compute the tapping features
+          tapFeatures <- ComputeTappingFeatures(tapData,depressThr)
+        }
     }
+
     tapFeatures
 }
 
