@@ -76,8 +76,8 @@ getFreqDomainFeatures <- function(accel, samplingRate, windowLen, ovlp){
   }
   
   # Split signal in to overlapping windows
-  st.ind = seq(1,length(timestamp), by = ovlp*windowLen)
-  end.ind = seq(windowLen,length(timestamp), by = ovlp*windowLen)
+  st.ind = seq(1, length(timestamp), ovlp*windowLen)
+  end.ind = seq(windowLen, length(timestamp), ovlp*windowLen)
   st.ind = st.ind[1:length(end.ind)]
   
   wave = mapply(function(st, end, accel){
@@ -85,7 +85,7 @@ getFreqDomainFeatures <- function(accel, samplingRate, windowLen, ovlp){
   }, st.ind, end.ind, MoreArgs = list(accel), SIMPLIFY = T)
   
   # Find properties of spectrogram
-  specGram = seewave::meanspec(accel, f = samplingRate, wl = windowLen, wn = 'hamming')
+  specGram = seewave::meanspec(accel, f = samplingRate, wl = windowLen, wn = 'hamming', plot = FALSE)
   ftrs =  specGram %>%
     seewave::specprop(f = samplingRate, wl = windowLen, wn = 'hamming') %>%
     as.data.frame()
@@ -110,8 +110,8 @@ getFreqDomainFeatures <- function(accel, samplingRate, windowLen, ovlp){
   
   return(ftrs)
 }
-  
-  
+
+
 ####### MAIN
 #' extracts features from tremor task accelerometer JSON data file
 #'
@@ -125,29 +125,60 @@ getFreqDomainFeatures <- function(accel, samplingRate, windowLen, ovlp){
 #' walkingJsonFile <- synGet(sample_walking_File)@filePath
 #' getWalkFeatures(walkingJsonFile)
 
-getTremorFeatures <- function(tremor.json.file, windowLen = 256, freqRange = c(0.1, 25)) {
+getTremorFeatures <- function(tremor.json.file, windowLen = 256, freqRange = c(0.1, 25), ovlp = 0.5) {
+  print(tremor.json.file)
+  # Assign empty features
+  ftrs.empty = matrix(NA, nrow = 4, ncol = 38) %>% data.frame()
+  colnames(ftrs.empty) = c("axis", "mean.tm", "median.tm", "mode.tm", "sd.tm", "skewness.tm", 
+                           "kurtosis.tm", "Q25.tm", "Q75.tm", "range.tm", "rough.tm", "rugo.tm", 
+                           "acf.tm", "zcr.tm", "mtkeo.tm", "dfa.tm", "IQR.tm", "mean.freq", "sd.freq", 
+                           "median.freq", "sem.freq", "mode.freq", "Q25.freq", "Q75.freq", "IQR.freq", 
+                           "cent.freq", "skewness.freq", "kurtosis.freq", "sfm.freq", "sh.freq", 
+                           "prec.freq", "mean.freq0", "sd.freq0", "mean.lsp.amp", "sd.lsp.amp", 
+                           "mean.lsp.freq", "sd.lsp.freq", "csh")
+  ftrs.empty$axis = c('x','y','z','a')
+  
+  # If no json file exists
+  if(is.na(tremor.json.file)){
+    ftrs.empty$error = 'No JSON file'; return(ftrs.empty) 
+  }
+  
   # Get data from json file
-  dat =jsonlite::fromJSON(as.character(tremor.json.file))
+  tryCatch({
+    dat = jsonlite::fromJSON(as.character(tremor.json.file))
+  }, error = function(e){
+    ftrs.empty$error = 'JSON file read error'; return(ftrs.empty) 
+  })
+  
+  # Check if data has more than 3s recordings
+  timestamp = dat$timestamp-dat$timestamp[1]
+  if(diff(range(timestamp)) <= 3){
+    ftrs.empty$error = 'Less than 3s recording'; return(ftrs.empty) 
+  }
   
   # Rotate userAcceleration (x,y,z)
-  timestamp = dat$timestamp
   userAcceleration = data.frame(get_quaternary_rotated_userAccel(dat))
-  
-  # Compute average userAcceleration
-  userAcceleration$a = sqrt(rowSums(dat$userAcceleration^2))
-  
-  # Compute sampling rate
-  samplingRate = length(timestamp)/(timestamp[length(timestamp)] - timestamp[1])
   
   # Order userAcceleration
   ind = order(timestamp)
   timestamp = timestamp[ind]
   userAcceleration = userAcceleration[ind, ]
   
+  # Compute sampling rate
+  samplingRate = length(timestamp)/(timestamp[length(timestamp)] - timestamp[1])
+  
   # Remove first and last second of data
   ind = round(samplingRate)+1:(length(timestamp)-round(samplingRate)-1)
   userAcceleration = userAcceleration[ind,]
   timestamp = timestamp[ind]
+  
+  # Compute average userAcceleration
+  userAcceleration[,'a'] = sqrt(rowSums(userAcceleration^2))
+  
+  # Mark outlier data (based on average acceleration)
+  # if(max(userAcceleration$a) > 1){
+  #   ftrs.empty$error = 'Avg acceleration greater than 1G'; return(ftrs.empty) 
+  # }
   
   # Remove data offset
   userAcceleration = apply(userAcceleration, 2, seewave::rmoffset, samplingRate)
@@ -156,7 +187,7 @@ getTremorFeatures <- function(tremor.json.file, windowLen = 256, freqRange = c(0
   bandPassFilt = signal::fir1(windowLen-1, 
                               c(freqRange[1] * 2/samplingRate, freqRange[2] * 2/samplingRate), 
                               type="pass", 
-                              window = hamming(windowLen))
+                              window = seewave::hamming.w(windowLen))
   userAcceleration = apply(userAcceleration, 2, function(x, bandPassFilt) signal::filtfilt(bandPassFilt, x), bandPassFilt)
   
   # Get time domain features
@@ -170,6 +201,7 @@ getTremorFeatures <- function(tremor.json.file, windowLen = 256, freqRange = c(0
     data.table::rbindlist(idcol = 'axis')
   
   ftrs = plyr::join_all(list(tmFeatures, freqFeatures))
+  ftrs$error = NA
   
   return(ftrs)
 }
