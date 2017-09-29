@@ -23,6 +23,11 @@ Imports: plyr,
          changepoint,
          pracma,
          stringr,
-         magrittr
+         magrittr,
+         seewave,
+         tuneR,
+         signal,
+         data.table,
+         e1071
 URL: http://www.sagebase.org
 RoxygenNote: 5.0.1.9000

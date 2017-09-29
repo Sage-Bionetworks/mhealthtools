@@ -67,7 +67,7 @@ getTimeDomainFeatures <- function(accel, samplingRate, windowLen, ovlp){
 #######
 # Function to extract single axis features in frequency domain
 #######
-getFreqDomainFeatures <- function(accel, samplingRate, windowLen, ovlp){
+getFreqDomainFeatures <- function(accel, samplingRate, windowLen, ovlp, freqRange, timestamp){
   
   # Sub-function to interpolate spectrogram at given frequencies
   interpolateFreq <- function(originalSpecDensity, originalFreq, interpolatedFreq){
@@ -115,6 +115,7 @@ getFreqDomainFeatures <- function(accel, samplingRate, windowLen, ovlp){
 ####### MAIN
 #' extracts features from tremor task accelerometer JSON data file
 #'
+#'
 #' @param tremor_task_json_file path to tremor accelerometer json file
 #' @return data frame of tremor features with one column
 #' @export
@@ -126,7 +127,7 @@ getFreqDomainFeatures <- function(accel, samplingRate, windowLen, ovlp){
 #' getWalkFeatures(walkingJsonFile)
 
 getTremorFeatures <- function(tremor.json.file, windowLen = 256, freqRange = c(0.1, 25), ovlp = 0.5) {
-  print(tremor.json.file)
+  
   # Assign empty features
   ftrs.empty = matrix(NA, nrow = 4, ncol = 38) %>% data.frame()
   colnames(ftrs.empty) = c("axis", "mean.tm", "median.tm", "mode.tm", "sd.tm", "skewness.tm", 
@@ -197,7 +198,7 @@ getTremorFeatures <- function(tremor.json.file, windowLen = 256, freqRange = c(0
   
   # Get freq domain features
   freqFeatures = apply(userAcceleration, 2, 
-                       getFreqDomainFeatures, samplingRate, windowLen, ovlp) %>%
+                       getFreqDomainFeatures, samplingRate, windowLen, ovlp, freqRange, timestamp) %>%
     data.table::rbindlist(idcol = 'axis')
   
   ftrs = plyr::join_all(list(tmFeatures, freqFeatures))
