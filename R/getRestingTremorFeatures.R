@@ -10,44 +10,40 @@ getRestingTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRan
   
   # If no json file exists
   ftrs = data.frame(error = NA)
-  if(is.na(tremorJsonFileLoc)){
-    ftrs$error = 'No JSON file'; return(ftrs) 
-  }
+  if(is.na(tremorJsonFileLoc)){ ftrs$error = 'No JSON file'; return(ftrs) }
   
   # Get accelerometer data
-  tryCatch({
-    dat = jsonlite::fromJSON(as.character(tremorJsonFileLoc))
-    samplingRate = length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1])
-  }, error = function(e){
-    ftrs$error = 'JSON file read error'; return(ftrs) 
-  })
+  dat = tryCatch({ jsonlite::fromJSON(as.character(tremorJsonFileLoc)) }, 
+                 error = function(e){ NA })
+  if(is.na(dat)){ ftrs$error = 'JSON file read error'; return(ftrs) }
   
+  # Get sampling rate
+  samplingRate = length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1])
+
   # Rotate acceleration data to earth co-ordinates
-  tryCatch({
+  userAccel = tryCatch({
     userAccel = cbind(timestamp = dat$timestamp-dat$timestamp[1],
-                      mpowertools:::get_quaternary_rotated_userAccel(dat)) %>%
+          mpowertools:::get_quaternary_rotated_userAccel(dat)) %>%
       as.data.frame()
     ind = order(userAccel$timestamp)
     userAccel = userAccel[ind, ] %>%
       tidyr::gather(axis, accel, -timestamp)
-  }, error = function(e){
-    ftrs$error = 'userAccel Rotation error'; return(ftrs) 
-  })
+  }, error = function(e){ NA })
+  if(is.na(userAccel)){ ftrs$error = 'userAccel rotation error'; return(ftrs) }
   
   # Detrend data
-  tryCatch({
-    userAccel = userAccel %>%
+  userAccel = tryCatch({
+    userAccel %>%
       plyr::ddply(.(axis), .fun = function(x){
         x$accel = loess(x$accel~x$timestamp)$residual
         return(x)
       })
-  }, error = function(e){
-    ftrs$error = 'Detrend error'; return(ftrs) 
-  })
+  }, error = function(e){ NA })
+  if(is.na(userAccel)){ ftrs$error = 'Detrend error'; return(ftrs) }
   
   # Band pass filter signal between freqRange
-  tryCatch({
-    userAccel = userAccel %>%
+  userAccel = tryCatch({
+    userAccel %>% 
       plyr::ddply(.(axis), .fun = function(x, wl, sl, freqRange){
         bandPassFilt = signal::fir1(wl-1, c(freqRange[1] * 2/sl, freqRange[2] * 2/sl),
                                     type="pass", 
@@ -55,17 +51,15 @@ getRestingTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRan
         x$accel = signal::filtfilt(bandPassFilt, x$accel)
         return(x)
       }, windowLen, samplingRate, freqRange)
-  }, error = function(e){
-    ftrs$error = 'Band pass filter error'; return(ftrs) 
-  })
+  }, error = function(e){ NA })
+  if(is.na(userAccel)){ ftrs$error = 'Band pass filter error'; return(ftrs) }
   
   # Filter signal between 1 and 9 sec
-  tryCatch({
-    userAccel = userAccel %>%
+  userAccel = tryCatch({
+    userAccel %>%
       dplyr::filter(timestamp >= 1, timestamp <= 9)
-  }, error = function(e){
-    ftrs$error = 'Not enough time samples'; return(ftrs) 
-  })
+  }, error = function(e){ NA })
+  if(is.na(userAccel)){ ftrs$error = 'Not enough time samples'; return(ftrs) }
   
   # Split user acceleration into windows
   userAccel  = userAccel %>%
