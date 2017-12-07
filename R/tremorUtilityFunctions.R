@@ -165,3 +165,27 @@ getFrequencyDomainEnergy <- function(accel, samplingRate = 100){
   
   return(ftrs)
 }
+
+#####
+## Get log spectral distance - Given two acceleration vector this function will return features characterising the distance between two spectrum
+# accel.ref - reference timeseries vector of length n
+# accel.agt - against timeseries vector of length n
+# samplingRate.ref - samplingRate of the reference signal (by default it is 100 Hz)
+# samplingRate.agt - samplingRate of the against signal (by default it is 100 Hz)
+
+# lsd - A features data frame of dimension 1 x 1
+#####
+getLogSpectralDistance <- function(accel.ref, accel.agt, samplingRate.ref = 100, samplingRate.agt = 100){
+  # Get spectrogram
+  spect.ref = mpowertools:::getSpectrum(accel.ref, samplingRate = samplingRate.ref)
+  spect.ref = splinefun(spect.ref$freq, spect.ref$pdf)
+  spect.agt = mpowertools:::getSpectrum(accel.agt, samplingRate = samplingRate.agt)
+  spect.agt = splinefun(spect.agt$freq, spect.agt$pdf)
+  
+  lsd = data.frame(freq = seq(0,25,0.1)) %>%
+    dplyr::mutate(ref = spect.ref(freq),
+                  agt = spect.agt(freq),
+                  lsd = 10*log10(ref/agt)^2)
+  lsd = data.frame(lsd.fr = sqrt(pracma::trapz(lsd$freq, lsd$lsd)))
+  return(lsd)
+}

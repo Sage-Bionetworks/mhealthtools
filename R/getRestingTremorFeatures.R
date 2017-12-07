@@ -23,7 +23,7 @@ getRestingTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRan
   # Rotate acceleration data to earth co-ordinates
   userAccel = tryCatch({
     userAccel = cbind(timestamp = dat$timestamp-dat$timestamp[1],
-          mpowertools:::get_quaternary_rotated_userAccel(dat)) %>%
+                      mpowertools:::get_quaternary_rotated_userAccel(dat)) %>%
       as.data.frame()
     ind = order(userAccel$timestamp)
     userAccel = userAccel[ind, ] %>%
@@ -64,17 +64,17 @@ getRestingTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRan
   # Split user acceleration into windows
   userAccel  = userAccel %>%
     plyr::dlply(.(axis), .fun = function(accel, wl, ovlp){
-      a = windowSignal(accel$accel, wl = wl, ovlp = ovlp) 
+      a = mpowertools:::windowSignal(accel$accel, wl = wl, ovlp = ovlp) 
     }, windowLen, ovlp)
   
   # Get time and frequency domain features for userAcceleration
   ftrs.accel = userAccel %>%
     lapply(function(accel){
-      list(apply(accel, 2, getTimeDomainSummary) %>%
+      list(apply(accel, 2, mpowertools:::getTimeDomainSummary) %>%
              data.table::rbindlist(use.names = T, fill = T, idcol = 'Window'),
-           apply(accel, 2, getFrequencyDomainSummary) %>%
+           apply(accel, 2, mpowertools:::getFrequencyDomainSummary, samplingRate) %>%
              data.table::rbindlist(use.names = T, fill = T, idcol = 'Window'),
-           apply(accel, 2, getFrequencyDomainEnergy) %>%
+           apply(accel, 2, mpowertools:::getFrequencyDomainEnergy, samplingRate) %>%
              data.table::rbindlist(use.names = T, fill = T, idcol = 'Window')) %>%
         plyr::join_all()
     }) %>%
@@ -90,11 +90,11 @@ getRestingTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRan
   # Get time and frequency domain features for jerk
   ftrs.jerk = userJerk %>%
     lapply(function(accel){
-      list(apply(accel, 2, getTimeDomainSummary) %>%
+      list(apply(accel, 2, mpowertools:::getTimeDomainSummary) %>%
              data.table::rbindlist(use.names = T, fill = T, idcol = 'Window'),
-           apply(accel, 2, getFrequencyDomainSummary) %>%
+           apply(accel, 2, mpowertools:::getFrequencyDomainSummary, samplingRate) %>%
              data.table::rbindlist(use.names = T, fill = T, idcol = 'Window'),
-           apply(accel, 2, getFrequencyDomainEnergy) %>%
+           apply(accel, 2, mpowertools:::getFrequencyDomainEnergy, samplingRate) %>%
              data.table::rbindlist(use.names = T, fill = T, idcol = 'Window')) %>%
         plyr::join_all()
     }) %>%
@@ -104,26 +104,43 @@ getRestingTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRan
   # Get user acf
   userACF = userAccel %>%
     lapply(function(accel, sl){
-      apply(accel,2, function(x){acf(x)$acf})
+      apply(accel,2, function(x){acf(x, plot = F)$acf})
     }, samplingRate)
   
   # Get time and frequency domain features for acf
   ftrs.acf = userACF %>%
     lapply(function(accel){
-      list(apply(accel, 2, getTimeDomainSummary) %>%
+      list(apply(accel, 2, mpowertools:::getTimeDomainSummary) %>%
              data.table::rbindlist(use.names = T, fill = T, idcol = 'Window'),
-           apply(accel, 2, getFrequencyDomainSummary) %>%
+           apply(accel, 2, mpowertools:::getFrequencyDomainSummary, samplingRate) %>%
              data.table::rbindlist(use.names = T, fill = T, idcol = 'Window'),
-           apply(accel, 2, getFrequencyDomainEnergy) %>%
+           apply(accel, 2, mpowertools:::getFrequencyDomainEnergy, samplingRate) %>%
              data.table::rbindlist(use.names = T, fill = T, idcol = 'Window')) %>%
         plyr::join_all()
     }) %>%
     data.table::rbindlist(use.names = T, fill = T, idcol = 'axis')
   colnames(ftrs.acf)[-(1:2)] = paste0(colnames(ftrs.acf)[-(1:2)], '.acf')
   
+  # Tag outliers windows based on phone rotation
+  gr.error = lapply(dat$gravity, function(x) {
+    accel = mpowertools:::windowSignal(x) %>%
+      as.data.frame() %>%
+      tidyr::gather(Window, value) %>%
+      dplyr::group_by(Window) %>%
+      dplyr::summarise(mx = max(value, na.rm = T),
+                       mn = min(value, na.rm = T))
+    }) %>%
+    data.table::rbindlist(use.names = T, fill = T, idcol = 'axis') %>%
+    dplyr::mutate(error = sign(mx) != sign(mn)) %>% 
+    dplyr::group_by(Window) %>% 
+    dplyr::summarise(error = any(error, na.rm = T))
+  gr.error$error[gr.error$error == TRUE] = 'Phone rotated within window'
+  gr.error$error[gr.error$error == FALSE] = 'None'
+  
   # Combine all features
   ftrs = list(ftrs.accel, ftrs.jerk, ftrs.acf) %>%
-    plyr::join_all()
+    plyr::join_all() %>%
+    dplyr::left_join(gr.error)
   
   return(ftrs)
 }
