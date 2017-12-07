@@ -26,7 +26,7 @@ getComparativeTremorFeatures <- function(tremorRefJsonFileLoc, tremorAgtJsonFile
   dat.agt = tryCatch({ 
     jsonlite::fromJSON(as.character(tremorAgtJsonFileLoc)) 
   }, error = function(e){ NA })
-  if(is.na(dat.ref)){ ftrs$error = 'Against JSON file read error'; return(ftrs) }
+  if(is.na(dat.agt)){ ftrs$error = 'Against JSON file read error'; return(ftrs) }
   
   # Get sampling rate
   samplingRate.ref = length(dat.ref$timestamp)/(dat.ref$timestamp[length(dat.ref$timestamp)] - dat.ref$timestamp[1])
