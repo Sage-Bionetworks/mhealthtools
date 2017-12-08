@@ -29,6 +29,7 @@ Imports: plyr,
          signal,
          data.table,
          e1071,
-         pracma
+         pracma,
+         EMD
 URL: http://www.sagebase.org
 RoxygenNote: 5.0.1.9000
