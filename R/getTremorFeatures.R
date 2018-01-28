@@ -6,7 +6,7 @@
 #' @return data frame of tremor features
 #' @export
 #' @examples
-getRestingTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5) {
+getTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5) {
   
   # If no json file exists
   ftrs = data.frame(error = NA)
