@@ -1,7 +1,7 @@
 Package: mpowertools
 Type: Package
 Title: mPowerTools - Modules for processing data from mPower apps
-Version: 0.1.0
+Version: 0.1.1
 Author: c(
           person("Abhishek", "Pratap", email = "apratap@sagebase.org", role = c("aut", "cre"))
           person("Elias", "Chaibub Neto", email = "elias.chaibub.neto@sagebase.org", role = c("ctb"))
@@ -23,6 +23,13 @@ Imports: plyr,
          changepoint,
          pracma,
          stringr,
-         magrittr
+         magrittr,
+         seewave,
+         tuneR,
+         signal,
+         data.table,
+         e1071,
+         pracma,
+         EMD
 URL: http://www.sagebase.org
 RoxygenNote: 5.0.1.9000
