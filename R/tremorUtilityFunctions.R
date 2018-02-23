@@ -50,6 +50,12 @@ get_quaternary_rotated_userAccel <- function(dat){
 #####
 windowSignal <- function(accel, wl = 256, ovlp = 0.5){
   nlen = length(accel)
+  
+  # If length of signal is less than window length
+  if (nlen < wl){
+    wl = nlen; ovlp = 1;
+  }
+    
   nstart = seq(1, nlen, wl*ovlp)
   nend = seq(wl, nlen, wl*ovlp)
   nstart = nstart[1:length(nend)]
@@ -100,7 +106,8 @@ getTimeDomainSummary <- function(accel, samplingRate = 100){
                     energy = sum(accel^2),
                     mobility = sqrt(var(diff(accel)*samplingRate)/var(accel)),
                     mtkeo = mean(seewave::TKEO(accel, f = samplingRate, plot = F)[,2], na.rm = T),
-                    dfa = fractal::DFA(accel, sum.order = 1)[[1]]) %>%
+                    dfa = fractal::DFA(accel, sum.order = 1)[[1]],
+                    rmsmag = sqrt(sum(accel^2)/length(accel))) %>%  # Root Mean Square magnitude
     dplyr::mutate(IQR = Q25 - Q75,
                   complexity = sqrt(var(diff(diff(accel)*samplingRate)*samplingRate)/var(diff(accel)*samplingRate)))
   names(ftrs) = paste0(names(ftrs),'.tm')
@@ -122,6 +129,7 @@ getFrequencyDomainSummary <- function(accel, samplingRate = 100){
   
   ftrs = list()
   ftrs$mn = sum(freq * pdf)
+  ftrs$mx = max(pdf)
   ftrs$sd = sqrt(sum(pdf * ((freq - ftrs$mn)^2)))
   ftrs$sem = ftrs$sd/sqrt(dim(spect)[1])
   ftrs$md = freq[length(cdf[cdf <= 0.5]) + 1]
