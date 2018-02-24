@@ -43,17 +43,23 @@ get_quaternary_rotated_userAccel <- function(dat){
 #####
 ## Window signal - Given a acceleration vector this function will return a windowed signal with hamming window
 # accel - timeseries vector of length n
-# wl - window length
+# windowLen - window length
 # ovlp - window overlap
 
-# a - returns a matrix of wl x nwindows windowed acceleration matrix
+# a - returns a matrix of windowLen x nwindows windowed acceleration matrix
 #####
-windowSignal <- function(accel, wl = 256, ovlp = 0.5){
+windowSignal <- function(accel, windowLen = 256, ovlp = 0.5){
   nlen = length(accel)
-  nstart = seq(1, nlen, wl*ovlp)
-  nend = seq(wl, nlen, wl*ovlp)
+  
+  # If length of signal is less than window length
+  if (nlen < windowLen){
+    windowLen = nlen; ovlp = 1;
+  }
+    
+  nstart = seq(1, nlen, windowLen*ovlp)
+  nend = seq(windowLen, nlen, windowLen*ovlp)
   nstart = nstart[1:length(nend)]
-  wn = seewave::hamming.w(wl)
+  wn = seewave::hamming.w(windowLen)
   
   a = apply(cbind(nstart,nend), 1, function(x, a, wn){
     a[seq(x[1],x[2],1)]*wn
@@ -100,7 +106,8 @@ getTimeDomainSummary <- function(accel, samplingRate = 100){
                     energy = sum(accel^2),
                     mobility = sqrt(var(diff(accel)*samplingRate)/var(accel)),
                     mtkeo = mean(seewave::TKEO(accel, f = samplingRate, plot = F)[,2], na.rm = T),
-                    dfa = fractal::DFA(accel, sum.order = 1)[[1]]) %>%
+                    dfa = fractal::DFA(accel, sum.order = 1)[[1]],
+                    rmsmag = sqrt(sum(accel^2)/length(accel))) %>%  # Root Mean Square magnitude
     dplyr::mutate(IQR = Q25 - Q75,
                   complexity = sqrt(var(diff(diff(accel)*samplingRate)*samplingRate)/var(diff(accel)*samplingRate)))
   names(ftrs) = paste0(names(ftrs),'.tm')
@@ -111,17 +118,20 @@ getTimeDomainSummary <- function(accel, samplingRate = 100){
 ## Get frequency domain features - Given a acceleration vector this function will return features characterising the time series in frequency domain
 # accel - timeseries vector of length n
 # samplingRate - samplingRate of the signal (by default it is 100 Hz)
+# npeaks - Number of peaks to be computed in EWT
 
 # ftrs - A features data frame of dimension 1 x 13
 #####
-getFrequencyDomainSummary <- function(accel, samplingRate = 100){
+getFrequencyDomainSummary <- function(accel, samplingRate = 100, npeaks = 3){
   spect = getSpectrum(accel, samplingRate)
   freq = spect$freq
   pdf = spect$pdf/sum(spect$pdf, na.rm = T)
   cdf = cumsum(pdf)
   
+  # Get STFT spectrum based features
   ftrs = list()
   ftrs$mn = sum(freq * pdf)
+  ftrs$mx = max(pdf)
   ftrs$sd = sqrt(sum(pdf * ((freq - ftrs$mn)^2)))
   ftrs$sem = ftrs$sd/sqrt(dim(spect)[1])
   ftrs$md = freq[length(cdf[cdf <= 0.5]) + 1]
@@ -135,6 +145,21 @@ getFrequencyDomainSummary <- function(accel, samplingRate = 100){
   ftrs$kurt = (sum((pdf - mean(pdf))^4)/(dim(spect)[1] - 1))/w^4
   ftrs$sfm = seewave::sfm(pdf)
   ftrs$sh = seewave::sh(pdf)
+  
+  # Get EWT spectrum
+  ewSpect = data.frame(freq = freq, pdf = pdf) %>%
+    getEWTspectrum(samplingRate = samplingRate, npeaks = npeaks)
+  
+  # Compute normalised point energies of each EW spctrum
+  ewEnergy = colSums(ewSpect^2, na.rm = T)
+  ewEnergy = ewEnergy/sum(ewEnergy, na.rm = T)
+  
+  # Compute entropy with EWT approximated energies
+  ftrs$ewt.permEnt = statcomp::permutation_entropy(ewEnergy)
+  ftrs$ewt.shannonEnt = seewave::sh(ewEnergy, alpha = 'shannon')
+  ftrs$ewt.simpsonEnt = seewave::sh(ewEnergy, alpha = 'simpson')
+  ftrs$ewt.renyiEnt = seewave::sh(ewEnergy, alpha = 2) # alpha is hardcoded to be 2
+  ftrs$ewt.tsallisEnt = (1-sum(ewEnergy^0.1))/(0.1-1) # q is hardcoded to be 0.1
   
   names(ftrs) = paste0(names(ftrs),'.fr')
 
@@ -188,4 +213,75 @@ getLogSpectralDistance <- function(accel.ref, accel.agt, samplingRate.ref = 100,
                   lsd = 10*log10(ref/agt)^2)
   lsd = data.frame(lsd.fr = sqrt(pracma::trapz(lsd$freq, lsd$lsd)))
   return(lsd)
+}
+
+#####
+## Get EWT spectrum - Given a time series vector this function will return Emprical Wavelet Transformed spectrum
+# spect - FFT spectrum as a two dimensional data frame with columns names as freq and pdf respectively n.freq x 2
+# npeaks - Number of peaks to be captured 
+# fractionMinPeakHeight - minimum height (relative to maximum peak height) a peak has to have.Specified as fraction between 0 and 1.
+# minPeakDistance - the minimum distance (in indices) peaks have to have to be counted 
+# samplingRate - samplingRate of the signal (by default it is 100 Hz)
+
+# ewSpect - Emprical wavelet transformed spectrum of dimension n.freq x (npeaks + 1)
+#####
+getEWTspectrum <- function(spect, npeaks = 3, fractionMinPeakHeight = 0.1, minPeakDistance = 1, samplingRate = 100){
+  
+  # Find top peaks for EWT calculation
+  peakFreqs = pracma::findpeaks(spect$pdf, 
+                                minpeakheight = fractionMinPeakHeight * max(spect$pdf, na.rm = T),
+                                minpeakdistance = minPeakDistance, 
+                                npeaks = npeaks,
+                                sortstr = TRUE)
+  
+  # Convert peak frequency to radians and find mid points
+  peakFreqs = spect$freq[sort(peakFreqs[,2])] * pi * 2 / samplingRate
+  peakFreqs = unique(c(0,peakFreqs,pi))
+  midPeakFreqs = c(0, peakFreqs[-length(peakFreqs)] + diff(peakFreqs)/2, pi)
+  
+  # Choose optimal scaling operator for the transition widths
+  numeratorvec = midPeakFreqs[2:(length(midPeakFreqs)+2)] - midPeakFreqs[1:(length(midPeakFreqs)+1)]
+  denominatorvec = midPeakFreqs[2:(length(midPeakFreqs)+2)] + midPeakFreqs[1:(length(midPeakFreqs)+1)]
+  optimalGamma = min(numeratorvec/denominatorvec, na.rm = TRUE)
+  
+  # Compute emprical scaling and wavelets
+  empricalWavelets = purrr::map2(midPeakFreqs[1:(length(midPeakFreqs)-1)], 
+                                 midPeakFreqs[2:length(midPeakFreqs)],
+                                 .f = function(wn1, wn2, n.freq, optimalGamma){
+                                   # Compute emprical scaling function for the first peak
+                                   phi.sy = rep(0, n.freq)
+                                   w = seq(0, pi, len = n.freq)
+                                   
+                                   # Compute beta (an arbitary coefficient)
+                                   x = (1/(2*optimalGamma*wn1)) * (abs(w) - (1-optimalGamma) * wn1)
+                                   beta1 = x^4*(35-84*x+70*x^2-20*x^3)
+                                   
+                                   x = (1/(2*optimalGamma*wn2)) * (abs(w) - (1-optimalGamma) * wn2)
+                                   beta2 = x^4*(35-84*x+70*x^2-20*x^3)
+                                   
+                                   if(wn2 != pi){
+                                     # Compute scaling/wavelets for different conditions
+                                     ind = ((1+optimalGamma)*wn1 <= abs(w)) & (abs(w) <= (1-optimalGamma) * wn2)
+                                     phi.sy[ind] = 1
+                                     ind = ((1 - optimalGamma) * wn2 <= abs(w)) & (abs(w) <= (1 + optimalGamma) * wn2)
+                                     phi.sy[ind] = cos(pi*beta2[ind]/2)
+                                     ind = ((1 - optimalGamma) * wn1 <= abs(w)) & (abs(w) <= (1 + optimalGamma) * wn1)
+                                     phi.sy[ind] = sin(pi*beta1[ind]/2)
+                                   } else {
+                                     # Compute scaling/wavelets for different conditions
+                                     ind = abs(w) <= (1-optimalGamma) * wn1
+                                     phi.sy[ind] = 1
+                                     ind = ((1 - optimalGamma) * wn1 <= abs(w)) & (abs(w) <= (1 + optimalGamma) * wn1)
+                                     phi.sy[ind] = cos(pi*beta1[ind]/2)
+                                     phi.sy = 1 - phi.sy
+                                   }
+                                   
+                                   return(phi.sy)
+                                 }, 
+                                 dim(spect)[1], optimalGamma)
+  
+  # Compute EW modified spectrum
+  ewSpect = sapply(empricalWavelets, function(x, spect){spect$pdf*x}, spect)
+  
+  return(ewSpect)
 }

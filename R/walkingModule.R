@@ -16,17 +16,23 @@ process_medicationChoiceAnswers <- function(json_file) {
 
 getMedianF0 <- function(tmp_time, y, nframe = 10){
   n = length(y)
-  dt = round(n/(nframe+1))
-  F0 = as.numeric()
-  for(i in 1:nframe){
-    nstart = (i-1)*dt+1
-    nend = (i+1)*dt
-    F0[i] = lomb::lsp(y[nstart:nend], tmp_time[nstart:nend], plot = FALSE, from = 0.2, to = 5)$peak.at[1]
+  dt = round(n/(nframe + 1))
+  
+  if (length(unique(y)) > 1){
+    F0 = as.numeric()
+    for (i in 1:nframe) {
+      nstart = (i - 1) * dt + 1
+      nend = (i + 1) * dt
+      F0[i] = lomb::lsp(y[nstart:nend], tmp_time[nstart:nend], 
+                        plot = FALSE, from = 0.2, to = 5)$peak.at[1]
+    }
+    medianF0 = median(F0, na.rm = T)
+    sdF0 = sd(F0, na.rm = T)
+  } else {
+    medianF0 = 0
+    sdF0 = 0
   }
-  medianF0 = median(F0, na.rm = T)
-  sdF0 = sd(F0, na.rm = T)
-  return(c(medianF0 = medianF0,
-           sdF0 = sdF0))
+  return(c(medianF0 = medianF0, sdF0 = sdF0))
 }
 
 
@@ -67,8 +73,12 @@ SingleAxisFeatures <- function(x, tmp_time, varName) {
   P0XF <- tryCatch({ 
     lspXF$peak
   }, error=function(err) { NA })
-  summaryF0X = as.numeric(getMedianF0(tmp_time, x))
-  tlagX <- tmp_time[fractal::timeLag(x, method = 'acfdecor')]
+  summaryF0X <- tryCatch({
+    as.numeric(getMedianF0(tmp_time, x))
+  }, error = function(err){ c(NA, NA) })
+  tlagX <- tryCatch({
+    tmp_time[fractal::timeLag(x, method = 'acfdecor')]
+  }, error = function(err){ NA })
   
   out <- c(meanX, sdX, modeX, skewX, kurX,
            q1X, medianX, q3X, iqrX, rangeX, acfX,

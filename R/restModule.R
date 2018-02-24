@@ -9,9 +9,21 @@ shapeRestData <- function(restData){
 
 #dat <- restData
 GetBalanceFeatures <- function(dat) {
-  dat <- Turning(dat)
-  turningTime <- dat$turningTime
-  dat <- dat$dat
+
+  error = 'None'
+
+  res <- tryCatch({
+      tmp <- Turning(dat)
+      list(dat=tmp$dat, turnTime = tmp$turningTime, error='None')
+  },error=function(e){
+      error="unable to process turning time"
+      list(dat=dat, turnTime = NA, error=error)
+  })
+
+  dat <- res$dat
+  turningTime <- res$turnTime
+  error=res$error
+
   x <- dat[, "x"]
   y <- dat[, "y"]
   z <- dat[, "z"]
@@ -42,7 +54,7 @@ GetBalanceFeatures <- function(dat) {
   dis <- BoxVolumeFeature(dat)
 
   # features
-  restFeatures <- c(out, bpa, dis, 'error'='None')
+  restFeatures <- c(out, bpa, dis, 'error'=error)
   return(restFeatures)
 }
 
@@ -160,11 +172,12 @@ createRestFeaturesErrorResult <- function(error) {
 #' @examples
 #' library(synapseClient)
 #' synapseLogin()
-#' walkingTable = synTableQuery("SELECT * FROM syn5713119")
-#' walkingTable = walkingTable@values
-#' sampleRow = rownames(walkingTable)[10]
-#' sample_restAccel_jsonFile <- synDownloadTableFile('syn5713119',sampleRow, 'accel_walking_rest.json.items')
-#' getRestFeatures(sample_restAccel_jsonFile)
+#' walkingTable <- synTableQuery("SELECT * FROM syn5713119")
+#' walkingTable <- walkingTable@values
+#' sampleRow <- rownames(walkingTable)[10]
+#' sample_restAccel_jsonFile <- synDownloadTableFile('syn5713119',sampleRow, 'deviceMotion_walking_rest.json.items')
+#' sample_restAccel_jsonFile <- as.character(sample_restAccel_jsonFile)
+#' sample_restResults <- getRestFeatures(sample_restAccel_jsonFile)
 getRestFeatures <- function(restAccel_json_file) {
   results <- readJsonFile(restAccel_json_file)
   restData <- results$data
