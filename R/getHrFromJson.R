@@ -1,5 +1,5 @@
 ####### MAIN
-#' extracts hr for each color band from avg pixel per frame of video (processed hr) JSON data file
+#' extracts hr for each color band from avg pixel value per frame of video (processed hr) JSON data file
 #'
 #'
 #' @param hrJsonFileLoc path to hr json file
