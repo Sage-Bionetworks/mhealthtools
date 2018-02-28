@@ -101,7 +101,7 @@ getHrFromJson <- function(hrJsonFileLoc, windowLen = 10){
       apply(dfl,2,getHR,samplingRate)}, error = function(e){ NA })
     dfl = as.data.frame(t(dfl))
     colnames(dfl) = c('hr','confidence')
-    dfl = dfl
+    return(dfl)
   })
   
   return(dat)
