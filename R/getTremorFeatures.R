@@ -56,16 +56,16 @@ getTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 2
   
   ftrs = data.frame(error = NA)
   
-  # Rotate acceleration data to earth co-ordinates
+  # Get user acceleration
   userAccel = tryCatch({
     userAccel = cbind(timestamp = dat$timestamp-dat$timestamp[1],
-                      mpowertools:::get_quaternary_rotated_userAccel(dat)) %>%
+                      dat$userAcceleration) %>%
       as.data.frame()
     ind = order(userAccel$timestamp)
     userAccel = userAccel[ind, ] %>%
       tidyr::gather(axis, accel, -timestamp)
   }, error = function(e){ NA })
-  if(all(is.na(userAccel))){ ftrs$error = 'userAccel rotation error'; return(ftrs) }
+  if(all(is.na(userAccel))){ ftrs$error = 'userAccel extraction error'; return(ftrs) }
   
   # Detrend data
   userAccel = tryCatch({
