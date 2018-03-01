@@ -20,12 +20,13 @@ getHrFromJson <- function(hrJsonFileLoc, windowLen = 10){
   #############################################################
   
   # If no json file exists
-  if(is.na(hrJsonFileLoc)){return('No JSON file') }
+  dat1 = data.frame(red = NA, green = NA, blue = NA, error = NA)
+  if(is.na(hrJsonFileLoc)){dat1$error = 'No JSON file'; return(dat1) }
   
   # Get HR data
   dat = tryCatch({ jsonlite::fromJSON(as.character(hrJsonFileLoc)) }, 
                  error = function(e){ NA })
-  if(all(is.na(dat))){return('JSON file read error') }
+    if(all(is.na(dat))){dat1$error = 'JSON file read error'; return(dat1) }
   
   # Get sampling rate
   samplingRate = length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1])
@@ -47,7 +48,7 @@ getHrFromJson <- function(hrJsonFileLoc, windowLen = 10){
     dfl = tryCatch({
       apply(dfl,2,mpowertools:::getfilteredsignal,mforder,bpforder, freqRange,samplingRate)}, error = function(e){ NA })
   })
-  if(all(is.na(dat))){return('filtering error') }
+  if(all(is.na(dat))){dat1$error = 'filtering error'; return(dat1) }
   
   # Get HR for each filtered segment of each color
   dat <- dat %>% lapply(function(dfl){
@@ -57,7 +58,9 @@ getHrFromJson <- function(hrJsonFileLoc, windowLen = 10){
     colnames(dfl) = c('hr','confidence')
     return(dfl)
   })
-  if(all(is.na(dat))){return('HR calculation error') }
+  if(all(is.na(dat))){dat1$error = 'HR calculation error'; return(dat1) }
+  
+  dat$error = 'none'
   
   return(dat)
   
