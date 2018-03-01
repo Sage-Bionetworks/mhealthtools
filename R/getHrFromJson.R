@@ -25,7 +25,7 @@ getHrFromJson <- function(hrJsonFileLoc, windowLen = 10){
   # Get HR data
   dat = tryCatch({ jsonlite::fromJSON(as.character(hrJsonFileLoc)) }, 
                  error = function(e){ NA })
-  if(is.na(dat)){return('JSON file read error') }
+  if(all(is.na(dat))){return('JSON file read error') }
   
   # Get sampling rate
   samplingRate = length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1])
@@ -47,6 +47,7 @@ getHrFromJson <- function(hrJsonFileLoc, windowLen = 10){
     dfl = tryCatch({
       apply(dfl,2,getfilteredsignal,mforder,bpforder, freqRange,samplingRate)}, error = function(e){ NA })
   })
+  if(all(is.na(dat))){return('filtering error') }
   
   # Get HR for each filtered segment of each color
   dat <- dat %>% lapply(function(dfl){
@@ -56,6 +57,7 @@ getHrFromJson <- function(hrJsonFileLoc, windowLen = 10){
     colnames(dfl) = c('hr','confidence')
     return(dfl)
   })
+  if(all(is.na(dat))){return('HR calculation error') }
   
   return(dat)
   
