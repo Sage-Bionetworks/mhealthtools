@@ -45,14 +45,14 @@ getHrFromJson <- function(hrJsonFileLoc, windowLen = 10){
   dat <- dat %>% lapply(function(dfl){
     dfl[is.na(dfl)] <- 0
     dfl = tryCatch({
-      apply(dfl,2,getfilteredsignal,mforder,bpforder, freqRange,samplingRate)}, error = function(e){ NA })
+      apply(dfl,2,mpowertools:::getfilteredsignal,mforder,bpforder, freqRange,samplingRate)}, error = function(e){ NA })
   })
   if(all(is.na(dat))){return('filtering error') }
   
   # Get HR for each filtered segment of each color
   dat <- dat %>% lapply(function(dfl){
     dfl = tryCatch({
-      apply(dfl,2,getHR,samplingRate)}, error = function(e){ NA })
+      apply(dfl,2,mpowertools:::getHR,samplingRate)}, error = function(e){ NA })
     dfl = as.data.frame(t(dfl))
     colnames(dfl) = c('hr','confidence')
     return(dfl)
