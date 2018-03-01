@@ -13,7 +13,7 @@
 # Wrapper function to take in json and give HR per color channel
 #############################################################
 
-getHrFromJson <- function(hrJsonFileLoc=NA, windowLen = 10){
+getHrFromJson <- function(hrJsonFileLoc=NA, windowLen = 10, freqRange = c(1,25), bpforder = 128){
 
   #############################################################
   # Main Code Block
@@ -35,8 +35,6 @@ getHrFromJson <- function(hrJsonFileLoc=NA, windowLen = 10){
   windowLen = round(samplingRate*windowLen)
   
   # Apply pre processing filter signal between freqRange
-  freqRange = c(1,25) # Bandpass frequency range (1-25Hz)
-  bpforder = 128 # Bandpass filter order
   mforder = 2*round(60*samplingRate/220) + 1 # order for the running mean based filter
   
   # Split each color into segments based on windowLen
