@@ -22,10 +22,10 @@ getTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRange = c(
   samplingRate = length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1])
   
   # Get accelerometer features
-  ftrs.acc = mpowertools:::getTremorFeatures.userAccel(dat, windowLen = windowLen, freqRange = freqRange, ovlp = ovlp)
+  ftrs.acc = mpowertools:::getTremorFeatures.userAccel(dat, samplingRate, windowLen = windowLen, freqRange = freqRange, ovlp = ovlp)
   
   # Get accelerometer features
-  ftrs.gyro = mpowertools:::getTremorFeatures.rotRate(dat, windowLen = windowLen, freqRange = freqRange, ovlp = ovlp)
+  ftrs.gyro = mpowertools:::getTremorFeatures.rotRate(dat, samplingRate, windowLen = windowLen, freqRange = freqRange, ovlp = ovlp)
   
   # Return if processing is errored
   if(!is.na(ftrs.acc$error) || !is.na(ftrs.gyro$error)){
@@ -60,7 +60,7 @@ getTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRange = c(
 }
 
 # Function to extract tremor features from user acceleration
-getTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5) {
+getTremorFeatures.userAccel <- function(dat, samplingRate, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5) {
   
   ftrs = data.frame(Window = NA, error = NA)
   
@@ -154,7 +154,7 @@ getTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 2
 }
 
 # Function to extract tremor features from user angular velocity from gyroscope
-getTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5) {
+getTremorFeatures.rotRate <- function(dat, samplingRate, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5) {
   
   ftrs = data.frame(Window = NA, error = NA)
   
