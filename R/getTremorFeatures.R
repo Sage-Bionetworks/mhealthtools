@@ -54,7 +54,7 @@ getTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRange = c(
 # Function to extract tremor features from user acceleration
 getTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5) {
   
-  ftrs = data.frame(error = NA)
+  ftrs = data.frame(Window = NA, error = NA)
   
   # Get user acceleration
   userAccel = tryCatch({
@@ -70,7 +70,7 @@ getTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 2
   # Detrend data
   userAccel = tryCatch({
     userAccel %>%
-      plyr::ddply(.(axis), .fun = function(x){
+      plyr::ddply(.variables = 'axis', .fun = function(x){
         x$accel = loess(x$accel~x$timestamp)$residual
         return(x)
       })
@@ -80,7 +80,7 @@ getTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 2
   # Band pass filter signal between freqRange
   userAccel = tryCatch({
     userAccel %>% 
-      plyr::ddply(.(axis), .fun = function(x, windowLen, sl, freqRange){
+      plyr::ddply(.variables = 'axis', .fun = function(x, windowLen, sl, freqRange){
         bandPassFilt = signal::fir1(windowLen-1, c(freqRange[1] * 2/sl, freqRange[2] * 2/sl),
                                     type="pass", 
                                     window = seewave::hamming.w(windowLen))
@@ -99,8 +99,8 @@ getTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 2
   
   # Split user acceleration into windows
   userAccel  = userAccel %>%
-    plyr::dlply(.(axis), .fun = function(accel, windowLen, ovlp){
-      a = windowSignal(accel$accel, windowLen = windowLen, ovlp = ovlp) 
+    plyr::dlply(.variables = 'axis', .fun = function(accel, windowLen, ovlp){
+      a = mpowertools:::windowSignal(accel$accel, windowLen = windowLen, ovlp = ovlp) 
     }, windowLen, ovlp)
   
   # Get user jerk
@@ -131,11 +131,11 @@ getTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 2
   ftrs = list(ua = userAccel, uj = userJerk, uv = userVel,  ud = userDisp, uaacf = userACF) %>%
     plyr::ldply(.fun = function(userAccel){
       plyr::ldply(userAccel, .fun = function(accel){
-        list(apply(accel, 2, getTimeDomainSummary, samplingRate) %>%
+        list(apply(accel, 2, mpowertools:::getTimeDomainSummary, samplingRate) %>%
                data.table::rbindlist(use.names = T, fill = T, idcol = 'Window'),
-             apply(accel, 2, getFrequencyDomainSummary, samplingRate = samplingRate, npeaks = 3) %>%
+             apply(accel, 2, mpowertools:::getFrequencyDomainSummary, samplingRate = samplingRate, npeaks = 3) %>%
                data.table::rbindlist(use.names = T, fill = T, idcol = 'Window'),
-             apply(accel, 2, getFrequencyDomainEnergy, samplingRate) %>%
+             apply(accel, 2, mpowertools:::getFrequencyDomainEnergy, samplingRate) %>%
                data.table::rbindlist(use.names = T, fill = T, idcol = 'Window')) %>%
           plyr::join_all(by = 'Window')
       }, .id = 'axis')
@@ -147,7 +147,7 @@ getTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 2
 # Function to extract tremor features from user angular velocity from gyroscope
 getTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5) {
   
-  ftrs = data.frame(error = NA)
+  ftrs = data.frame(Window = NA, error = NA)
   
   # Get user angular velocity from gyro data
   userAngVel = tryCatch({
@@ -163,7 +163,7 @@ getTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c(1, 25)
   # Detrend data
   userAngVel = tryCatch({
     userAngVel %>%
-      plyr::ddply(.(axis), .fun = function(x){
+      plyr::ddply(.variables = 'axis', .fun = function(x){
         x$angvel = loess(x$angvel~x$timestamp)$residual
         x <- return(x)
       })
@@ -173,7 +173,7 @@ getTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c(1, 25)
   # Band pass filter signal between freqRange
   userAngVel = tryCatch({
     userAngVel %>% 
-      plyr::ddply(.(axis), .fun = function(x, windowLen, sl, freqRange){
+      plyr::ddply(.variables = 'axis', .fun = function(x, windowLen, sl, freqRange){
         bandPassFilt = signal::fir1(windowLen-1, c(freqRange[1] * 2/sl, freqRange[2] * 2/sl),
                                     type="pass", 
                                     window = seewave::hamming.w(windowLen))
@@ -192,8 +192,8 @@ getTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c(1, 25)
   
   # Split user acceleration into windows
   userAngVel  = userAngVel %>%
-    plyr::dlply(.(axis), .fun = function(angvel, windowLen, ovlp){
-      a = windowSignal(angvel$angvel, windowLen = windowLen, ovlp = ovlp) 
+    plyr::dlply(.variables = 'axis', .fun = function(angvel, windowLen, ovlp){
+      a = mpowertools:::windowSignal(angvel$angvel, windowLen = windowLen, ovlp = ovlp) 
     }, windowLen, ovlp)
   
   # Get user angular acceleration
@@ -218,11 +218,11 @@ getTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c(1, 25)
   ftrs = list(uav = userAngVel, uaa = userAngAcc, uad = userAngDis,  uavacf = userACF) %>%
     plyr::ldply(.fun = function(userAccel){
       plyr::ldply(userAccel, .fun = function(accel){
-        list(apply(accel, 2, getTimeDomainSummary, samplingRate) %>%
+        list(apply(accel, 2, mpowertools:::getTimeDomainSummary, samplingRate) %>%
                data.table::rbindlist(use.names = T, fill = T, idcol = 'Window'),
-             apply(accel, 2, getFrequencyDomainSummary, samplingRate = samplingRate, npeaks = 3) %>%
+             apply(accel, 2, mpowertools:::getFrequencyDomainSummary, samplingRate = samplingRate, npeaks = 3) %>%
                data.table::rbindlist(use.names = T, fill = T, idcol = 'Window'),
-             apply(accel, 2, getFrequencyDomainEnergy, samplingRate) %>%
+             apply(accel, 2, mpowertools:::getFrequencyDomainEnergy, samplingRate) %>%
                data.table::rbindlist(use.names = T, fill = T, idcol = 'Window')) %>%
           plyr::join_all(by = 'Window')
       }, .id = 'axis')
