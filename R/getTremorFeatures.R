@@ -22,10 +22,16 @@ getTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRange = c(
   samplingRate = length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1])
   
   # Get accelerometer features
-  ftrs.acc = getTremorFeatures.userAccel(dat, windowLen = windowLen, freqRange = freqRange, ovlp = ovlp)
+  ftrs.acc = mpowertools:::getTremorFeatures.userAccel(dat, windowLen = windowLen, freqRange = freqRange, ovlp = ovlp)
   
   # Get accelerometer features
-  ftrs.gyro = getTremorFeatures.rotRate(dat, windowLen = windowLen, freqRange = freqRange, ovlp = ovlp)
+  ftrs.gyro = mpowertools:::getTremorFeatures.rotRate(dat, windowLen = windowLen, freqRange = freqRange, ovlp = ovlp)
+  
+  # Return if processing is errored
+  if(!is.na(ftrs.acc$error) || !is.na(ftrs.gyro$error)){
+    return(list(accelerometer = ftrs.acc, gyroscope = ftrs.gyro) %>%
+             data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor'))
+  }
   
   # Tag outliers windows based on phone rotation
   gr.error = lapply(dat$gravity, function(x) {
@@ -46,6 +52,8 @@ getTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRange = c(
   # Combine all features
   ftrs = list(accelerometer = ftrs.acc, gyroscope = ftrs.gyro) %>%
     data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>%
+    dplyr::mutate(Window = as.character(Window)) %>%
+    dplyr::select(-error) %>%
     dplyr::left_join(gr.error, by = 'Window')
   
   return(ftrs)
@@ -139,7 +147,8 @@ getTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 2
                data.table::rbindlist(use.names = T, fill = T, idcol = 'Window')) %>%
           plyr::join_all(by = 'Window')
       }, .id = 'axis')
-    }, .id = 'measurementType')
+    }, .id = 'measurementType') %>%
+    dplyr::mutate(error = NA)
   
   return(ftrs)
 }
@@ -226,7 +235,8 @@ getTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c(1, 25)
                data.table::rbindlist(use.names = T, fill = T, idcol = 'Window')) %>%
           plyr::join_all(by = 'Window')
       }, .id = 'axis')
-    }, .id = 'measurementType')
+    }, .id = 'measurementType') %>%
+    dplyr::mutate(error = NA)
   
   return(ftrs)
 }
