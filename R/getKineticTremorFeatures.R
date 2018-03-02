@@ -55,7 +55,7 @@ getKineticTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRan
 # Function to extract kinetic tremor features from user acceleration from accelerometer
 getKineticTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5){  
   
-  ftrs = data.frame(error = NA)
+  ftrs = data.frame(Window = NA, error = NA)
 
   # Get user acceleration data
   userAccel = tryCatch({
@@ -71,7 +71,7 @@ getKineticTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange =
   # Detrend data
   userAccel = tryCatch({
     userAccel %>%
-      plyr::ddply(.(axis), .fun = function(x){
+      plyr::ddply(.variables = 'axis', .fun = function(x){
         x$accel = loess(x$accel~x$timestamp)$residual
         return(x)
       })
@@ -81,7 +81,7 @@ getKineticTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange =
   # Band pass filter signal between freqRange
   userAccel = tryCatch({
     userAccel %>% 
-      plyr::ddply(.(axis), .fun = function(x, windowLen, sl, freqRange){
+      plyr::ddply(.variables = 'axis', .fun = function(x, windowLen, sl, freqRange){
         bandPassFilt = signal::fir1(windowLen-1, c(freqRange[1] * 2/sl, freqRange[2] * 2/sl),
                                     type="pass", 
                                     window = seewave::hamming.w(windowLen))
@@ -100,7 +100,7 @@ getKineticTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange =
   
   # Split user acceleration into EMDs and window
   userAccel = userAccel %>%
-    plyr::dlply(.(axis), .fun = function(accel, windowLen, ovlp){
+    plyr::dlply(.variables = 'axis', .fun = function(accel, windowLen, ovlp){
       imf =  EMD::emd(accel$accel, accel$timestamp, max.imf = 4)$imf %>%
         as.data.frame()
       colnames(imf) = paste0('IMF',1:dim(imf)[2])
@@ -155,7 +155,7 @@ getKineticTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange =
 # Function to extract tremor features from user angular velocity from gyroscope
 getKineticTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5) {
   
-  ftrs = data.frame(error = NA)
+  ftrs = data.frame(Window = NA, error = NA)
   
   # Get user angular velocity from gyro data
   userAngVel = tryCatch({
@@ -171,7 +171,7 @@ getKineticTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c
   # Detrend data
   userAngVel = tryCatch({
     userAngVel %>%
-      plyr::ddply(.(axis), .fun = function(x){
+      plyr::ddply(.variables = 'axis', .fun = function(x){
         x$angvel = loess(x$angvel~x$timestamp)$residual
         x <- return(x)
       })
@@ -181,7 +181,7 @@ getKineticTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c
   # Band pass filter signal between freqRange
   userAngVel = tryCatch({
     userAngVel %>% 
-      plyr::ddply(.(axis), .fun = function(x, windowLen, sl, freqRange){
+      plyr::ddply(.variables = 'axis', .fun = function(x, windowLen, sl, freqRange){
         bandPassFilt = signal::fir1(windowLen-1, c(freqRange[1] * 2/sl, freqRange[2] * 2/sl),
                                     type="pass", 
                                     window = seewave::hamming.w(windowLen))
@@ -200,7 +200,7 @@ getKineticTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c
   
   # Split user acceleration into EMDs and window
   userAngVel = userAngVel %>%
-    plyr::dlply(.(axis), .fun = function(accel, windowLen, ovlp){
+    plyr::dlply(.variables = 'axis', .fun = function(accel, windowLen, ovlp){
       imf =  EMD::emd(accel$angvel, accel$timestamp, max.imf = 4)$imf %>%
         as.data.frame()
       colnames(imf) = paste0('IMF',1:dim(imf)[2])
