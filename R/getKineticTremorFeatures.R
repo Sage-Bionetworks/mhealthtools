@@ -27,6 +27,12 @@ getKineticTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRan
   # Get accelerometer features
   ftrs.gyro = getKineticTremorFeatures.rotRate(dat, windowLen = windowLen, freqRange = freqRange, ovlp = ovlp)
   
+  # Return if processing is errored
+  if(!is.na(ftrs.acc$error) || !is.na(ftrs.gyro$error)){
+    return(list(accelerometer = ftrs.acc, gyroscope = ftrs.gyro) %>%
+             data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor'))
+  }
+  
   # Tag outliers windows based on phone rotation
   gr.error = lapply(dat$gravity, function(x) {
     accel = mpowertools:::windowSignal(x) %>%
@@ -47,6 +53,8 @@ getKineticTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRan
   ftrs = list(accelerometer = ftrs.acc, gyroscope = ftrs.gyro) %>%
     data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>%
     tidyr::separate(Window, c('IMF','Window'), sep = '\\.') %>%
+    dplyr::mutate(Window = as.character(Window)) %>%
+    dplyr::select(-error) %>%
     dplyr::left_join(gr.error, by = 'Window')
 
   return(ftrs)
@@ -147,7 +155,8 @@ getKineticTremorFeatures.userAccel <- function(dat, windowLen = 256, freqRange =
                data.table::rbindlist(use.names = T, fill = T, idcol = 'Window')) %>%
           plyr::join_all(by = 'Window')
       }, .id = 'axis')
-    }, .id = 'measurementType')
+    }, .id = 'measurementType')%>%
+    dplyr::mutate(error = NA)
   
   return(ftrs)
 }
@@ -241,7 +250,8 @@ getKineticTremorFeatures.rotRate <- function(dat, windowLen = 256, freqRange = c
                data.table::rbindlist(use.names = T, fill = T, idcol = 'Window')) %>%
           plyr::join_all(by = 'Window')
       }, .id = 'axis')
-    }, .id = 'measurementType')
+    }, .id = 'measurementType') %>%
+    dplyr::mutate(error = NA)
   
   return(ftrs)
 }
