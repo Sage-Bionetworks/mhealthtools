@@ -18,10 +18,10 @@ get_sampling_rate <- function(sensor_data) {
 
 gather_axis <- function(sensor_data) {
   gathered_axis <- tryCatch({
-    normalized_sensor_data = dplyr::bind_cols(t = sensor_data$t - sensor_data$t[1],
-                                              sensor_data %>% select(-t))
+    t0 <- sensor_data$t[1]
+    normalized_sensor_data <-  sensor_data %>% mutate(t = t - t0)
     index = order(sensor_data$t)
-    gathered_axis = sensor_data[index,] %>%
+    gathered_axis = normalized_sensor_data[index,] %>%
                     tidyr::gather(axis, metric, -t)
   }, error = function(e) { NA })
   return(gathered_axis)
@@ -48,4 +48,11 @@ bandpass <- function(sensor_data, window_length, sampling_rate, frequency_range)
       dplyr::mutate(metric = signal::filtfilt(bandpass_filter, metric))
   }, error = function(e) { NA })
   return(bandpass_filtered_sensor_data)
+}
+
+filter_time <- function(sensor_data, t1, t2) {
+  filtered_time_sensor_data <- tryCatch({
+    filtered_time_sensor_data <- sensor_data %>% dplyr::filter(t >= t1, t <= t2)
+    return(filtered_time_sensor_data)
+  }, error = function(e) { NA })
 }
