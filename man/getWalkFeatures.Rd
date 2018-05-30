@@ -22,4 +22,3 @@ sample_walking_File <-'syn7077340'
 walkingJsonFile <- synGet(sample_walking_File)@filePath
 getWalkFeatures(walkingJsonFile)
 }
-

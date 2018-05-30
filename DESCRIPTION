@@ -6,7 +6,8 @@ Author: c(
           person("Abhishek", "Pratap", email = "apratap@sagebase.org", role = c("aut", "cre"))
           person("Elias", "Chaibub Neto", email = "elias.chaibub.neto@sagebase.org", role = c("ctb"))
           person("Thanneer", "Perumal", email = "thanneer.perumal@sagebase.org", role = c("aut", "ctb"))
-          person("Meghashyam", "Tummalacherla", email = "meghasyam@sagebase.org", role = c("ctb")))
+          person("Meghashyam", "Tummalacherla", email = "meghasyam@sagebase.org", role = c("ctb"))
+          person("Phil", "Snyder", email = "phil.snyder@sagebase.org", role = c("aut", "ctb")))
 Maintainer: Thanneer Malai Perumal <thanneer.perumal@sagebase.org>
 Description: More about what it does (maybe more than one line)
 License: GPL-3
@@ -35,4 +36,4 @@ Imports: plyr,
          statcomp,
          purrr
 URL: http://www.sagebase.org
-RoxygenNote: 5.0.1.9000
+RoxygenNote: 6.0.1
