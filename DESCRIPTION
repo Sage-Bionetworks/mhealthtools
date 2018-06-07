@@ -1,7 +1,7 @@
-Package: mpowertools
+Package: mhealthtools
 Type: Package
-Title: mPowerTools - Modules for processing data from mPower apps
-Version: 0.1.1
+Title: mHealthTools - Modules for processing data from mHealth apps
+Version: 0.1.0
 Author: c(
           person("Abhishek", "Pratap", email = "apratap@sagebase.org", role = c("aut", "cre"))
           person("Elias", "Chaibub Neto", email = "elias.chaibub.neto@sagebase.org", role = c("ctb"))
