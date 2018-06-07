@@ -7,7 +7,7 @@
 tidy_sensor_data(sensor_data)
 }
 \arguments{
-\item{sensor_data}{A data frame with columns t, x, y, z.}
+\item{sensor_data}{A data frame with a time column, \code{t}.}
 }
 \value{
 Sensor data in tidy format.

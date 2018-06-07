@@ -4,20 +4,27 @@
 \alias{get_tremor_features}
 \title{Extract tremor features from raw accelerometer and gyroscope data.}
 \usage{
-get_tremor_features(accelerometer_data, gyrometer_data, gravity_data = NA,
-  window_length = 256, frequency_range = c(1, 25), overlap = 0.5)
+get_tremor_features(accelerometer_data, gyroscope_data, gravity_data = NA,
+  funs = c(time_domain_summary, frequency_domain_summary,
+  frequency_domain_energy), window_length = 256, time_range = c(1, 9),
+  frequency_range = c(1, 25), overlap = 0.5)
 }
 \arguments{
 \item{accelerometer_data}{A data frame with columns t, x, y, z containing 
 accelerometer measurements.}
 
-\item{gyrometer_data}{A data frame with columns t, x, y, z containing 
-gyrometer measurements.}
+\item{gyroscope_data}{A data frame with columns t, x, y, z containing 
+gyroscope measurements.}
 
 \item{gravity_data}{A data frame with columns t, x, y, z containing 
 gravity sensor measurements.}
 
+\item{funs}{Feature extraction functions that accept a single
+time-series vector as input.}
+
 \item{window_length}{Length of sliding windows.}
+
+\item{time_range}{Timestamp range to use.}
 
 \item{frequency_range}{Frequency range for the bandpass filter.}
 

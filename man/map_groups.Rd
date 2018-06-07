@@ -4,18 +4,18 @@
 \alias{map_groups}
 \title{Map a function to a single column within tibble groups}
 \usage{
-map_groups(.x, groups, col, .f, ...)
+map_groups(x, groups, col, f, ...)
 }
 \arguments{
-\item{.x}{A (non-grouped) tibble}
-
 \item{groups}{A character vector specifying which columns to group on.}
 
 \item{col}{Column to pass as a vector to \code{.f}.}
 
-\item{.f}{Function to be mapped to \code{col} for each group.}
-
 \item{...}{Additional arguments to \code{.f}.}
+
+\item{.x}{A (non-grouped) tibble}
+
+\item{.f}{Function to be mapped to \code{col} for each group.}
 }
 \value{
 A tibble indexed by groups with an additional column containing

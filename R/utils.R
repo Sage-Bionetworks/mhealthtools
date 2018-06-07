@@ -3,9 +3,15 @@
 #' @param sensor_data A data frame with columns t, x, y, z.
 #' @return The sampling rate (number of samples taken per second on average).
 get_sampling_rate <- function(sensor_data) {
-  t_length = length(sensor_data$t)
-  sampling_rate = t_length / (sensor_data$t[t_length] - sensor_data$t[1])
-  return(sampling_rate)
+  tryCatch({
+    t_length = length(sensor_data$t)
+    sampling_rate = t_length / (sensor_data$t[t_length] - sensor_data$t[1])
+    return(sampling_rate)
+  }, error = function(e) { NA })
+}
+
+has_error <- function(sensor_data) {
+  tibble::has_name(sensor_data, "error") && any(!is.na(sensor_data$error))
 }
 
 #' Gather the axial columns
@@ -13,16 +19,21 @@ get_sampling_rate <- function(sensor_data) {
 #' Gathers x, y, and z columns into a single \code{axis} column and
 #' normalize the \code{t} column to begin at \code{t} = 0.
 #' 
-#' @param sensor_data A data frame with columns t, x, y, z.
+#' @param sensor_data A data frame with a time column, \code{t}.
 #' @return Sensor data in tidy format.
 tidy_sensor_data <- function(sensor_data) {
+  if (has_error(sensor_data)) return(sensor_data)
   tidy_sensor_data <- tryCatch({
     t0 <- sensor_data$t[1]
-    normalized_sensor_data <-  sensor_data %>% mutate(t = t - t0)
+    normalized_sensor_data <-  sensor_data %>% dplyr::mutate(t = t - t0)
     index = order(sensor_data$t)
     tidy_sensor_data = normalized_sensor_data[index,] %>%
                     tidyr::gather(axis, acceleration, -t)
-  }, error = function(e) { NA })
+  }, error = function(e) {
+    dplyr::tibble(
+      window = NA,
+      error = "Could not put sensor data in tidy format by gathering the axes.")
+  })
   return(tidy_sensor_data)
 }
 
@@ -41,13 +52,16 @@ detrend <- function(time, acceleration) {
 #' @param sensor_data A data frame with columns t, axis, acceleration.
 #' @return Sensor data with detrended acceleration values.
 mutate_detrend <- function(sensor_data) {
+  if (has_error(sensor_data)) return(sensor_data)
   detrended_sensor_data <- tryCatch({
     detrended_sensor_data <- sensor_data %>%
                              dplyr::group_by(axis) %>%
                              dplyr::mutate(
                                acceleration = detrend(t, acceleration)) %>% 
                              dplyr::ungroup()
-  }, error = function(e) { e })
+  }, error = function(e) {
+    dplyr::tibble(window = NA, error = "Detrend error")
+  })
   return(detrended_sensor_data)
 }
 
@@ -60,7 +74,9 @@ mutate_detrend <- function(sensor_data) {
 #' @param frequency_high Upper bound on frequency in Hz
 #' @return Filtered time series data
 bandpass <- function(acceleration, window_length, sampling_rate,
-                     frequency_low, frequency_high) {
+                     frequency_range) {
+  frequency_low <- frequency_range[1]
+  frequency_high <- frequency_range[2]
   if(frequency_low*2/sampling_rate > 1 || frequency_high*2/sampling_rate > 1) {
     stop("Frequency parameters can be at most half the sampling rate.")
   }
@@ -79,19 +95,21 @@ bandpass <- function(acceleration, window_length, sampling_rate,
 #' @param sensor_date A data frame with columns t, axis, acceleration.
 #' @param window_length Length of the filter.
 #' @param sampling_rate Sampling rate of the acceleration data.
-#' @param frequency_low Lower bound on frequency in Hz
-#' @param frequency_high Upper bound on frequency in Hz
+#' @param frequency_range Bounds on frequency in Hz
 #' @return Filtered time series data
 mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
-                     frequency_low, frequency_high) {
+                            frequency_range) {
+  if (has_error(sensor_data)) return(sensor_data)
   bandpass_filtered_sensor_data <- tryCatch({
     sensor_data %>%
       dplyr::group_by(axis) %>%
       dplyr::mutate(
         acceleration = bandpass(acceleration, window_length, sampling_rate,
-                                frequency_low, frequency_high)) %>% 
+                                frequency_range)) %>% 
       dplyr::ungroup()
-  }, error = function(e) { NA })
+  }, error = function(e) {
+    dplyr::tibble(window = NA, error = "Bandpass filter error")
+  })
   return(bandpass_filtered_sensor_data)
 }
 
@@ -100,12 +118,15 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
 #' @param sensor_date A data frame with columns t, axis, acceleration.
 #' @param t1 Start time.
 #' @param t2 End time.
-#' @return Sensor data between time t1 and t2
+#' @return Sensor data between time t1 and t2 (inclusive)
 filter_time <- function(sensor_data, t1, t2) {
+  if (has_error(sensor_data)) return(sensor_data)
   filtered_time_sensor_data <- tryCatch({
     filtered_time_sensor_data <- sensor_data %>% dplyr::filter(t >= t1, t <= t2)
     return(filtered_time_sensor_data)
-  }, error = function(e) { NA })
+  }, error = function(e) {
+    dplyr::tibble(window = NA, error = "'Not enough time samples")
+  })
 }
 
 #' Window the acceleration vector of sensor data by axis
@@ -115,22 +136,28 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @param overlap window overlap
 #' @return Windowed sensor data
 window <- function(sensor_data, window_length, overlap) {
-  windowed_sensor_data <- sensor_data %>%
-    spread(axis, acceleration) %>% 
-    select(x, y, z) %>%
-    purrr::map(windowSignal, 
-               window_length = window_length, overlap = overlap)
-  retidy <- function(windowed_matrix) {
-    windowed_matrix <- cbind(index = 1:dim(windowed_matrix)[1],
-                             windowed_matrix)
-    tidy_tibble <- windowed_matrix %>% 
-      dplyr::as_tibble() %>%
-      tidyr::gather(window, acceleration, -index, convert=T)
-    return(tidy_tibble)
-  }
-  tidy_windowed_sensor_data <- lapply(windowed_sensor_data, retidy) %>% 
-    dplyr::bind_rows(.id = "axis")
-  return(tidy_windowed_sensor_data)
+  if (has_error(sensor_data)) return(sensor_data)
+  tryCatch({
+    windowed_sensor_data <- sensor_data %>%
+      tidyr::spread(axis, acceleration) %>% 
+      dplyr::select(x, y, z) %>%
+      purrr::map(windowSignal, 
+                 window_length = window_length, overlap = overlap)
+    tidy_windowed_sensor_data <- lapply(
+      windowed_sensor_data,
+      function(windowed_matrix) {
+        windowed_matrix <- cbind(index = 1:dim(windowed_matrix)[1],
+                                 windowed_matrix)
+        tidy_tibble <- windowed_matrix %>% 
+          dplyr::as_tibble() %>%
+          tidyr::gather(window, acceleration, -index, convert=T)
+        return(tidy_tibble)
+      }) %>% 
+      dplyr::bind_rows(.id = "axis")
+    return(tidy_windowed_sensor_data)
+  }, error = function(e) {
+    dplyr::tibble(window = NA, error = "Windowing error")
+  })
 }
 
 #' Window a signal
@@ -168,7 +195,8 @@ windowSignal <- function(accel, window_length = 256, overlap = 0.5){
 #' @param sampling_rate Sampling rate of the acceleration vector.
 #' @return Jerk vector.
 jerk <- function(acceleration, sampling_rate) {
-  jerk <- (acceleration - lag(acceleration)) * sampling_rate
+  jerk <- (acceleration - dplyr::lag(acceleration)) * sampling_rate
+  jerk[1] <- 0
   return(jerk)
 }
 
@@ -178,10 +206,15 @@ jerk <- function(acceleration, sampling_rate) {
 #' @param sampling_rate Sampling rate of the acceleration data.
 #' @return Sensor data with jerk column.
 mutate_jerk <- function(sensor_data, sampling_rate) {
-  sensor_data_with_jerk <- sensor_data %>%
-    dplyr::group_by(axis) %>% 
+  if (has_error(sensor_data)) return(sensor_data)
+  sensor_data_with_jerk <- tryCatch({
+    sensor_data %>%
+    dplyr::group_by(axis, window) %>% 
     dplyr::mutate(jerk = jerk(acceleration, sampling_rate)) %>%
     dplyr::ungroup()
+  }, error = function(e) {
+    dplyr::tibble(window = NA, error = "Error calculating jerk")
+  })
   return(sensor_data_with_jerk)
 }
 
@@ -191,7 +224,7 @@ mutate_jerk <- function(sensor_data, sampling_rate) {
 #' @param sampling_rate Sampling rate of the acceleration vector.
 #' @return Velocity vector.
 velocity <- function(acceleration, sampling_rate) {
-  velocity <- cumsum(acceleration) * sampling_rate
+  velocity <- diffinv(acceleration)[-1] * sampling_rate
   return(velocity)
 }
 
@@ -201,10 +234,15 @@ velocity <- function(acceleration, sampling_rate) {
 #' @param sampling_rate Sampling rate of the acceleration data.
 #' @return Sensor data with velocity column.
 mutate_velocity <- function(sensor_data, sampling_rate) {
-  sensor_data_with_velocity <- sensor_data %>% 
-    dplyr::group_by(axis) %>%
+  if (has_error(sensor_data)) return(sensor_data)
+  sensor_data_with_velocity <- tryCatch({
+    sensor_data %>% 
+    dplyr::group_by(axis, window) %>%
     dplyr::mutate(velocity = velocity(acceleration, sampling_rate)) %>% 
     dplyr::ungroup()
+  }, error = function(e) {
+    dplyr::tibble(window = NA, error = "Error calculating velocity")
+  })
   return(sensor_data_with_velocity)
 }
 
@@ -215,7 +253,7 @@ mutate_velocity <- function(sensor_data, sampling_rate) {
 #' @return Displacement vector.
 displacement <- function(acceleration, sampling_rate) {
   velocity <- velocity(acceleration, sampling_rate)
-  displacement <- cumsum(velocity) * sampling_rate
+  displacement <- diffinv(velocity)[-1] * sampling_rate
   return(displacement)
 }
 
@@ -225,14 +263,42 @@ displacement <- function(acceleration, sampling_rate) {
 #' @param sampling_rate Sampling rate of the acceleration data.
 #' @return Sensor data with displacement column.
 mutate_displacement <- function(sensor_data, sampling_rate) {
-  sensor_data_with_displacement <- sensor_data %>%
-    dplyr::group_by(axis) %>%
+  if (has_error(sensor_data)) return(sensor_data)
+  sensor_data_with_displacement <- tryCatch({
+    sensor_data %>%
+    dplyr::group_by(axis, window) %>%
     dplyr::mutate(displacement = displacement(acceleration, sampling_rate)) %>% 
     dplyr::ungroup()
+  }, error = function(e) {
+    dplyr::tibble(window = NA, error = "Error calculating displacement")
+  })
   return(sensor_data_with_displacement)
 }
 
-# TODO: ACF function?
+#' Construct a dataframe with ACF values
+#' 
+#' Estimate the ACF for windowed sensor data.
+#' 
+#' @param sensor_data A data frame with columns t, axis, acceleration.
+#' @return A tibble with columns axis, window, index, acf
+calculate_acf <- function(sensor_data) {
+  if (has_error(sensor_data)) return(sensor_data)
+  acf_data <- tryCatch({
+    sensor_data %>%
+      dplyr::group_by(axis, window) %>%
+      tidyr::nest(acceleration) %>%
+      dplyr::mutate(data = map(data, function(d) {
+        acf_col <- acf(d$acceleration, plot=F)$acf
+        index_col <- 1:length(acf_col)
+        dplyr::bind_cols(acf = acf_col, index = index_col)
+      })) %>%
+      tidyr::unnest(data) %>% 
+      select(axis, window, index, acf)
+  }, error = function(e) {
+    dplyr::tibble(window = NA, error = "Error calculating ACF")
+  })
+  return(acf_data)
+}
 
 #' Get min and max gravity values for each window
 #' 
@@ -241,7 +307,8 @@ mutate_displacement <- function(sensor_data, sampling_rate) {
 #' @param overlap Window overlap.
 #' @return Min and max values for each window.
 tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
-  gravity_summary <- windowSignal(gravity_vector, window_length, overlap) %>%
+  gravity_summary <-
+    windowSignal(gravity_vector, window_length, overlap) %>%
     dplyr::as_tibble() %>%
     tidyr::gather(window, value) %>%
     dplyr::group_by(window) %>%
@@ -260,7 +327,8 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
 #' @param overlap Window overlap.
 #' @return Rotations errors for each window.
 tag_outlier_windows <- function(gravity, window_length, overlap) {
-  gr_error = gravity %>% 
+  gr_error <- tryCatch({
+    gr_error <- gravity %>% 
     purrr::map(tag_outlier_windows_, window_length, overlap) %>%
     dplyr::bind_rows(.id = 'axis') %>%
     dplyr::mutate(error = sign(max) != sign(min)) %>% 
@@ -268,6 +336,10 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
     dplyr::summarise(error = any(error, na.rm = T))
   gr_error$error[gr_error$error == TRUE] = 'Phone rotated within window'
   gr_error$error[gr_error$error == FALSE] = 'None'
+  return(gr_error)
+  }, error = function(e) {
+    dplyr::tibble(window = "NA", error = "Error tagging outlier windows")
+  })
   return(gr_error)
 }
 
@@ -278,7 +350,10 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
 #' @param accel An acceleration vector.
 #' @param sampling_rate Sampling_rate of the acceleration vector.
 #' @return A features data frame of dimension 1 x n_features
-time_domain_summary <- function(accel, sampling_rate) {
+time_domain_summary <- function(accel, sampling_rate=100) {
+  if(sampling_rate == 100) {
+    warning("Using default sampling rate of 100 for time_domain_summary")
+  }
   ftrs <- dplyr::tibble(
     mean = mean(accel, na.rm = TRUE),
     median = quantile(accel, probs = c(0.5), na.rm = TRUE),
@@ -316,7 +391,11 @@ time_domain_summary <- function(accel, sampling_rate) {
 #' @param npeaks Number of peaks to be computed in EWT
 #' @return A features data frame of dimension 1 x num_features
 #####
-frequency_domain_summary <- function(accel, sampling_rate, npeaks = 3) {
+frequency_domain_summary <- function(accel, sampling_rate=100, npeaks = 3) {
+  if(sampling_rate == 100 && npeaks == 3) {
+    warning(paste("Using default sampling rate of 100",
+                  "and 3 peaks for frequency_domain_summary"))
+  }
   spect <- getSpectrum(accel, sampling_rate)
   freq <- spect$freq
   pdf <- spect$pdf/sum(spect$pdf, na.rm = T)
@@ -472,7 +551,10 @@ getEWTspectrum <- function(spect, npeaks = 3, fractionMinPeakHeight = 0.1,
 #' @param accel A timeseries vector.
 #' @param sampling_rate Sampling rate of the signal (by default it is 100 Hz).
 #' @return A features data frame of dimension 1 x 48.
-frequency_domain_energy <- function(accel, sampling_rate) {
+frequency_domain_energy <- function(accel, sampling_rate=100) {
+  if(sampling_rate == 100) {
+    warning("Using default sampling rate of 100 for frequency_domain_energy")
+  }
   spect = getSpectrum(accel, sampling_rate)
   freq = spect$freq
   pdf = spect$pdf/sum(spect$pdf, na.rm = T)
@@ -502,11 +584,11 @@ frequency_domain_energy <- function(accel, sampling_rate) {
 #' @param ... Additional arguments to \code{.f}.
 #' @return A tibble indexed by groups with an additional column containing
 #' the output of the mapped function.
-map_groups <- function(.x, groups, col, .f, ...) {
-  dots = rlang::enquos(...) # can also use enexprs()
-  .x %>%
-    group_by_at(.vars = groups) %>% 
-    nest() %>% 
-    mutate(data = purrr::map(data, ~ .f(.[[col]], !!!dots))) %>%
-    unnest(data)
+map_groups <- function(x, groups, col, f, ...) {
+  dots <- rlang::enquos(...) # can also use enexprs()
+  x %>%
+    dplyr::group_by_at(.vars = groups) %>% 
+    tidyr::nest() %>% 
+    dplyr::mutate(data = purrr::map(data, ~ f(.[[col]], !!!dots))) %>%
+    tidyr::unnest(data)
 }
