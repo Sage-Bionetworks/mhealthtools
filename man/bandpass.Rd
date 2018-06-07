@@ -4,8 +4,7 @@
 \alias{bandpass}
 \title{Apply a pass-band filter to time series data}
 \usage{
-bandpass(acceleration, window_length, sampling_rate, frequency_low,
-  frequency_high)
+bandpass(acceleration, window_length, sampling_rate, frequency_range)
 }
 \arguments{
 \item{acceleration}{Numeric vector containing acceleration values.}

@@ -4,17 +4,14 @@
 \alias{mutate_bandpass}
 \title{Apply a pass-band filter to sensor data}
 \usage{
-mutate_bandpass(sensor_data, window_length, sampling_rate, frequency_low,
-  frequency_high)
+mutate_bandpass(sensor_data, window_length, sampling_rate, frequency_range)
 }
 \arguments{
 \item{window_length}{Length of the filter.}
 
 \item{sampling_rate}{Sampling rate of the acceleration data.}
 
-\item{frequency_low}{Lower bound on frequency in Hz}
-
-\item{frequency_high}{Upper bound on frequency in Hz}
+\item{frequency_range}{Bounds on frequency in Hz}
 
 \item{sensor_date}{A data frame with columns t, axis, acceleration.}
 }

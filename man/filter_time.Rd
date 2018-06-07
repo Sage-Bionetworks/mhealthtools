@@ -14,7 +14,7 @@ filter_time(sensor_data, t1, t2)
 \item{sensor_date}{A data frame with columns t, axis, acceleration.}
 }
 \value{
-Sensor data between time t1 and t2
+Sensor data between time t1 and t2 (inclusive)
 }
 \description{
 Select a specific time range from sensor data.

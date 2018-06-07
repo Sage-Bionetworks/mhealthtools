@@ -4,7 +4,7 @@
 \alias{frequency_domain_energy}
 \title{Get frequency domain features}
 \usage{
-frequency_domain_energy(accel, sampling_rate)
+frequency_domain_energy(accel, sampling_rate = 100)
 }
 \arguments{
 \item{accel}{A timeseries vector.}
