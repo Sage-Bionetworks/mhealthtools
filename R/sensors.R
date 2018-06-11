@@ -52,6 +52,15 @@ accelerometer_features <- function(
   all_features <- dplyr::bind_rows(movement_features, acf_features) %>%
     dplyr::mutate(error = NA)
   
+  all_features <- all_features %>% 
+    mutate(
+      measurementType = ifelse(measurementType == "acceleration", "ua", measurementType),
+      measurementType = ifelse(measurementType == "jerk", "uj", measurementType),
+      measurementType = ifelse(measurementType == "velocity", "uv", measurementType),
+      measurementType = ifelse(measurementType == "displacement", "ud", measurementType),
+      measurementType = ifelse(measurementType == "acf", "uaacf", measurementType)
+    )
+  
   return(all_features)
 }
 
@@ -77,7 +86,7 @@ gyroscope_features <- function(
   sampling_rate <- get_sampling_rate(sensor_data)
   # check input integrity
   if (is.na(sampling_rate)) {
-    return(dplyr::tibble(window = "NA", error = "Could not calculate sampling rate."))
+    return(dplyr::tibble(Window = "NA", error = "Could not calculate sampling rate."))
   }
   # preprocess and calculate jerk, velocity, displacement
   sensor_data <- sensor_data %>%
@@ -95,7 +104,7 @@ gyroscope_features <- function(
   
   # extract features
   movement_features <- map_dfr(
-    list("acceleration", "jerk", "velocity", "displacement"),
+    list("acceleration", "jerk", "velocity"),
     ~ extract_features(sensor_data, ., funs))
   
   if (has_error(acf_data)) {
@@ -107,6 +116,14 @@ gyroscope_features <- function(
   acf_features <- extract_features(acf_data, "acf", funs)
   all_features <- dplyr::bind_rows(movement_features, acf_features) %>%
     dplyr::mutate(error = NA)
+  
+  all_features <- all_features %>% 
+    mutate(
+      measurementType = ifelse(measurementType == "acceleration", "uav", measurementType),
+      measurementType = ifelse(measurementType == "jerk", "uaa", measurementType),
+      measurementType = ifelse(measurementType == "velocity", "uad", measurementType),
+      measurementType = ifelse(measurementType == "acf", "uavacf", measurementType)
+    )
   
   return(all_features)
 }
@@ -127,10 +144,10 @@ extract_features <- function(x, col, funs) {
   purrr::map(
     funs, ~ map_groups(
       x = x,
-      groups = c("axis", "window"),
+      groups = c("axis", "Window"),
       col = col,
       f = .)) %>%
-    purrr::reduce(left_join, by=c("axis", "window")) %>%
+    purrr::reduce(left_join, by=c("axis", "Window")) %>%
     dplyr::mutate(measurementType = col) %>%
-    dplyr::select(axis, window, measurementType, everything())
+    dplyr::select(measurementType, axis, Window, everything())
 }
