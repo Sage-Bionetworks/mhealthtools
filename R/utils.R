@@ -32,7 +32,7 @@ tidy_sensor_data <- function(sensor_data) {
       tidyr::gather(axis, acceleration, -t)
   }, error = function(e) {
     dplyr::tibble(
-      window = NA,
+      Window = NA,
       error = "Could not put sensor data in tidy format by gathering the axes.")
   })
   return(tidy_sensor_data)
@@ -61,7 +61,7 @@ mutate_detrend <- function(sensor_data) {
         acceleration = detrend(t, acceleration)) %>% 
       dplyr::ungroup()
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "Detrend error")
+    dplyr::tibble(Window = NA, error = "Detrend error")
   })
   return(detrended_sensor_data)
 }
@@ -111,7 +111,7 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
                                 frequency_range)) %>% 
       dplyr::ungroup()
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "Bandpass filter error")
+    dplyr::tibble(Window = NA, error = "Bandpass filter error")
   })
   return(bandpass_filtered_sensor_data)
 }
@@ -131,7 +131,7 @@ filter_time <- function(sensor_data, t1, t2) {
     filtered_time_sensor_data <- sensor_data %>% dplyr::filter(t >= t1, t <= t2)
     return(filtered_time_sensor_data)
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "Not enough time samples")
+    dplyr::tibble(Window = NA, error = "'Not enough time samples")
   })
 }
 
@@ -159,13 +159,13 @@ window <- function(sensor_data, window_length, overlap) {
                                  windowed_matrix)
         tidy_tibble <- windowed_matrix %>% 
           dplyr::as_tibble() %>%
-          tidyr::gather(window, acceleration, -index, convert=T)
+          tidyr::gather(Window, acceleration, -index, convert=T)
         return(tidy_tibble)
       }) %>% 
       dplyr::bind_rows(.id = "axis")
     return(tidy_windowed_sensor_data)
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "Windowing error")
+    dplyr::tibble(Window = NA, error = "Windowing error")
   })
 }
 
@@ -221,11 +221,11 @@ mutate_jerk <- function(sensor_data, sampling_rate) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_jerk <- tryCatch({
     sensor_data %>%
-      dplyr::group_by(axis, window) %>% 
-      dplyr::mutate(jerk = jerk(acceleration, sampling_rate)) %>%
-      dplyr::ungroup()
+    dplyr::group_by(axis, Window) %>% 
+    dplyr::mutate(jerk = jerk(acceleration, sampling_rate)) %>%
+    dplyr::ungroup()
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "Error calculating jerk")
+    dplyr::tibble(Window = NA, error = "Error calculating jerk")
   })
   return(sensor_data_with_jerk)
 }
@@ -249,11 +249,11 @@ mutate_velocity <- function(sensor_data, sampling_rate) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_velocity <- tryCatch({
     sensor_data %>% 
-      dplyr::group_by(axis, window) %>%
-      dplyr::mutate(velocity = velocity(acceleration, sampling_rate)) %>% 
-      dplyr::ungroup()
+    dplyr::group_by(axis, Window) %>%
+    dplyr::mutate(velocity = velocity(acceleration, sampling_rate)) %>% 
+    dplyr::ungroup()
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "Error calculating velocity")
+    dplyr::tibble(Window = NA, error = "Error calculating velocity")
   })
   return(sensor_data_with_velocity)
 }
@@ -278,11 +278,11 @@ mutate_displacement <- function(sensor_data, sampling_rate) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_displacement <- tryCatch({
     sensor_data %>%
-      dplyr::group_by(axis, window) %>%
-      dplyr::mutate(displacement = displacement(acceleration, sampling_rate)) %>% 
-      dplyr::ungroup()
+    dplyr::group_by(axis, Window) %>%
+    dplyr::mutate(displacement = displacement(acceleration, sampling_rate)) %>% 
+    dplyr::ungroup()
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "Error calculating displacement")
+    dplyr::tibble(Window = NA, error = "Error calculating displacement")
   })
   return(sensor_data_with_displacement)
 }
@@ -297,7 +297,7 @@ calculate_acf <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
   acf_data <- tryCatch({
     sensor_data %>%
-      dplyr::group_by(axis, window) %>%
+      dplyr::group_by(axis, Window) %>%
       tidyr::nest(acceleration) %>%
       dplyr::mutate(data = map(data, function(d) {
         acf_col <- stats::acf(d$acceleration, plot=F)$acf
@@ -305,9 +305,9 @@ calculate_acf <- function(sensor_data) {
         dplyr::bind_cols(acf = acf_col, index = index_col)
       })) %>%
       tidyr::unnest(data) %>% 
-      select(axis, window, index, acf)
+      select(axis, Window, index, acf)
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "Error calculating ACF")
+    dplyr::tibble(Window = NA, error = "Error calculating ACF")
   })
   return(acf_data)
 }
@@ -323,8 +323,8 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
   gravity_summary <- gravity_vector %>% 
     windowSignal(window_length = window_length, overlap = overlap) %>%
     dplyr::as_tibble() %>%
-    tidyr::gather(window, value) %>%
-    dplyr::group_by(window) %>%
+    tidyr::gather(Window, value) %>%
+    dplyr::group_by(Window) %>%
     dplyr::summarise(max = max(value, na.rm = T),
                      min = min(value, na.rm = T))
   return(gravity_summary)
@@ -342,16 +342,16 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
 tag_outlier_windows <- function(gravity, window_length, overlap) {
   gr_error <- tryCatch({
     gr_error <- gravity %>% 
-      purrr::map(tag_outlier_windows_, window_length, overlap) %>%
-      dplyr::bind_rows(.id = 'axis') %>%
-      dplyr::mutate(error = sign(max) != sign(min)) %>% 
-      dplyr::group_by(window) %>% 
-      dplyr::summarise(error = any(error, na.rm = T))
-    gr_error$error[gr_error$error == TRUE] = 'Phone rotated within window'
-    gr_error$error[gr_error$error == FALSE] = 'None'
-    return(gr_error)
+    purrr::map(tag_outlier_windows_, window_length, overlap) %>%
+    dplyr::bind_rows(.id = 'axis') %>%
+    dplyr::mutate(error = sign(max) != sign(min)) %>% 
+    dplyr::group_by(Window) %>% 
+    dplyr::summarise(error = any(error, na.rm = T))
+  gr_error$error[gr_error$error == TRUE] = 'Phone rotated within window'
+  gr_error$error[gr_error$error == FALSE] = 'None'
+  return(gr_error)
   }, error = function(e) {
-    dplyr::tibble(window = "NA", error = "Error tagging outlier windows")
+    dplyr::tibble(Window = "NA", error = "Error tagging outlier windows")
   })
   return(gr_error)
 }

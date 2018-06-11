@@ -61,14 +61,14 @@ get_walk_features <- function(
   # Combine all features
   features <- list(accelerometer = features_accel, gyroscope = features_gyro) %>%
     data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>%
-    dplyr::mutate(window = as.character(window))
+    dplyr::mutate(Window = as.character(Window))
   if(is.na(gravity_data)) {
     features <- features %>%
       mutate(error = "None")
   } else {
     features <- features %>%
       dplyr::select(-error) %>% 
-      dplyr::left_join(gr_error, by = 'window')
+      dplyr::left_join(gr_error, by = 'Window')
   }
   
   return(features)
