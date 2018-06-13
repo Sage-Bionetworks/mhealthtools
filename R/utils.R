@@ -378,7 +378,7 @@ time_domain_summary <- function(accel, sampling_rate=100) {
                   complexity = sqrt(
                     var(diff(diff(accel)*sampling_rate)*sampling_rate) /
                       var(diff(accel)*sampling_rate)))
-  names(ftrs) = str_c(names(ftrs), '.tm')
+  names(ftrs) = stringr::str_c(names(ftrs), '.tm')
   return(ftrs)
 }
 
@@ -437,7 +437,7 @@ frequency_domain_summary <- function(accel, sampling_rate=100, npeaks = 3) {
       ewt.renyiEnt = seewave::sh(ewEnergy, alpha = 2), # alpha is hardcoded to be 2
       ewt.tsallisEnt = (1-sum(ewEnergy^0.1))/(0.1-1)) # q is hardcoded to be 0.1
   
-  names(ftrs) <- str_c(names(ftrs), '.fr')
+  names(ftrs) <- stringr::str_c(names(ftrs), '.fr')
   
   return(data.frame(ftrs))
 }
