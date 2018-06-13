@@ -543,10 +543,10 @@ getEWTspectrum <- function(spect, npeaks = 3, fractionMinPeakHeight = 0.1,
 }
 
 
-#' Get frequency domain features
+#' Get frequency domain energy features
 #' 
 #' Given an acceleration vector, this function will return features
-#' characterising the time series in frequency domain.
+#' characterising the time series in frequency domain by energy
 #' 
 #' @param accel A timeseries vector.
 #' @param sampling_rate Sampling rate of the signal (by default it is 100 Hz).
