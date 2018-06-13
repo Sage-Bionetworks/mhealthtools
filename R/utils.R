@@ -224,7 +224,7 @@ mutate_jerk <- function(sensor_data, sampling_rate) {
 #' @param sampling_rate Sampling rate of the acceleration vector.
 #' @return Velocity vector.
 velocity <- function(acceleration, sampling_rate) {
-  velocity <- diffinv(acceleration)[-1] * sampling_rate
+  velocity <- stats::diffinv(acceleration)[-1] * sampling_rate
   return(velocity)
 }
 
@@ -253,7 +253,7 @@ mutate_velocity <- function(sensor_data, sampling_rate) {
 #' @return Displacement vector.
 displacement <- function(acceleration, sampling_rate) {
   velocity <- velocity(acceleration, sampling_rate)
-  displacement <- diffinv(velocity)[-1] * sampling_rate
+  displacement <- stats::diffinv(velocity)[-1] * sampling_rate
   return(displacement)
 }
 
@@ -288,7 +288,7 @@ calculate_acf <- function(sensor_data) {
       dplyr::group_by(axis, window) %>%
       tidyr::nest(acceleration) %>%
       dplyr::mutate(data = map(data, function(d) {
-        acf_col <- acf(d$acceleration, plot=F)$acf
+        acf_col <- stats::acf(d$acceleration, plot=F)$acf
         index_col <- 1:length(acf_col)
         dplyr::bind_cols(acf = acf_col, index = index_col)
       })) %>%
