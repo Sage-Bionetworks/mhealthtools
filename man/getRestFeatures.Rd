@@ -18,10 +18,10 @@ extracts features from accelerometer rest data file
 \examples{
 library(synapseClient)
 synapseLogin()
-walkingTable = synTableQuery("SELECT * FROM syn5713119")
-walkingTable = walkingTable@values
-sampleRow = rownames(walkingTable)[10]
-sample_restAccel_jsonFile <- synDownloadTableFile('syn5713119',sampleRow, 'accel_walking_rest.json.items')
-getRestFeatures(sample_restAccel_jsonFile)
+walkingTable <- synTableQuery("SELECT * FROM syn5713119")
+walkingTable <- walkingTable@values
+sampleRow <- rownames(walkingTable)[10]
+sample_restAccel_jsonFile <- synDownloadTableFile('syn5713119',sampleRow, 'deviceMotion_walking_rest.json.items')
+sample_restAccel_jsonFile <- as.character(sample_restAccel_jsonFile)
+sample_restResults <- getRestFeatures(sample_restAccel_jsonFile)
 }
-

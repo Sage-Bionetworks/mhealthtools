@@ -25,4 +25,3 @@ sample_gameRecord_File <- synDownloadTableFile('syn5713115', sampleRow,
 "MemoryGameResults.json.MemoryGameGameRecords")
 getMemoryGameFeatures(sample_gameRecord_File)
 }
-

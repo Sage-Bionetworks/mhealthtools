@@ -4,7 +4,7 @@
 \alias{getTappingFeatures}
 \title{extracts tapping features from Tapping JSON data file}
 \usage{
-getTappingFeatures(tappingJsonFile, depressThr = 20)
+getTappingFeatures(tappingJsonFile, depressThr = 20, removeDups = T)
 }
 \arguments{
 \item{tappingJsonFile}{path to tapping json file}
@@ -20,6 +20,5 @@ library(synapseClient)
 synapseLogin()
 sample_Tapping_File <-'syn7067514'
 tappingJsonFile <- synGet(sample_Tapping_File)@filePath
-getTappingFeatures(tappingJsonFile)
+getTappingFeatures(tappingJsonFile, depressThr = 0, removeDups=T)
 }
-
