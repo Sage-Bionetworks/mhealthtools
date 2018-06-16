@@ -4,6 +4,10 @@
 # email: meghasyam@sagebase.org
 ####################################################
 
+######################## *** NOTE *** ########################
+## Still have to write tests for map_groups
+######################## *** NOTE *** ########################
+
 ### Require mHealthTools
 require(mhealthtools)
 
@@ -297,8 +301,3 @@ test_that('Get EWT spectrum',{
   expect_is(mhealthtools:::getEWTspectrum(accelVecSpec),'matrix') # Check if output is in correct format
 
 })
-
-
-######################## *** NOTE *** ########################
-## Still have to write tests for map_groups
-######################## *** NOTE *** ########################
