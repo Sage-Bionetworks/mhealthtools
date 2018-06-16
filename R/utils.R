@@ -461,7 +461,7 @@ getSpectrum <- function(accel, sampling_rate = 100, nfreq = 500){
 
 #' Get EWT spectrum 
 #' 
-#' Given a time series vector this function will return its 
+#' Given the spectrum of a time series vector this function will return its 
 #' Empirical Wavelet Transformed spectrum.
 #' 
 #' @param spect FFT spectrum as a two dimensional data frame with columns
