@@ -38,7 +38,7 @@ accelerometer_features <- function(
   acf_data <- calculate_acf(sensor_data)
   
   # extract features
-  movement_features <- map_dfr(
+  movement_features <- purrr::map_dfr(
     list("acceleration", "jerk", "velocity", "displacement"),
     ~ extract_features(sensor_data, ., funs))
   
@@ -94,7 +94,7 @@ gyroscope_features <- function(
   acf_data <- calculate_acf(sensor_data)
   
   # extract features
-  movement_features <- map_dfr(
+  movement_features <- purrr::map_dfr(
     list("acceleration", "jerk", "velocity", "displacement"),
     ~ extract_features(sensor_data, ., funs))
   
