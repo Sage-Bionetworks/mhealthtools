@@ -13,7 +13,7 @@
 # Wrapper function to take in json and give HR per color channel
 #############################################################
 
-getHR <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 128){
+getHR_dat <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 128){
   
   #############################################################
   # Main Code Block
