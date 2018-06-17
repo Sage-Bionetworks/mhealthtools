@@ -20,7 +20,7 @@ getHrFromJson <- function(hrJsonFileLoc=NA, windowLen = 10, freqRange = c(1,25),
   #############################################################
   
   # If no json file exists
-  dat1 = data.frame(red = NA, green = NA, blue = NA, error = NA)
+  dat1 = list(red = NA, green = NA, blue = NA, error = NA, samplingRate = NA)
   if(is.na(hrJsonFileLoc)){dat1$error = 'No JSON file'; return(dat1) }
   
   # Get HR data
@@ -29,8 +29,11 @@ getHrFromJson <- function(hrJsonFileLoc=NA, windowLen = 10, freqRange = c(1,25),
     if(all(is.na(dat))){dat1$error = 'JSON file read error'; return(dat1) }
   
   # Get sampling rate
-  samplingRate = length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1])
-  
+  samplingRate = tryCatch({ length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1]) }, 
+                 error = function(e){ NA })
+  if(!is.finite(samplingRate)){dat1$error = 'Sampling Rate calculated from timestamp is Inf or NaN / timestamp not found in json'; return(dat1) }
+  if(samplingRate < 55){if(samplingRate > 22){bpforder = 64}else{bpforder = 32}}
+  dat1$samplingRate = samplingRate
   # Convert window length from seconds to samples
   windowLen = round(samplingRate*windowLen)
   
@@ -38,7 +41,9 @@ getHrFromJson <- function(hrJsonFileLoc=NA, windowLen = 10, freqRange = c(1,25),
   mforder = 2*round(60*samplingRate/220) + 1 # order for the running mean based filter
   
   # Split each color into segments based on windowLen
-  dat = dat %>% dplyr::select(red, green, blue) %>% lapply(mpowertools:::windowSignal, windowLen, ovlp=0.5)
+  dat = tryCatch({ dat %>% dplyr::select(red, green, blue) %>% lapply(mpowertools:::windowSignal, windowLen, ovlp=0.5) }, 
+                 error = function(e){ NA })
+    if(all(is.na(dat))){dat1$error = 'red, green, blue cannot be read from JSON'; return(dat1) }
   
   # Apply filter to each segment of each color
   dat <- dat %>% lapply(function(dfl){
@@ -59,7 +64,8 @@ getHrFromJson <- function(hrJsonFileLoc=NA, windowLen = 10, freqRange = c(1,25),
   if(all(is.na(dat))){dat1$error = 'HR calculation error'; return(dat1) }
   
   dat$error = 'none'
-  
+  if(samplingRate < 55){dat$error = 'Low Sampling Rate,atleast 55FPS needed'}
+  dat$samplingRate = samplingRate
   return(dat)
   
 }
@@ -77,17 +83,27 @@ getHrFromJson <- function(hrJsonFileLoc=NA, windowLen = 10, freqRange = c(1,25),
     x = x-mean(x) #Mean centering the signal
     
     # Bandpass filter the given time series data
-    bandPassFilt = signal::fir1(bpforder-1, c(freqRange[1] * 2/samplingRate, freqRange[2] * 2/samplingRate),
+   if(samplingRate > 55){ 
+   bandPassFilt = signal::fir1(bpforder-1, c(freqRange[1] * 2/samplingRate, freqRange[2] * 2/samplingRate),
                                 type="pass", 
                                 window = seewave::hamming.w(bpforder))
+   }else{
+   bandPassFilt = signal::fir1(bpforder, freqRange[1] * 2/samplingRate, # the order for a high pass filter needs to be even
+                                type="high", 
+                                window = seewave::hamming.w(bpforder+1))   
+   }
+  
     x = signal::filtfilt(bandPassFilt, x)
     x = x[((bpforder/2)+1):(length(x)-(bpforder/2)+1)]
     
     # Sorted Mean filter the given signal
     y = 0*x
     for (i in seq((mforder+1)/2, length(x)-(mforder-1)/2,1)){
-      tempseq <- sort(x[(i-((mforder-1)/2)):((i+((mforder-1)/2)))])
-      y[i] = x[i]-mean(tempseq[1:(length(tempseq)-1)])
+      tempseq <- (x[(i-((mforder-1)/2)):((i+((mforder-1)/2)))])
+     # y[i] = x[i]-(sum(tempseq)-max(tempseq))/(mforder-1)
+      
+      tempseq <- tempseq - mean(tempseq)
+      y[i] = (((x[i] - max(tempseq) - min(tempseq))-(sum(tempseq)-max(tempseq))/(mforder-1))/(max(tempseq)-min(tempseq) + 0.0000001))
     }
     return(y)
  }
@@ -100,7 +116,7 @@ getHrFromJson <- function(hrJsonFileLoc=NA, windowLen = 10, freqRange = c(1,25),
     y <- 0*x
     y[round(60*samplingRate/maxHR):round(60*samplingRate/minHR)] = x[round(60*samplingRate/maxHR):round(60*samplingRate/minHR)]
     confidence = max(y)/max(x)
-    hr = 60*samplingRate/(which(y==max(y))-1)
+    hr = 60*samplingRate/(which.max(y)-1)
     
     # If hr or condidence is NaN, then return hr = 0 and confidence = 0
     if(is.na(confidence) || is.na(hr)){
