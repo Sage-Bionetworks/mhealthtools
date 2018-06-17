@@ -41,7 +41,7 @@ getHrFromJson <- function(hrJsonFileLoc=NA, windowLen = 10, freqRange = c(1,25),
   mforder = 2*round(60*samplingRate/220) + 1 # order for the running mean based filter
   
   # Split each color into segments based on windowLen
-  dat = tryCatch({ dat %>% dplyr::select(red, green, blue) %>% lapply(mhealthtools:::windowSignal, windowLen, ovlp=0.5) }, 
+  dat = tryCatch({ dat %>% dplyr::select(red, green, blue) %>% lapply(mhealthtools:::windowSignal, windowLen, 0.5) }, 
                  error = function(e){ NA })
     if(all(is.na(dat))){dat1$error = 'red, green, blue cannot be read from JSON'; return(dat1) }
   
