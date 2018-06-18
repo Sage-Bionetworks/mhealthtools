@@ -1,15 +1,15 @@
-## mHealthTools
+## mhealthtools
 R package for extracting features from mobile sensor data.
 
 ### Description
-mHealthTools package processes data from various mobile sensors such as accelerometer, gyroscope, pedometer, screen touches, and microphones. Though this package is specifically designed around mHealth applications developed by Sage Bionetwokrs, it works in general with any mobile sensors, provided the data is supplied in a said format.
+mhealthtools package processes data from various mobile sensors such as accelerometer, gyroscope, pedometer, screen touches, and microphones. Though this package is specifically designed around mHealth applications developed by Sage Bionetwokrs, it works in general with any mobile sensors, provided the data is supplied in a said format.
 
 ### Installing
 
-First, install the `mHealthTools` package using `devtools`:
+First, install the `mhealthtools` package using `devtools`:
 
 ```
-devtools::install_github("Sage-Bionetworks/mHealthTools")
+devtools::install_github("Sage-Bionetworks/mhealthtools")
 ```
 
 ### Usage
