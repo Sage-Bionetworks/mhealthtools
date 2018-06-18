@@ -48,16 +48,16 @@ get_tremor_features <- function(
     overlap = overlap,
     time_range = time_range,
     frequency_range = frequency_range)
-
+  
   # Return if processing is errored
   if(has_error(features_accel) || has_error(features_gyro)) {
     return(list(accelerometer = features_accel, gyroscope = features_gyro) %>%
              data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor'))
   }
-
+  
   # tag outlier windows
   gr_error <- tag_outlier_windows(gravity_data, window_length, overlap)
-    
+  
   # Combine all features
   features <- list(accelerometer = features_accel, gyroscope = features_gyro) %>%
     data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>%
