@@ -5,7 +5,7 @@
 ####################################################
 
 ######################## *** NOTE *** ########################
-## Still have to write tests for getfilteredsignal, getHrFromTimeSeries
+## Still have to write tests for getfilteredsignal
 ######################## *** NOTE *** ########################
 
 ### Require mHealthTools
@@ -47,5 +47,27 @@ test_that('Function to extract heart rate per channel(R,G,B)',{
   tempDat <- copy(datHR)
   tempDat$timestamp <- rep(1, length(datHR$timestamp))
   expect_equal(mhealthtools:::getHR(tempDat), testTibble) # Error if sampling rate cannot be calculated from timestamp
+  
+  tempDat <- copy(datHR)
+  tempDat <- tempDat %>% dplyr::rename('rex' = 'red') # Changed the column name of red to rex
+  testTibble$error = 'red, green, blue cannot be read from JSON'
+  expect_equal(mhealthtools:::getHR(tempDat), testTibble) # Error if any channel red, green or blue is missing
+  
+  tempDat <- copy(datHR)
+  tempDat$red <- rep(NA, length(datHR$red))
+})
+
+test_that('Extract heart rate given a timeseries',{
+  # actual function in getHR: getHrFromTimeSeries
+  timeSeries <- datHR$red
+  
+  expect_is(mhealthtools:::getHrFromTimeSeries(timeSeries,100), 'numeric') # Check if output is in correct format
+  
+  # NA's are handled as 0s, so even if the input has NA's (not all of them we should get a numeric output)
+  timeSeries[1:10] <- NA
+  expect_is(mhealthtools:::getHrFromTimeSeries(timeSeries,100), 'numeric') # Check if output is in correct format
+
+  # If all the input is NA's then the output will be c(NA,NA)
+  expect_equal(mhealthtools:::getHrFromTimeSeries(rep(NA,1000),100), c(NA,NA)) # Check if output is in correct format
   
 })
