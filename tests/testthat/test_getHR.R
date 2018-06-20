@@ -26,7 +26,7 @@ library(stringr)
 library(purrr)
 
 ### Load data file
-jsonFileLoc <- 'data/hr_test.json'
+jsonFileLoc <- '../data/hr_test.json'
 datHR = jsonlite::fromJSON(as.character(jsonFileLoc)) %>% as.data.frame()
 
 ### Individual test functions
