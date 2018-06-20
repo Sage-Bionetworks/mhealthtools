@@ -26,7 +26,7 @@ library(stringr)
 library(purrr)
 
 ### Load data file
-jsonFileLoc <- 'data/phone_data_test.json'
+jsonFileLoc <- '../data/phone_data_test.json'
 dat = jsonlite::fromJSON(as.character(jsonFileLoc)) %>% as.data.frame()
 
 ### JSON reader to read the file from the mPower Study format to the format needed for mHealthTools
