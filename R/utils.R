@@ -351,7 +351,7 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
 #' @param sampling_rate Sampling_rate of the acceleration vector.
 #' @return A features data frame of dimension 1 x n_features
 time_domain_summary <- function(accel, sampling_rate=NA) {
-  if(is.na(sampling_rate) {
+  if(is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
     sampling_rate = 100
   }
@@ -393,7 +393,7 @@ time_domain_summary <- function(accel, sampling_rate=NA) {
 #' @return A features data frame of dimension 1 x num_features
 #####
 frequency_domain_summary <- function(accel, sampling_rate=NA, npeaks = NA) {
-  if(is.na(sampling_rate) {
+  if(is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
     sampling_rate = 100
   }
@@ -557,10 +557,11 @@ getEWTspectrum <- function(spect, npeaks = 3, fractionMinPeakHeight = 0.1,
 #' @param accel A timeseries vector.
 #' @param sampling_rate Sampling rate of the signal (by default it is 100 Hz).
 #' @return A features data frame of dimension 1 x 48.
-frequency_domain_energy <- function(accel, sampling_rate=100) {
-  if(sampling_rate == 100) {
+frequency_domain_energy <- function(accel, sampling_rate=NA) {
+  if(is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for frequency_domain_energy")
-  }
+    sampling_rate = 100
+  }  
   spect = getSpectrum(accel, sampling_rate)
   freq = spect$freq
   pdf = spect$pdf/sum(spect$pdf, na.rm = T)
