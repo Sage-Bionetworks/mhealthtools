@@ -350,9 +350,10 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
 #' @param accel An acceleration vector.
 #' @param sampling_rate Sampling_rate of the acceleration vector.
 #' @return A features data frame of dimension 1 x n_features
-time_domain_summary <- function(accel, sampling_rate=100) {
-  if(sampling_rate == 100) {
+time_domain_summary <- function(accel, sampling_rate=NA) {
+  if(is.na(sampling_rate) {
     warning("Using default sampling rate of 100 for time_domain_summary")
+    sampling_rate = 100
   }
   ftrs <- dplyr::tibble(
     mean = mean(accel, na.rm = TRUE),
@@ -391,10 +392,15 @@ time_domain_summary <- function(accel, sampling_rate=100) {
 #' @param npeaks Number of peaks to be computed in EWT
 #' @return A features data frame of dimension 1 x num_features
 #####
-frequency_domain_summary <- function(accel, sampling_rate=100, npeaks = 3) {
-  if(sampling_rate == 100 && npeaks == 3) {
-    warning(paste("Using default sampling rate of 100",
-                  "and 3 peaks for frequency_domain_summary"))
+frequency_domain_summary <- function(accel, sampling_rate=NA, npeaks = NA) {
+  if(is.na(sampling_rate) {
+    warning("Using default sampling rate of 100 for time_domain_summary")
+    sampling_rate = 100
+  }
+
+  if(is.na(npeaks)) {
+    warning("Using default npeaks of 3 for frequency_domain_summary")
+    npeaks = 3
   }
   spect <- getSpectrum(accel, sampling_rate)
   freq <- spect$freq
