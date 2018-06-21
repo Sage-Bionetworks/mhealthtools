@@ -319,6 +319,7 @@ calculate_acf <- function(sensor_data) {
 #' @param overlap Window overlap.
 #' @return Min and max values for each window.
 tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
+  if (!is.vector(gravity_vector)) stop("Input must be a numeric vector")
   gravity_summary <- gravity_vector %>% 
     windowSignal(window_length = window_length, overlap = overlap) %>%
     dplyr::as_tibble() %>%
@@ -334,7 +335,7 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
 #' Identify windows in which the phone may have been rotated or flipped,
 #' as indicated by a gravity vector
 #' 
-#' @param gravity A gravity vector
+#' @param gravity A dataframe with gravity vectors for columns
 #' @param window_length Length of the filter.
 #' @param overlap Window overlap.
 #' @return Rotations errors for each window.
@@ -472,7 +473,7 @@ frequency_domain_summary <- function(accel, sampling_rate=NA, npeaks = NA) {
 #' @return An AR spectrum.
 getSpectrum <- function(accel, sampling_rate = 100, nfreq = 500){
   tmp = stats::spec.ar(accel, nfreq = nfreq, plot = F)
-  spect = data.frame(freq = tmp$freq * sampling_rate, pdf = tmp$spec)
+  spect = data.frame(freq = tmp$freq * sampling_rate, pdf = tmp$spec)[1:nfreq,]
   return(spect)
 }
 

@@ -131,7 +131,7 @@ test_that('Filtering the time series data by selecting a time range',{
   testTibble <- dplyr::tibble(window = NA, error = "'Not enough time samples")
   
   expect_is(mhealthtools:::filter_time(datAccelTidy, 1,2), 'data.frame') # Check if output is in correct format
-  expect_error(mhealthtools:::filter_time(datAccel,1,2)) # throw an error if there is no t column
+  expect_error(mhealthtools:::filter_time(datAccel[,"x"],1,2)) # throw an error if there is no t column
   # Maybe throw an error if t2(100s) of the window (t1,t2) is more than the actual time in the sensor data (0-10s)
   # Maybe throw an error if t1(11s) of the window (t1,t2) is more than the actual time in the sensor data (0-10s)
 
@@ -154,7 +154,7 @@ test_that('Windowing the sensor data by axis',{
   testTibble <- dplyr::tibble(window = NA, error = "Windowing error")  
   
   expect_is(mhealthtools:::window(datAccelTidy, 256, 0.5),'data.frame') # 256 window length, 0.5 overlap, checking output format
-  expect_equal(mhealthtools:::window(datAccel,256, 0.5), testTibble) # throw an error if Input is not in correct format
+  expect_error(mhealthtools:::window(datAccel,256, 0.5)) # throw an error if Input is not in correct format
   
 })
 
