@@ -23,6 +23,7 @@ has_error <- function(sensor_data) {
 #' @return Sensor data in tidy format.
 tidy_sensor_data <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
+  if (any(is.na(sensor_data$t))) stop("NA values present in column t.")
   tidy_sensor_data <- tryCatch({
     t0 <- sensor_data$t[1]
     normalized_sensor_data <-  sensor_data %>% dplyr::mutate(t = t - t0)
@@ -79,6 +80,8 @@ bandpass <- function(acceleration, window_length, sampling_rate,
   frequency_high <- frequency_range[2]
   if(frequency_low*2/sampling_rate > 1 || frequency_high*2/sampling_rate > 1) {
     stop("Frequency parameters can be at most half the sampling rate.")
+  } else if (any(is.na(acceleration))) {
+    stop("NA values present in input.")
   }
   bandpass_filter <- signal::fir1(
     window_length-1,
@@ -121,11 +124,14 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
 #' @return Sensor data between time t1 and t2 (inclusive)
 filter_time <- function(sensor_data, t1, t2) {
   if (has_error(sensor_data)) return(sensor_data)
+  if (!hasName(sensor_data, "t")) {
+    stop("Input has no column t.")
+  }
   filtered_time_sensor_data <- tryCatch({
     filtered_time_sensor_data <- sensor_data %>% dplyr::filter(t >= t1, t <= t2)
     return(filtered_time_sensor_data)
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "'Not enough time samples")
+    dplyr::tibble(window = NA, error = "Not enough time samples")
   })
 }
 

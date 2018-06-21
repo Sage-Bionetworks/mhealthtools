@@ -130,13 +130,10 @@ test_that('Filtering the time series data by selecting a time range',{
   testTibble <- dplyr::tibble(window = NA, error = "'Not enough time samples")
   
   expect_is(mhealthtools:::filter_time(datAccelTidy, 1,2), 'data.frame') # Check if output is in correct format
-  expect_equal(mhealthtools:::filter_time(datAccel,1,2), testTibble) # throw an error if input is not in tidy format
-  expect_equal(mhealthtools:::filter_time(datAccelTidy,1,100), testTibble) # throw error if time out of range (test file is from 0-10s)
+  expect_equal(mhealthtools:::filter_time(datAccel,1,2), testTibble) # throw an error if there is no t column
   # Maybe throw an error if t2(100s) of the window (t1,t2) is more than the actual time in the sensor data (0-10s)
-  expect_equal(mhealthtools:::filter_time(datAccelTidy,11,20), testTibble) # throw error if time out of range (test file is from 0-10s)
   # Maybe throw an error if t1(11s) of the window (t1,t2) is more than the actual time in the sensor data (0-10s)
-  # The error for the above two expectations can just be like 'selected time range(s) is invalid'
-  
+
 })
 
 context('Windowing')
