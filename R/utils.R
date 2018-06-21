@@ -143,6 +143,9 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @return Windowed sensor data
 window <- function(sensor_data, window_length, overlap) {
   if (has_error(sensor_data)) return(sensor_data)
+  if (!all(hasName(sensor_data, c("t", "axis", "acceleration")))) {
+    stop("Sensor data is missing necessary columns.")
+  }
   tryCatch({
     windowed_sensor_data <- sensor_data %>%
       tidyr::spread(axis, acceleration) %>% 
@@ -176,6 +179,9 @@ window <- function(sensor_data, window_length, overlap) {
 #' @param overlap Window overlap.
 #' @return A matrix of window_length x nwindows windowed acceleration matrix.
 windowSignal <- function(accel, window_length = 256, overlap = 0.5){
+  if (any(is.na(accel))) {
+    stop("NA values present in input.")
+  }
   nlen = length(accel)
   
   # If length of signal is less than window length
@@ -313,8 +319,8 @@ calculate_acf <- function(sensor_data) {
 #' @param overlap Window overlap.
 #' @return Min and max values for each window.
 tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
-  gravity_summary <-
-    windowSignal(gravity_vector, window_length, overlap) %>%
+  gravity_summary <- gravity_vector %>% 
+    windowSignal(window_length = window_length, overlap = overlap) %>%
     dplyr::as_tibble() %>%
     tidyr::gather(window, value) %>%
     dplyr::group_by(window) %>%

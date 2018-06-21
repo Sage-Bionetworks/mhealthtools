@@ -58,7 +58,8 @@ test_that("Tidying sensor data",{
 
   tempDat <- data.table::copy(datAccel)
   tempDat$t[1] <- NA # time column now has a NA in it
-  expect_that(mhealthtools:::tidy_sensor_data(tempDat), equals(NA)) # Is the function giving NA/error for an invalid input
+  # Does the function throw an error when t values are missing
+  expect_error(mhealthtools:::tidy_sensor_data(tempDat))
 
   tempDat$error <- rep(NA, length(tempDat$t))
   tempDat$error[1] <- 'some error' # Just a non NA value for error
@@ -111,7 +112,7 @@ test_that('Bandpass a timeseries data',{
   # Frequency parameters violating Nyquist criterion
 
   # introduce an NA timeseries data, this should throw an error (Should be the same if atleast one point was NA)
-  expect_error(mhealthtools:::bandpass(rep(NA,990), 120, 100, c(1,10)), "Corrupted Input") # Input is NA, so expect an error
+  expect_error(mhealthtools:::bandpass(rep(NA,990), 120, 100, c(1,10))) # Input is NA, so expect an error
 
 })
 
@@ -130,7 +131,7 @@ test_that('Filtering the time series data by selecting a time range',{
   testTibble <- dplyr::tibble(window = NA, error = "'Not enough time samples")
   
   expect_is(mhealthtools:::filter_time(datAccelTidy, 1,2), 'data.frame') # Check if output is in correct format
-  expect_equal(mhealthtools:::filter_time(datAccel,1,2), testTibble) # throw an error if there is no t column
+  expect_error(mhealthtools:::filter_time(datAccel,1,2)) # throw an error if there is no t column
   # Maybe throw an error if t2(100s) of the window (t1,t2) is more than the actual time in the sensor data (0-10s)
   # Maybe throw an error if t1(11s) of the window (t1,t2) is more than the actual time in the sensor data (0-10s)
 
@@ -142,7 +143,7 @@ test_that('Windowing a time series',{
   # actual function in utils: windowSignal
   
   expect_is(mhealthtools:::windowSignal(datAccel$x),'matrix') # Check if output is in correct format
-  expect_error(mhealthtools:::windowSignal(rep(NA,256)),"invalid input") 
+  expect_error(mhealthtools:::windowSignal(rep(NA,256))) 
   # If input has NAs maybe throw an error(?), output will have NAs
   # but better if we just give a warning / error message 
   
