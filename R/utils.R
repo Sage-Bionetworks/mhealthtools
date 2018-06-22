@@ -23,6 +23,7 @@ has_error <- function(sensor_data) {
 #' @return Sensor data in tidy format.
 tidy_sensor_data <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
+  if (any(is.na(sensor_data$t))) stop("NA values present in column t.")
   tidy_sensor_data <- tryCatch({
     t0 <- sensor_data$t[1]
     normalized_sensor_data <-  sensor_data %>% dplyr::mutate(t = t - t0)
@@ -79,6 +80,8 @@ bandpass <- function(acceleration, window_length, sampling_rate,
   frequency_high <- frequency_range[2]
   if(frequency_low*2/sampling_rate > 1 || frequency_high*2/sampling_rate > 1) {
     stop("Frequency parameters can be at most half the sampling rate.")
+  } else if (any(is.na(acceleration))) {
+    stop("NA values present in input.")
   }
   bandpass_filter <- signal::fir1(
     window_length-1,
@@ -121,11 +124,14 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
 #' @return Sensor data between time t1 and t2 (inclusive)
 filter_time <- function(sensor_data, t1, t2) {
   if (has_error(sensor_data)) return(sensor_data)
+  if (!hasName(sensor_data, "t")) {
+    stop("Input has no column t.")
+  }
   filtered_time_sensor_data <- tryCatch({
     filtered_time_sensor_data <- sensor_data %>% dplyr::filter(t >= t1, t <= t2)
     return(filtered_time_sensor_data)
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "'Not enough time samples")
+    dplyr::tibble(window = NA, error = "Not enough time samples")
   })
 }
 
@@ -137,6 +143,9 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @return Windowed sensor data
 window <- function(sensor_data, window_length, overlap) {
   if (has_error(sensor_data)) return(sensor_data)
+  if (!all(hasName(sensor_data, c("t", "axis", "acceleration")))) {
+    stop("Sensor data is missing necessary columns.")
+  }
   tryCatch({
     windowed_sensor_data <- sensor_data %>%
       tidyr::spread(axis, acceleration) %>% 
@@ -170,6 +179,9 @@ window <- function(sensor_data, window_length, overlap) {
 #' @param overlap Window overlap.
 #' @return A matrix of window_length x nwindows windowed acceleration matrix.
 windowSignal <- function(accel, window_length = 256, overlap = 0.5){
+  if (any(is.na(accel))) {
+    stop("NA values present in input.")
+  }
   nlen = length(accel)
   
   # If length of signal is less than window length
@@ -307,8 +319,9 @@ calculate_acf <- function(sensor_data) {
 #' @param overlap Window overlap.
 #' @return Min and max values for each window.
 tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
-  gravity_summary <-
-    windowSignal(gravity_vector, window_length, overlap) %>%
+  if (!is.vector(gravity_vector)) stop("Input must be a numeric vector")
+  gravity_summary <- gravity_vector %>% 
+    windowSignal(window_length = window_length, overlap = overlap) %>%
     dplyr::as_tibble() %>%
     tidyr::gather(window, value) %>%
     dplyr::group_by(window) %>%
@@ -322,7 +335,7 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
 #' Identify windows in which the phone may have been rotated or flipped,
 #' as indicated by a gravity vector
 #' 
-#' @param gravity A gravity vector
+#' @param gravity A dataframe with gravity vectors for columns
 #' @param window_length Length of the filter.
 #' @param overlap Window overlap.
 #' @return Rotations errors for each window.
@@ -460,7 +473,7 @@ frequency_domain_summary <- function(accel, sampling_rate=NA, npeaks = NA) {
 #' @return An AR spectrum.
 getSpectrum <- function(accel, sampling_rate = 100, nfreq = 500){
   tmp = stats::spec.ar(accel, nfreq = nfreq, plot = F)
-  spect = data.frame(freq = tmp$freq * sampling_rate, pdf = tmp$spec)
+  spect = data.frame(freq = tmp$freq * sampling_rate, pdf = tmp$spec)[1:nfreq,]
   return(spect)
 }
 

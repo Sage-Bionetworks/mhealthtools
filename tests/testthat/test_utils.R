@@ -58,7 +58,8 @@ test_that("Tidying sensor data",{
 
   tempDat <- data.table::copy(datAccel)
   tempDat$t[1] <- NA # time column now has a NA in it
-  expect_that(mhealthtools:::tidy_sensor_data(tempDat), equals(NA)) # Is the function giving NA/error for an invalid input
+  # Does the function throw an error when t values are missing
+  expect_error(mhealthtools:::tidy_sensor_data(tempDat))
 
   tempDat$error <- rep(NA, length(tempDat$t))
   tempDat$error[1] <- 'some error' # Just a non NA value for error
@@ -111,7 +112,7 @@ test_that('Bandpass a timeseries data',{
   # Frequency parameters violating Nyquist criterion
 
   # introduce an NA timeseries data, this should throw an error (Should be the same if atleast one point was NA)
-  expect_error(mhealthtools:::bandpass(rep(NA,990), 120, 100, c(1,10)), "Corrupted Input") # Input is NA, so expect an error
+  expect_error(mhealthtools:::bandpass(rep(NA,990), 120, 100, c(1,10))) # Input is NA, so expect an error
 
 })
 
@@ -130,13 +131,10 @@ test_that('Filtering the time series data by selecting a time range',{
   testTibble <- dplyr::tibble(window = NA, error = "'Not enough time samples")
   
   expect_is(mhealthtools:::filter_time(datAccelTidy, 1,2), 'data.frame') # Check if output is in correct format
-  expect_equal(mhealthtools:::filter_time(datAccel,1,2), testTibble) # throw an error if input is not in tidy format
-  expect_equal(mhealthtools:::filter_time(datAccelTidy,1,100), testTibble) # throw error if time out of range (test file is from 0-10s)
+  expect_error(mhealthtools:::filter_time(datAccel[,"x"],1,2)) # throw an error if there is no t column
   # Maybe throw an error if t2(100s) of the window (t1,t2) is more than the actual time in the sensor data (0-10s)
-  expect_equal(mhealthtools:::filter_time(datAccelTidy,11,20), testTibble) # throw error if time out of range (test file is from 0-10s)
   # Maybe throw an error if t1(11s) of the window (t1,t2) is more than the actual time in the sensor data (0-10s)
-  # The error for the above two expectations can just be like 'selected time range(s) is invalid'
-  
+
 })
 
 context('Windowing')
@@ -145,7 +143,7 @@ test_that('Windowing a time series',{
   # actual function in utils: windowSignal
   
   expect_is(mhealthtools:::windowSignal(datAccel$x),'matrix') # Check if output is in correct format
-  expect_error(mhealthtools:::windowSignal(rep(NA,256)),"invalid input") 
+  expect_error(mhealthtools:::windowSignal(rep(NA,256))) 
   # If input has NAs maybe throw an error(?), output will have NAs
   # but better if we just give a warning / error message 
   
@@ -156,7 +154,7 @@ test_that('Windowing the sensor data by axis',{
   testTibble <- dplyr::tibble(window = NA, error = "Windowing error")  
   
   expect_is(mhealthtools:::window(datAccelTidy, 256, 0.5),'data.frame') # 256 window length, 0.5 overlap, checking output format
-  expect_equal(mhealthtools:::window(datAccel,256, 0.5), testTibble) # throw an error if Input is not in correct format
+  expect_error(mhealthtools:::window(datAccel,256, 0.5)) # throw an error if Input is not in correct format
   
 })
 
