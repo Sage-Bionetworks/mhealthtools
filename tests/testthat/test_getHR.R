@@ -38,7 +38,7 @@ test_that('Function to extract heart rate per channel(R,G,B)',{
                            samplingRate = NA)
   testTibble$error = 'Sampling Rate calculated from timestamp is Inf or NaN / timestamp not found in json'
   
-  expect_is(mhealthtools:::getHR(datHR), 'list') # Check if output is in correct format
+  expect_is(mhealthtools:::getHR(datHR), 'data.frame') # Check if output is in correct format
   
   tempDat <- copy(datHR)
   tempDat <- tempDat %>% dplyr::rename('t' = 'timestamp') # Changed the column name of timestamp to t
