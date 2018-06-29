@@ -4,7 +4,7 @@
 \alias{time_domain_summary}
 \title{Get time domain features}
 \usage{
-time_domain_summary(accel, sampling_rate = 100)
+time_domain_summary(accel, sampling_rate = NA)
 }
 \arguments{
 \item{accel}{An acceleration vector.}

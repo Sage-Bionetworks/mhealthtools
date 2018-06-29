@@ -12,6 +12,7 @@
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return Accelerometer features.
+#' @export
 accelerometer_features <- function(
   sensor_data,
   funs = c(time_domain_summary, frequency_domain_summary, frequency_domain_energy),
@@ -69,6 +70,7 @@ accelerometer_features <- function(
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return Gyroscope features.
+#' @export
 gyroscope_features <- function(
   sensor_data,
   funs = c(time_domain_summary, frequency_domain_summary, frequency_domain_energy),
