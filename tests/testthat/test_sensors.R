@@ -26,12 +26,12 @@ library(stringr)
 library(purrr)
 
 ### Load data file
-jsonFileLoc <- '../data/phone_data_test.json'
-dat = jsonlite::fromJSON(as.character(jsonFileLoc)) %>% as.data.frame()
+data("sensor_data")
+dat <- sensor_data
 
-### JSON reader to read the file from the mPower Study format to the format needed for mHealthTools
-json_reader <- function(path, metric) {
-  dat <- jsonlite::fromJSON(path) %>% 
+### flatten data to the format needed for mHealthTools
+flatten_data <- function(dat, metric) {
+  dat <- dat %>% 
     select(timestamp, metric) %>% 
     jsonlite::flatten()
   names(dat) <- c("t", "x", "y", "z")
@@ -39,9 +39,9 @@ json_reader <- function(path, metric) {
 }
 
 ### Get the formatted accelerometer and gyroscope data to use in testing below
-datAccel <- json_reader(jsonFileLoc,'userAcceleration')
-datGyro  <- json_reader(jsonFileLoc,'rotationRate')
-datGravity <- json_reader(jsonFileLoc, 'gravity')
+datAccel <- flatten_data(dat,'userAcceleration')
+datGyro  <- flatten_data(dat,'rotationRate')
+datGravity <- flatten_data(dat, 'gravity')
 
 ### Individual test functions
 context('Extract Accelerometer features')
