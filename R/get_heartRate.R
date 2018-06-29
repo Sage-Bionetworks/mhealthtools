@@ -13,7 +13,7 @@
 # Wrapper function to take in json and give HR per color channel
 #############################################################
 
-getHeartRate <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 128){
+get_heartRate <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 128){
   
   #############################################################
   # Main Code Block
