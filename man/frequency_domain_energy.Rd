@@ -2,9 +2,9 @@
 % Please edit documentation in R/utils.R
 \name{frequency_domain_energy}
 \alias{frequency_domain_energy}
-\title{Get frequency domain features}
+\title{Get frequency domain energy features}
 \usage{
-frequency_domain_energy(accel, sampling_rate = 100)
+frequency_domain_energy(accel, sampling_rate = NA)
 }
 \arguments{
 \item{accel}{A timeseries vector.}
@@ -16,5 +16,5 @@ A features data frame of dimension 1 x 48.
 }
 \description{
 Given an acceleration vector, this function will return features
-characterising the time series in frequency domain.
+characterising the time series in frequency domain by energy
 }
