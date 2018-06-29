@@ -29,6 +29,6 @@ To contribute, [fork](http://help.github.com/fork-a-repo/) the [main repo](https
 ### Authors
 * Thanneer Perumal <thanneer.perumal@sagebase.org> [aut, cre]
 * Phil Snyder <phil.snyder@sagebase.org> [aut, cre]
-* Meghashyam Tummalacherla <meghasyam@sagebase.org> [aut, ctb]
+* Meghasyam Tummalacherla <meghasyam@sagebase.org> [aut, ctb]
 * Abhishek Pratap <apratap@sagebase.org> [aut, ctb]
 * Elias Chaibub Neto <elias.chaibub.neto@sagebase.org> [ctb]
