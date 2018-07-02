@@ -131,7 +131,7 @@ filter_time <- function(sensor_data, t1, t2) {
     filtered_time_sensor_data <- sensor_data %>% dplyr::filter(t >= t1, t <= t2)
     return(filtered_time_sensor_data)
   }, error = function(e) {
-    dplyr::tibble(window = NA, error = "Not enough time samples")
+    dplyr::tibble(Window = NA, error = "'Not enough time samples")
   })
 }
 
