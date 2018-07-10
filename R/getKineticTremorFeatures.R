@@ -6,21 +6,21 @@
 #' @return data frame of tremor features
 #' @export
 #' @examples
-#' @author Thanneer Malai Perumal, Meghasyam Tummalacherla 
-getKineticTremorFeatures <- function(tremorJsonFileLoc, windowLen = 256, freqRange = c(1, 25), ovlp = 0.5) {
-  
-  # If no json file exists
-  ftrs = data.frame(Window = NA, error = NA)
-  if(all(is.na(tremorJsonFileLoc))){ ftrs$error = 'No JSON file'; return(ftrs) }
-  
-  # Read contents of JSON file
-  dat = tryCatch({ jsonlite::fromJSON(as.character(tremorJsonFileLoc)) }, 
-                 error = function(e){ NA })
-  if(all(is.na(dat))){ ftrs$error = 'JSON file read error'; return(ftrs) }
-  
-  # Get sampling rate
-  samplingRate = length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1])
-  
+#' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder 
+getKineticTremorFeatures <- function(
+  accelerometer_data, gyroscope_data, gravity_data = NA,
+  funs = c(time_domain_summary, frequency_domain_summary, frequency_domain_energy),
+  window_length = 256, time_range = c(1,9), 
+  frequency_range = c(1, 25), overlap = 0.5) {
+  features = dplyr::tibble(Window = NA, error = NA)
+  # check input integrity
+  if (any(is.na(accelerometer_data))) {
+    features$error = 'Malformed accelerometer data'
+    return(features)
+  } else if (any(is.na(gyroscope_data))) {
+    features$error = 'Malformed gyroscope data'
+    return(features)
+  }
   # Get accelerometer features
   ftrs.acc = getKineticTremorFeatures.userAccel(dat, samplingRate, windowLen = windowLen, freqRange = freqRange, ovlp = ovlp)
   

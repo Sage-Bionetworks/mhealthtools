@@ -129,6 +129,10 @@ filter_time <- function(sensor_data, t1, t2) {
   })
 }
 
+mutate_emd <- function(sensor_data, max.imf=4) {
+  imf <- EMD::emd(sensor_data$acceleration, sensor_data$t)
+}
+
 #' Window the acceleration vector of sensor data by axis
 #' 
 #' @param sensor_data A data frame with columns t, axis, acceleration.
