@@ -18,8 +18,7 @@
 #' @importFrom magrittr "%>%"
 get_walk_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NA,
-  funs = c(time_domain_summary, frequency_domain_summary, frequency_domain_energy),
-  window_length = 256, time_range = c(1,9),
+  funs = NA, window_length = 256, time_range = c(1,9),
   frequency_range = c(1, 25), overlap = 0.5) {
   features = dplyr::tibble(Window = NA, error = NA)
   # check input integrity
@@ -64,7 +63,7 @@ get_walk_features <- function(
     dplyr::mutate(Window = as.character(Window))
   if(is.na(gravity_data)) {
     features <- features %>%
-      mutate(error = "None")
+      dplyr::mutate(error = "None")
   } else {
     features <- features %>%
       dplyr::select(-error) %>% 

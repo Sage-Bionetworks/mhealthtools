@@ -139,12 +139,12 @@ default_kinematic_features <- function(sampling_rate) {
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return Accelerometer features.
-accelerometer_features <- function(
-  sensor_data,
-  funs = NA,
-  window_length = 256, overlap = 0.5,
-  time_range = c(1,9), frequency_range=c(1, 25)) {
+accelerometer_features <- function(sensor_data, funs = NA, window_length = 256, overlap = 0.5,
+                                   time_range = c(1,9), frequency_range=c(1, 25)) {
   sampling_rate <- get_sampling_rate(sensor_data)
+  if(suppressWarnings(is.na(funs))) {
+    funs <- default_kinematic_features(sampling_rate)
+  }
   all_features <- accelerometer_features_(
     sensor_data = sensor_data,
     transform = purrr::partial(
@@ -156,9 +156,7 @@ accelerometer_features <- function(
       time_range = time_range,
       frequency_range = frequency_range,
       sampling_rate = sampling_rate),
-    extract = ifelse(is.na(funs),
-                     default_kinematic_features(sampling_rate),
-                     funs))
+    extract = funs)
   return(all_features)
 }
 
@@ -176,12 +174,12 @@ accelerometer_features <- function(
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return Gyroscope features.
-gyroscope_features <- function(
-  sensor_data,
-  funs = NA,
-  window_length = 256, overlap = 0.5,
-  time_range = c(1,9), frequency_range=c(1, 25)) {
+gyroscope_features <- function(sensor_data, funs = NA, window_length = 256, overlap = 0.5,
+                               time_range = c(1,9), frequency_range=c(1, 25)) {
   sampling_rate <- get_sampling_rate(sensor_data)
+  if(suppressWarnings(is.na(funs))) {
+    funs <- default_kinematic_features(sampling_rate)
+  }
   all_features <- gyroscope_features_(
     sensor_data = sensor_data,
     transform = purrr::partial(
@@ -193,10 +191,7 @@ gyroscope_features <- function(
       time_range = time_range,
       frequency_range = frequency_range,
       sampling_rate = sampling_rate),
-    extract = ifelse(
-      is.na(funs),
-      default_kinematic_features(sampling_rate),
-      funs))
+    extract = funs)
   return(all_features)
 }
 

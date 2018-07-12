@@ -6,8 +6,8 @@
 #' gyroscope measurements.
 #' @param gravity_data A data frame with columns t, x, y, z containing 
 #' gravity sensor measurements.
-#' @param funs Feature extraction functions that accept a single
-#' time-series vector as input.
+#' @param funs A list of feature extraction functions that accept a single
+#' numeric vector as input.
 #' @param window_length Length of sliding windows.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
@@ -18,8 +18,7 @@
 #' @importFrom magrittr "%>%"
 get_tremor_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NA,
-  funs = c(time_domain_summary, frequency_domain_summary, frequency_domain_energy),
-  window_length = 256, time_range = c(1,9), 
+  funs = NA, window_length = 256, time_range = c(1,9), 
   frequency_range = c(1, 25), overlap = 0.5) {
   features = dplyr::tibble(Window = NA, error = NA)
   # check input integrity
@@ -64,7 +63,7 @@ get_tremor_features <- function(
     dplyr::mutate(Window = as.character(Window))
   if(is.na(gravity_data)) {
     features <- features %>%
-      mutate(error = "None")
+      dplyr::mutate(error = "None")
   } else {
     features <- features %>%
       dplyr::select(-error) %>% 
