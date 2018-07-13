@@ -406,6 +406,7 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
     dplyr::summarise(error = any(error, na.rm = T)) %>% 
     dplyr::mutate(Window = as.integer(Window))
   gr_error$error[gr_error$error == TRUE] = 'Phone rotated within window'
+  gr_error$error[gr_error$error == FALSE] = 'None'
   return(gr_error)
   }, error = function(e) {
     dplyr::tibble(Window = "NA", error = "Error tagging outlier windows")

@@ -7,7 +7,7 @@
 #' @export
 #' @examples
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder 
-getKineticTremorFeatures <- function(
+get_kinetic_tremor_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NA,
   funs = NA, window_length = 256, time_range = c(1,9), 
   frequency_range = c(1, 25), overlap = 0.5, max_imf = 4) {
@@ -58,7 +58,7 @@ getKineticTremorFeatures <- function(
   # Combine all features
   features <- list(accelerometer = features_accel, gyroscope = features_gyro) %>%
     data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>% 
-    dplyr::mutate(Window = as.integer(Window), error = F)
+    dplyr::mutate(error = "None")
   
   # Tag outlier windows
   if(suppressWarnings(!is.na(gravity_data))) {

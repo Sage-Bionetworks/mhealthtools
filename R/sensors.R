@@ -294,8 +294,9 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
               windowSignal(col, window_length = window_length,
                            overlap = overlap) %>% 
                 dplyr::as_tibble() %>% 
-                tidyr::gather(key="Window", value="value")
-            }, .id = "IMF")
+                tidyr::gather(key="Window", value="value") %>% 
+                dplyr::mutate(Window = as.integer(Window))
+            }, .id = "IMF") %>% dplyr::mutate(IMF = as.integer(IMF))
         }, .id = "axis")
       return(windowed_imf)
     },

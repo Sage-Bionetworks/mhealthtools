@@ -33,7 +33,10 @@ get_walk_features <- function(
   # Get accelerometer features
   features_accel <- accelerometer_features(
     sensor_data = accelerometer_data, 
+    transformation = transformation_window(window_length = window_length,
+                                           overlap = overlap),
     funs = funs,
+    groups = c("axis", "Window"),
     window_length = window_length,
     overlap = overlap,
     time_range = time_range,
@@ -42,7 +45,10 @@ get_walk_features <- function(
   # Get gyroscope features
   features_gyro <- gyroscope_features(
     sensor_data = gyroscope_data,
+    transformation = transformation_window(window_length = window_length,
+                                           overlap = overlap),
     funs = funs,
+    groups = c("axis", "Window"),
     window_length = window_length,
     overlap = overlap,
     time_range = time_range,
@@ -53,18 +59,15 @@ get_walk_features <- function(
     return(list(accelerometer = features_accel, gyroscope = features_gyro) %>%
              data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor'))
   }
-  
-  # tag outlier windows
-  gr_error <- tag_outlier_windows(gravity_data, window_length, overlap)
-  
+
   # Combine all features
   features <- list(accelerometer = features_accel, gyroscope = features_gyro) %>%
-    data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>%
-    dplyr::mutate(Window = as.character(Window))
-  if(is.na(gravity_data)) {
-    features <- features %>%
-      dplyr::mutate(error = "None")
-  } else {
+    data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>% 
+    dplyr::mutate(error = "None")
+  
+  # Tag outlier windows
+  if(suppressWarnings(!is.na(gravity_data))) {
+    gr_error <- tag_outlier_windows(gravity_data, window_length, overlap)
     features <- features %>%
       dplyr::select(-error) %>% 
       dplyr::left_join(gr_error, by = 'Window')

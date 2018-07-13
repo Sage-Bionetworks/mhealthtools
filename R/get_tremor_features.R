@@ -63,7 +63,7 @@ get_tremor_features <- function(
   # Combine all features
   features <- list(accelerometer = features_accel, gyroscope = features_gyro) %>%
     data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>% 
-    dplyr::mutate(Window = as.integer(Window), error = F)
+    dplyr::mutate(error = "None")
   
   # Tag outlier windows
   if(suppressWarnings(!is.na(gravity_data))) {
