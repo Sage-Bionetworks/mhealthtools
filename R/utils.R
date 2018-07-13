@@ -29,7 +29,7 @@ tidy_sensor_data <- function(sensor_data) {
     normalized_sensor_data <-  sensor_data %>% dplyr::mutate(t = t - t0)
     index = order(sensor_data$t)
     tidy_sensor_data = normalized_sensor_data[index,] %>%
-      tidyr::gather(axis, acceleration, -t)
+                    tidyr::gather(axis, value, -t)
   }, error = function(e) {
     dplyr::tibble(
       Window = NA,
@@ -41,25 +41,25 @@ tidy_sensor_data <- function(sensor_data) {
 #' Detrend time series data
 #' 
 #' @param time Numeric vector containing the timestamp values.
-#' @param acceleration Numeric vector containing the acceleration values.
-#' @return Numeric vector with detrended acceleration values.
-detrend <- function(time, acceleration) {
-  detrended_acceleration <- loess(acceleration ~ time)$residual
-  return(detrended_acceleration)
+#' @param values Numeric vector the same length as \code{time}.
+#' @return Numeric vector with detrended values.
+detrend <- function(time, values) {
+  detrended_values <- loess(values ~ time)$residual
+  return(detrended_values)
 }
 
-#' Detrend acceleration within sensor data
+#' Detrend sensor data
 #' 
-#' @param sensor_data A data frame with columns t, axis, acceleration.
-#' @return Sensor data with detrended acceleration values.
+#' @param sensor_data A data frame with columns t, axis, value.
+#' @return Sensor data with detrended values.
 mutate_detrend <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
   detrended_sensor_data <- tryCatch({
     detrended_sensor_data <- sensor_data %>%
-      dplyr::group_by(axis) %>%
-      dplyr::mutate(
-        acceleration = detrend(t, acceleration)) %>% 
-      dplyr::ungroup()
+                             dplyr::group_by(axis) %>%
+                             dplyr::mutate(
+                               value = detrend(t, value)) %>% 
+                             dplyr::ungroup()
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Detrend error")
   })
@@ -68,19 +68,19 @@ mutate_detrend <- function(sensor_data) {
 
 #' Apply a pass-band filter to time series data
 #' 
-#' @param acceleration Numeric vector containing acceleration values.
+#' @param values Numeric vector.
 #' @param window_length Length of the filter.
-#' @param sampling_rate Sampling rate of the acceleration data.
+#' @param sampling_rate Sampling rate of the values.
 #' @param frequency_low Lower bound on frequency in Hz
 #' @param frequency_high Upper bound on frequency in Hz
 #' @return Filtered time series data
-bandpass <- function(acceleration, window_length, sampling_rate,
+bandpass <- function(values, window_length, sampling_rate,
                      frequency_range) {
   frequency_low <- frequency_range[1]
   frequency_high <- frequency_range[2]
   if(frequency_low*2/sampling_rate > 1 || frequency_high*2/sampling_rate > 1) {
     stop("Frequency parameters can be at most half the sampling rate.")
-  } else if (any(is.na(acceleration))) {
+  } else if (any(is.na(values))) {
     stop("NA values present in input.")
   }
   bandpass_filter <- signal::fir1(
@@ -89,15 +89,15 @@ bandpass <- function(acceleration, window_length, sampling_rate,
       frequency_high*2/sampling_rate),
     type="pass",
     window=seewave::hamming.w(window_length))
-  filtered_acceleration <- signal::filtfilt(bandpass_filter, acceleration)
-  return(filtered_acceleration)
+  filtered_values <- signal::filtfilt(bandpass_filter, values)
+  return(filtered_values)
 }
 
 #' Apply a pass-band filter to sensor data
 #' 
-#' @param sensor_date A data frame with columns t, axis, acceleration.
+#' @param sensor_date A data frame with columns t, axis, value.
 #' @param window_length Length of the filter.
-#' @param sampling_rate Sampling rate of the acceleration data.
+#' @param sampling_rate Sampling rate of the value column.
 #' @param frequency_range Bounds on frequency in Hz
 #' @return Filtered time series data
 mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
@@ -107,7 +107,7 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
     sensor_data %>%
       dplyr::group_by(axis) %>%
       dplyr::mutate(
-        acceleration = bandpass(acceleration, window_length, sampling_rate,
+        value = bandpass(value, window_length, sampling_rate,
                                 frequency_range)) %>% 
       dplyr::ungroup()
   }, error = function(e) {
@@ -118,7 +118,7 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
 
 #' Select a specific time range from sensor data.
 #' 
-#' @param sensor_date A data frame with columns t, axis, acceleration.
+#' @param sensor_date A data frame with a \code{t} column.
 #' @param t1 Start time.
 #' @param t2 End time.
 #' @return Sensor data between time t1 and t2 (inclusive)
@@ -135,9 +135,9 @@ filter_time <- function(sensor_data, t1, t2) {
   })
 }
 
-#' Window the acceleration vector of sensor data by axis
+#' Window the value vector of sensor data for each axis
 #' 
-#' @param sensor_data A data frame with columns t, axis, acceleration.
+#' @param sensor_data A data frame with columns t, axis, value.
 #' @param window_length Length of the filter
 #' @param overlap window overlap
 #' @return Windowed sensor data
@@ -148,7 +148,7 @@ window <- function(sensor_data, window_length, overlap) {
   }
   tryCatch({
     windowed_sensor_data <- sensor_data %>%
-      tidyr::spread(axis, acceleration) %>% 
+      tidyr::spread(axis, value) %>% 
       dplyr::select(x, y, z) %>%
       purrr::map(windowSignal, 
                  window_length = window_length, overlap = overlap)
@@ -159,7 +159,7 @@ window <- function(sensor_data, window_length, overlap) {
                                  windowed_matrix)
         tidy_tibble <- windowed_matrix %>% 
           dplyr::as_tibble() %>%
-          tidyr::gather(Window, acceleration, -index, convert=T)
+          tidyr::gather(Window, value, -index, convert=T)
         return(tidy_tibble)
       }) %>% 
       dplyr::bind_rows(.id = "axis")
@@ -171,18 +171,15 @@ window <- function(sensor_data, window_length, overlap) {
 
 #' Window a signal
 #'  
-#' Given a acceleration vector this function will return a windowed 
+#' Given a numeric vector, this function will return a windowed 
 #' signal with hamming window.
 #'  
-#' @param accel Timeseries vector of length n.
+#' @param values Timeseries vector of length n.
 #' @param window_length Length of the filter.
 #' @param overlap Window overlap.
-#' @return A matrix of window_length x nwindows windowed acceleration matrix.
-windowSignal <- function(accel, window_length = 256, overlap = 0.5){
-  if (any(is.na(accel))) {
-    stop("NA values present in input.")
-  }
-  nlen = length(accel)
+#' @return A matrix of window_length x nwindows
+windowSignal <- function(values, window_length = 256, overlap = 0.5){
+  nlen = length(values)
   
   # If length of signal is less than window length
   if (nlen < window_length){
@@ -196,7 +193,7 @@ windowSignal <- function(accel, window_length = 256, overlap = 0.5){
   
   a = apply(cbind(nstart,nend), 1, function(x, a, wn){
     a[seq(x[1],x[2],1)]*wn
-  }, accel, wn)
+  }, values, wn)
   colnames(a) = 1:dim(a)[2]
   return(a)
 }
@@ -210,6 +207,28 @@ jerk <- function(acceleration, sampling_rate) {
   jerk <- (acceleration - dplyr::lag(acceleration)) * sampling_rate
   jerk[1] <- 0
   return(jerk)
+}
+
+#' Take the derivative of a vector v
+#' 
+#' Take the derivative of a vector v by calculating the difference
+#' between component x_i and x_(i-1).
+#' 
+#' @param v A numeric vector
+#' @return A numeric vector
+derivative <- function(v) {
+  derivative <- (v - dplyr::lag(v))
+  derivative[1] <- 0
+  return(derivative)
+}
+
+#' Take the integral of a vector v
+#' 
+#' Take the integral of a vector v by computing the inverse of
+#' the lagged differences (\code{diff} function).
+integral <- function(v, sampling_rate) {
+  integral <- diffinv(v)[-1]
+  return(integral)
 }
 
 #' Add jerk column to sensor data
@@ -287,25 +306,73 @@ mutate_displacement <- function(sensor_data, sampling_rate) {
   return(sensor_data_with_displacement)
 }
 
+#' Add a column which is the "derivative" of an existing column to a time-series dataframe.
+#' 
+#' See function \code{derivative}.
+#' 
+#' @param sensor_data A data frame with columns t, axis, acceleration.
+#' @param sampling_rate Sampling rate of \code{col}.
+#' @param groups Column names to group \code{sensor_data} on before differentiating.
+#' @param col Name of column to differentiate.
+#' @param derived_col Name of new column which is the derivative of \code{col}.
+#' @return A dataframe
+mutate_derivative <- function(sensor_data, sampling_rate, groups, col, derived_col) {
+  if (has_error(sensor_data)) return(sensor_data)
+  sensor_data_with_derivative <- tryCatch({
+    sensor_data %>%
+    dplyr::group_by_at(.vars = groups) %>% 
+    dplyr::mutate(!!derived_col := derivative(!!dplyr::sym(col)) * sampling_rate) %>%
+    dplyr::ungroup()
+  }, error = function(e) {
+    dplyr::tibble(Window = NA, error = paste("Error calculating", derived_col))
+  })
+  return(sensor_data_with_derivative)
+}
+
+#' Add a column which is the "integral" of an existing column to a time-series dataframe.
+#' 
+#' See function \code{integral}.
+#' 
+#' @param sensor_data A data frame with columns t, axis, acceleration.
+#' @param sampling_rate Sampling rate of \code{col}.
+#' @param groups Column names to group \code{sensor_data} on before integrating.
+#' @param col Name of column to integrate.
+#' @param derived_col Name of new column which is the integral of \code{col}.
+#' @return A dataframe
+mutate_integral <- function(sensor_data, sampling_rate, groups, col, derived_col) {
+  if (has_error(sensor_data)) return(sensor_data)
+  sensor_data_with_integral <- tryCatch({
+    sensor_data %>% 
+    dplyr::group_by_at(.vars = groups) %>%
+    dplyr::mutate(!!derived_col := integral(!!dplyr::sym(col)) * sampling_rate) %>% 
+    dplyr::ungroup()
+  }, error = function(e) {
+    dplyr::tibble(Window = NA, error = paste("Error calculating", derived_col))
+  })
+  return(sensor_data_with_integral)
+}
+
 #' Construct a dataframe with ACF values
 #' 
 #' Estimate the ACF for windowed sensor data.
 #' 
-#' @param sensor_data A data frame with columns t, axis, acceleration.
+#' @param sensor_data A data frame with columns \code{axis}, \code{Window}, and \code{col}.
+#' @param col Name of column to calculate acf of.
+#' @param groups Column names to group on when computing acf.
 #' @return A tibble with columns axis, window, index, acf
-calculate_acf <- function(sensor_data) {
+calculate_acf <- function(sensor_data, col, groups) {
   if (has_error(sensor_data)) return(sensor_data)
   acf_data <- tryCatch({
     sensor_data %>%
-      dplyr::group_by(axis, Window) %>%
-      tidyr::nest(acceleration) %>%
-      dplyr::mutate(data = map(data, function(d) {
-        acf_col <- stats::acf(d$acceleration, plot=F)$acf
+      dplyr::group_by_at(.vars = groups) %>%
+      tidyr::nest(col) %>%
+      dplyr::mutate(data = purrr::map(data, function(d) {
+        acf_col <- acf(d[,col], plot=F)$acf
         index_col <- 1:length(acf_col)
         dplyr::bind_cols(acf = acf_col, index = index_col)
       })) %>%
       tidyr::unnest(data) %>% 
-      select(axis, Window, index, acf)
+      dplyr::select_at(.vars = c(groups, "acf"))
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Error calculating ACF")
   })
@@ -346,7 +413,8 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
     dplyr::bind_rows(.id = 'axis') %>%
     dplyr::mutate(error = sign(max) != sign(min)) %>% 
     dplyr::group_by(Window) %>% 
-    dplyr::summarise(error = any(error, na.rm = T))
+    dplyr::summarise(error = any(error, na.rm = T)) %>% 
+    dplyr::mutate(Window = as.integer(Window))
   gr_error$error[gr_error$error == TRUE] = 'Phone rotated within window'
   gr_error$error[gr_error$error == FALSE] = 'None'
   return(gr_error)
@@ -360,39 +428,39 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
 #' 
 #' Calculates features characterising a time series in the time domain.
 #' 
-#' @param accel An acceleration vector.
-#' @param sampling_rate Sampling_rate of the acceleration vector.
+#' @param values A numeric vector.
+#' @param sampling_rate Sampling_rate of \code{values}.
 #' @return A features data frame of dimension 1 x n_features
-time_domain_summary <- function(accel, sampling_rate=NA) {
+time_domain_summary <- function(values, sampling_rate=NA) {
   if(is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
-    sampling_rate = 100
+    sampling_rate <- 100
   }
   ftrs <- dplyr::tibble(
-    mean = mean(accel, na.rm = TRUE),
-    median = quantile(accel, probs = c(0.5), na.rm = TRUE),
-    mode = pracma::Mode(accel),
-    mx =  max(accel, na.rm = T),
-    mn = min(accel, na.rm = T),
-    sd = sd(accel, na.rm = TRUE),
-    skewness = e1071::skewness(accel),
-    kurtosis = e1071::kurtosis(accel),
-    Q25 = quantile(accel, probs = c(0.25), na.rm = TRUE),
-    Q75 = quantile(accel, probs = c(0.75), na.rm = TRUE),
-    range = max(accel, na.rm = T) - min(accel, na.rm = T),
-    rough = seewave::roughness(accel),
-    rugo = seewave::rugo(accel),
-    energy = sum(accel^2),
-    mobility = sqrt(var(diff(accel)*sampling_rate)/var(accel)),
+    mean = mean(values, na.rm = TRUE),
+    median = quantile(values, probs = c(0.5), na.rm = TRUE),
+    mode = pracma::Mode(values),
+    mx =  max(values, na.rm = T),
+    mn = min(values, na.rm = T),
+    sd = sd(values, na.rm = TRUE),
+    skewness = e1071::skewness(values),
+    kurtosis = e1071::kurtosis(values),
+    Q25 = quantile(values, probs = c(0.25), na.rm = TRUE),
+    Q75 = quantile(values, probs = c(0.75), na.rm = TRUE),
+    range = max(values, na.rm = T) - min(values, na.rm = T),
+    rough = seewave::roughness(values),
+    rugo = seewave::rugo(values),
+    energy = sum(values^2),
+    mobility = sqrt(var(diff(values)*sampling_rate)/var(values)),
     mtkeo = mean(seewave::TKEO(
-      accel, f = sampling_rate, plot = F)[,2], na.rm = T),
-    dfa = fractal::DFA(accel, sum.order = 1)[[1]],
-    rmsmag = sqrt(sum(accel^2)/length(accel))) %>%  # Root Mean Square magnitude
+      values, f = sampling_rate, plot = F)[,2], na.rm = T),
+    dfa = fractal::DFA(values, sum.order = 1)[[1]],
+    rmsmag = sqrt(sum(values^2)/length(values))) %>%  # Root Mean Square magnitude
     dplyr::mutate(IQR = Q25 - Q75,
                   complexity = sqrt(
-                    var(diff(diff(accel)*sampling_rate)*sampling_rate) /
-                      var(diff(accel)*sampling_rate)))
-  names(ftrs) = stringr::str_c(names(ftrs), '.tm')
+                    var(diff(diff(values)*sampling_rate)*sampling_rate) /
+                      var(diff(values)*sampling_rate)))
+  names(ftrs) = paste0(names(ftrs), '.tm')
   return(ftrs)
 }
 
@@ -400,12 +468,12 @@ time_domain_summary <- function(accel, sampling_rate=NA) {
 #' 
 #' Calculates features characterising a time series in the frequency domain.
 #' 
-#' @param accel An acceleration vector.
-#' @param sampling_rate Sampling_rate of the acceleration vector.
+#' @param values A numeric vector.
+#' @param sampling_rate Sampling_rate of \code{values}.
 #' @param npeaks Number of peaks to be computed in EWT
 #' @return A features data frame of dimension 1 x num_features
 #####
-frequency_domain_summary <- function(accel, sampling_rate=NA, npeaks = NA) {
+frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
   if(is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
     sampling_rate = 100
@@ -415,7 +483,7 @@ frequency_domain_summary <- function(accel, sampling_rate=NA, npeaks = NA) {
     warning("Using default npeaks of 3 for frequency_domain_summary")
     npeaks = 3
   }
-  spect <- getSpectrum(accel, sampling_rate)
+  spect <- getSpectrum(values, sampling_rate)
   freq <- spect$freq
   pdf <- spect$pdf/sum(spect$pdf, na.rm = T)
   pdf_adjusted <- pdf - mean(pdf)
@@ -456,7 +524,7 @@ frequency_domain_summary <- function(accel, sampling_rate=NA, npeaks = NA) {
       ewt.renyiEnt = seewave::sh(ewEnergy, alpha = 2), # alpha is hardcoded to be 2
       ewt.tsallisEnt = (1-sum(ewEnergy^0.1))/(0.1-1)) # q is hardcoded to be 0.1
   
-  names(ftrs) <- stringr::str_c(names(ftrs), '.fr')
+  names(ftrs) <- paste0(names(ftrs), '.fr')
   
   return(data.frame(ftrs))
 }
@@ -464,16 +532,16 @@ frequency_domain_summary <- function(accel, sampling_rate=NA, npeaks = NA) {
 
 #' Get AR spectrum
 #' 
-#' Given an acceleration vector, this function will return a spectrum
+#' Given a numeric vector, this function will return a spectrum
 #' with all pole AR model.
 #' 
-#' @param accel A timeseries vector.
+#' @param values A timeseries vector.
 #' @param sampling_rate Sampling rate of the signal (by default it is 100 Hz).
 #' @param nfreq Number of frequecy points to be interpolated.
 #' @return An AR spectrum.
-getSpectrum <- function(accel, sampling_rate = 100, nfreq = 500){
-  tmp = stats::spec.ar(accel, nfreq = nfreq, plot = F)
-  spect = data.frame(freq = tmp$freq * sampling_rate, pdf = tmp$spec)[1:nfreq,]
+getSpectrum <- function(values, sampling_rate = 100, nfreq = 500){
+  tmp = stats::spec.ar(values, nfreq = nfreq, plot = F)
+  spect = data.frame(freq = tmp$freq * sampling_rate, pdf = tmp$spec)
   return(spect)
 }
 
@@ -564,18 +632,18 @@ getEWTspectrum <- function(spect, npeaks = 3, fractionMinPeakHeight = 0.1,
 
 #' Get frequency domain energy features
 #' 
-#' Given an acceleration vector, this function will return features
-#' characterising the time series in frequency domain by energy
+#' Given a numeric vector, this function will return features
+#' characterising the time series in frequency domain.
 #' 
-#' @param accel A timeseries vector.
+#' @param values A timeseries vector.
 #' @param sampling_rate Sampling rate of the signal (by default it is 100 Hz).
 #' @return A features data frame of dimension 1 x 48.
-frequency_domain_energy <- function(accel, sampling_rate=NA) {
+frequency_domain_energy <- function(values, sampling_rate=NA) {
   if(is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for frequency_domain_energy")
     sampling_rate = 100
   }  
-  spect = getSpectrum(accel, sampling_rate)
+  spect = getSpectrum(values, sampling_rate)
   freq = spect$freq
   pdf = spect$pdf/sum(spect$pdf, na.rm = T)
   cdf = cumsum(pdf)
@@ -604,11 +672,35 @@ frequency_domain_energy <- function(accel, sampling_rate=NA) {
 #' @param ... Additional arguments to \code{.f}.
 #' @return A tibble indexed by groups with an additional column containing
 #' the output of the mapped function.
-map_groups <- function(x, groups, col, f, ...) {
+map_groups <- function(x, col, groups, f, ...) {
   dots <- rlang::enquos(...) # can also use enexprs()
   x %>%
     dplyr::group_by_at(.vars = groups) %>% 
     tidyr::nest() %>% 
     dplyr::mutate(data = purrr::map(data, ~ f(.[[col]], !!!dots))) %>%
     tidyr::unnest(data)
+}
+
+#' Extract features from a column
+#' 
+#' Apply each of the functions in \code{funs} to the column 
+#' \code{col} in data frame \code{x}. Each of the functions in 
+#' \code{funs} must accept a single vector as input and output 
+#' a data frame with columns axis and window (and optionally others).
+#' 
+#' @param x A data frame with columns axis, window, and \code{col}.
+#' @param col The name of the column in \code{x} to pass to each 
+#' function in \code{funs}.
+#' @param funs A list of functions that accept a single vector as input.
+#' @return a data frame with columns axis, window, and other feature columns.
+extract_features <- function(x, col, groups, funs) {
+  purrr::map(
+    funs, ~ map_groups(
+      x = x,
+      col = col,
+      groups = groups,
+      f = .)) %>%
+    purrr::reduce(dplyr::left_join, by = groups) %>%
+    dplyr::mutate(measurementType = col) %>%
+    dplyr::select(measurementType, axis, Window, dplyr::everything())
 }
