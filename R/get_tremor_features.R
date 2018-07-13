@@ -18,7 +18,7 @@
 #' @importFrom magrittr "%>%"
 get_tremor_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NA,
-  funs = NA, window_length = 256, time_range = c(1,9), 
+  funs = NA, window_length = 256, time_range = c(1,9),
   frequency_range = c(1, 25), overlap = 0.5) {
   features = dplyr::tibble(Window = NA, error = NA)
   # check input integrity

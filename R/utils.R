@@ -23,6 +23,7 @@ has_error <- function(sensor_data) {
 #' @return Sensor data in tidy format.
 tidy_sensor_data <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
+  if (any(is.na(sensor_data$t))) stop("NA values present in column t.")
   tidy_sensor_data <- tryCatch({
     t0 <- sensor_data$t[1]
     normalized_sensor_data <-  sensor_data %>% dplyr::mutate(t = t - t0)
@@ -79,6 +80,8 @@ bandpass <- function(values, window_length, sampling_rate,
   frequency_high <- frequency_range[2]
   if(frequency_low*2/sampling_rate > 1 || frequency_high*2/sampling_rate > 1) {
     stop("Frequency parameters can be at most half the sampling rate.")
+  } else if (any(is.na(values))) {
+    stop("NA values present in input.")
   }
   bandpass_filter <- signal::fir1(
     window_length-1,
@@ -121,6 +124,9 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
 #' @return Sensor data between time t1 and t2 (inclusive)
 filter_time <- function(sensor_data, t1, t2) {
   if (has_error(sensor_data)) return(sensor_data)
+  if (!hasName(sensor_data, "t")) {
+    stop("Input has no column t.")
+  }
   filtered_time_sensor_data <- tryCatch({
     filtered_time_sensor_data <- sensor_data %>% dplyr::filter(t >= t1, t <= t2)
     return(filtered_time_sensor_data)
@@ -137,6 +143,9 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @return Windowed sensor data
 window <- function(sensor_data, window_length, overlap) {
   if (has_error(sensor_data)) return(sensor_data)
+  if (!all(hasName(sensor_data, c("t", "axis", "acceleration")))) {
+    stop("Sensor data is missing necessary columns.")
+  }
   tryCatch({
     windowed_sensor_data <- sensor_data %>%
       tidyr::spread(axis, value) %>% 
@@ -246,7 +255,7 @@ mutate_jerk <- function(sensor_data, sampling_rate) {
 #' @param sampling_rate Sampling rate of the acceleration vector.
 #' @return Velocity vector.
 velocity <- function(acceleration, sampling_rate) {
-  velocity <- diffinv(acceleration)[-1] * sampling_rate
+  velocity <- stats::diffinv(acceleration)[-1] * sampling_rate
   return(velocity)
 }
 
@@ -275,7 +284,7 @@ mutate_velocity <- function(sensor_data, sampling_rate) {
 #' @return Displacement vector.
 displacement <- function(acceleration, sampling_rate) {
   velocity <- velocity(acceleration, sampling_rate)
-  displacement <- diffinv(velocity)[-1] * sampling_rate
+  displacement <- stats::diffinv(velocity)[-1] * sampling_rate
   return(displacement)
 }
 
@@ -377,8 +386,9 @@ calculate_acf <- function(sensor_data, col, groups) {
 #' @param overlap Window overlap.
 #' @return Min and max values for each window.
 tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
-  gravity_summary <-
-    windowSignal(gravity_vector, window_length, overlap) %>%
+  if (!is.vector(gravity_vector)) stop("Input must be a numeric vector")
+  gravity_summary <- gravity_vector %>% 
+    windowSignal(window_length = window_length, overlap = overlap) %>%
     dplyr::as_tibble() %>%
     tidyr::gather(Window, value) %>%
     dplyr::group_by(Window) %>%
@@ -392,7 +402,7 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
 #' Identify windows in which the phone may have been rotated or flipped,
 #' as indicated by a gravity vector
 #' 
-#' @param gravity A gravity vector
+#' @param gravity A dataframe with gravity vectors for columns
 #' @param window_length Length of the filter.
 #' @param overlap Window overlap.
 #' @return Rotations errors for each window.
@@ -421,9 +431,10 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
 #' @param values A numeric vector.
 #' @param sampling_rate Sampling_rate of \code{values}.
 #' @return A features data frame of dimension 1 x n_features
-time_domain_summary <- function(values, sampling_rate=100) {
-  if(sampling_rate == 100) {
+time_domain_summary <- function(values, sampling_rate=NA) {
+  if(is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
+    sampling_rate <- 100
   }
   ftrs <- dplyr::tibble(
     mean = mean(values, na.rm = TRUE),
@@ -462,10 +473,15 @@ time_domain_summary <- function(values, sampling_rate=100) {
 #' @param npeaks Number of peaks to be computed in EWT
 #' @return A features data frame of dimension 1 x num_features
 #####
-frequency_domain_summary <- function(values, sampling_rate=100, npeaks = 3) {
-  if(sampling_rate == 100 && npeaks == 3) {
-    warning(paste("Using default sampling rate of 100",
-                  "and 3 peaks for frequency_domain_summary"))
+frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
+  if(is.na(sampling_rate)) {
+    warning("Using default sampling rate of 100 for time_domain_summary")
+    sampling_rate = 100
+  }
+
+  if(is.na(npeaks)) {
+    warning("Using default npeaks of 3 for frequency_domain_summary")
+    npeaks = 3
   }
   spect <- getSpectrum(values, sampling_rate)
   freq <- spect$freq
@@ -532,7 +548,7 @@ getSpectrum <- function(values, sampling_rate = 100, nfreq = 500){
 
 #' Get EWT spectrum 
 #' 
-#' Given a time series vector this function will return its 
+#' Given the spectrum of a time series vector this function will return its 
 #' Empirical Wavelet Transformed spectrum.
 #' 
 #' @param spect FFT spectrum as a two dimensional data frame with columns
@@ -614,7 +630,7 @@ getEWTspectrum <- function(spect, npeaks = 3, fractionMinPeakHeight = 0.1,
 }
 
 
-#' Get frequency domain features
+#' Get frequency domain energy features
 #' 
 #' Given a numeric vector, this function will return features
 #' characterising the time series in frequency domain.
@@ -622,10 +638,11 @@ getEWTspectrum <- function(spect, npeaks = 3, fractionMinPeakHeight = 0.1,
 #' @param values A timeseries vector.
 #' @param sampling_rate Sampling rate of the signal (by default it is 100 Hz).
 #' @return A features data frame of dimension 1 x 48.
-frequency_domain_energy <- function(values, sampling_rate=100) {
-  if(sampling_rate == 100) {
+frequency_domain_energy <- function(values, sampling_rate=NA) {
+  if(is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for frequency_domain_energy")
-  }
+    sampling_rate = 100
+  }  
   spect = getSpectrum(values, sampling_rate)
   freq = spect$freq
   pdf = spect$pdf/sum(spect$pdf, na.rm = T)
