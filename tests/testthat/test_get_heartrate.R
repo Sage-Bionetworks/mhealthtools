@@ -26,39 +26,39 @@ library(stringr)
 library(purrr)
 
 ### Load data file
-jsonFileLoc <- '../data/hr_test.json'
-datHR = jsonlite::fromJSON(as.character(jsonFileLoc)) %>% as.data.frame()
+data("heartrate_data")
+datHR <- heartrate_data
 
 ### Individual test functions
 context('Extract Heart rate')
 test_that('Function to extract heart rate per channel(R,G,B)',{
-  # actual function in getHR: getHR
+  # actual function in get_heartrate: get_heartrate
   testTibble <- data.frame(red = NA, green = NA, blue = NA, 
                            error = NA,
                            samplingRate = NA)
   testTibble$error = 'Sampling Rate calculated from timestamp is Inf or NaN / timestamp not found in json'
   
-  expect_is(mhealthtools:::getHR(datHR), 'data.frame') # Check if output is in correct format
+  expect_is(mhealthtools:::get_heartrate(datHR), 'list') # Check if output is in correct format
   
   tempDat <- copy(datHR)
   tempDat <- tempDat %>% dplyr::rename('t' = 'timestamp') # Changed the column name of timestamp to t
-  expect_equal(mhealthtools:::getHR(tempDat), testTibble) # Error if timestamp column is missing
+  expect_equal(mhealthtools:::get_heartrate(tempDat), testTibble) # Error if timestamp column is missing
   
   tempDat <- copy(datHR)
   tempDat$timestamp <- rep(1, length(datHR$timestamp))
-  expect_equal(mhealthtools:::getHR(tempDat), testTibble) # Error if sampling rate cannot be calculated from timestamp
+  expect_equal(mhealthtools:::get_heartrate(tempDat), testTibble) # Error if sampling rate cannot be calculated from timestamp
   
   tempDat <- copy(datHR)
   tempDat <- tempDat %>% dplyr::rename('rex' = 'red') # Changed the column name of red to rex
   testTibble$error = 'red, green, blue cannot be read from JSON'
-  expect_equal(mhealthtools:::getHR(tempDat), testTibble) # Error if any channel red, green or blue is missing
+  expect_equal(mhealthtools:::get_heartrate(tempDat), testTibble) # Error if any channel red, green or blue is missing
   
   tempDat <- copy(datHR)
   tempDat$red <- rep(NA, length(datHR$red))
 })
 
 test_that('Extract heart rate given a timeseries',{
-  # actual function in getHR: getHrFromTimeSeries
+  # actual function in get_heartRate: getHrFromTimeSeries
   timeSeries <- datHR$red
   
   expect_is(mhealthtools:::getHrFromTimeSeries(timeSeries,100), 'numeric') # Check if output is in correct format

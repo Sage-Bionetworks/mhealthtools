@@ -1,19 +1,19 @@
-####### MAIN
-#' extracts hr for each color band from avg pixel value per frame of video (processed hr) JSON data file
+#' Extract heart rate for each color band from avg pixel value per frame of video (processed hr)
 #'
-#'
-#' @params A dataframe(dat) with columns timestamp, red, green and blue
-#' @return list containing hr and confidence of the estimate for each color (red, green, blue)
+#' @param dat A data frame with columns timestamp, red, green and blue
+#' @param windowLen Length of the time window in seconds, to be considered
+#' while calculating the heart rate for each channel
+#' @param freqRange Frequency range in Hz for the bandpass filter parameters
+#' @param bpforder Order (length) of the bandpass filter to be used for filtering
+#' @return list containing heart rate and confidence of the estimate for each color (red, green, blue)
 #' @export
-#' @examples
 #' @author Meghasyam Tummalacherla 
-
 
 #############################################################
 # Wrapper function to take in json and give HR per color channel
 #############################################################
 
-getHR <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 128){
+get_heartrate <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 128){
   
   #############################################################
   # Main Code Block
@@ -35,7 +35,8 @@ getHR <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 128){
   mforder = 2*round(60*samplingRate/220) + 1 # order for the running mean based filter
   
   # Split each color into segments based on windowLen
-  dat = tryCatch({ dat %>% dplyr::select(red, green, blue) %>% lapply(mhealthtools:::windowSignal, windowLen, 0.5) }, 
+  dat = tryCatch({ dat %>% dplyr::select(red, green, blue) %>% na.omit() %>% 
+                  lapply(mhealthtools:::windowSignal, windowLen, 0.5) }, 
                  error = function(e){ NA })
   if(all(is.na(dat))){dat1$error = 'red, green, blue cannot be read from JSON'; return(dat1) }
   
@@ -67,8 +68,14 @@ getHR <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 128){
 #############################################################
 # Required Sub Functions
 #############################################################
-
-# Bandpass and sorted mean filter the given signal
+#' Bandpass and sorted mean filter the given signal
+#'
+#' @param x A time series numeric data
+#' @param mforder Length of the sorted mean filter window
+#' @param freqRange Frequency range in Hz for the bandpass filter parameters
+#' @param bpforder Order (length) of the bandpass filter to be used for filtering
+#' @param samplingRate The sampling rate (fs) of the time series data
+#' @return The filtered time series data
 
 getfilteredsignal <- function(x, mforder = 33, bpforder = 128, freqRange=c(2,25), samplingRate){
   
@@ -102,7 +109,13 @@ getfilteredsignal <- function(x, mforder = 33, bpforder = 128, freqRange=c(2,25)
   return(y)
 }
 
-# Given a processed time series find its period using autocorrelation and then convert it to HR (bpm)
+#' Given a processed time series find its period using autocorrelation and then convert it to heart rate (bpm)
+#'
+#' @param x A time series numeric data
+#' @param samplingRate The sampling rate (fs) of the time series data
+#' @param minHR Minimum expected heart rate
+#' @param maxHR Maximum expected heart rate
+#' @return A named vector containing heart rate and the confidence of the result 
 
 getHrFromTimeSeries <- function(x, samplingRate, minHR = 40, maxHR=200){
   x[is.na(x)] <- 0

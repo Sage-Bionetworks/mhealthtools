@@ -4,7 +4,7 @@
 \alias{frequency_domain_summary}
 \title{Get frequency domain features}
 \usage{
-frequency_domain_summary(accel, sampling_rate = 100, npeaks = 3)
+frequency_domain_summary(accel, sampling_rate = NA, npeaks = NA)
 }
 \arguments{
 \item{accel}{An acceleration vector.}

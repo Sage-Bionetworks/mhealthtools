@@ -25,12 +25,12 @@ library(seewave)
 library(stringr)
 
 ### Load data file
-jsonFileLoc <- '../data/phone_data_test.json'
-dat = jsonlite::fromJSON(as.character(jsonFileLoc)) %>% as.data.frame()
+data("sensor_data")
+dat <- sensor_data
 
-### JSON reader to read the file from the mPower Study format to the format needed for mHealthTools
-json_reader <- function(path, metric) {
-  dat <- jsonlite::fromJSON(path) %>% 
+### flatten data to the format needed for mHealthTools
+flatten_data <- function(dat, metric) {
+  dat <- dat %>% 
     select(timestamp, metric) %>% 
     jsonlite::flatten()
   names(dat) <- c("t", "x", "y", "z")
@@ -38,8 +38,9 @@ json_reader <- function(path, metric) {
 }
 
 ### Get the formatted accelerometer and gyroscope data to use in testing below
-datAccel <- json_reader(jsonFileLoc,'userAcceleration')
-datGyro  <- json_reader(jsonFileLoc,'rotationRate')
+datAccel <- flatten_data(dat,'userAcceleration')
+datGyro  <- flatten_data(dat,'rotationRate')
+datGravity <- flatten_data(dat, 'gravity')
 
 ### Individual test functions
 
@@ -237,20 +238,20 @@ test_that('Identify min, max gravity values for each window of tidy sensor data'
   # Min and Max should be NA if any window has NAs in it
 })
 
-test_that('Identify windows in which Phone might have been flipped/rotated given gravity',{
-  # actual function in utils: tag_outlier_windows 
-  testTibble <- dplyr::tibble(window = NA, error = "Error tagging outlier windows")  
-  
-  gravityVec <- dat$gravity$x
-  
-  # Given a gravity vector as the function requires, we should not get the error tibble(testTibble back)
-  # expect_false(all.equal(mhealthtools:::tag_outlier_windows(gravityVec,256,0.5),testTibble)) 
-  # I think the error is because the input needs to be formatted before feeding it in, or if fed in a gravity vector, 
-  # it needs to be handled inside (or especially before L 331 of utils, ie the first line after tryCatch in tag_outlier_windows)
-  
-  # expect_equal(mhealthtools:::tag_outlier_windows(dat$gravity,256,0.5), testTibble) # Wrong input data format(not a vector, but a dataframe), expect an error tibble 
-  
-})
+# test_that('Identify windows in which Phone might have been flipped/rotated given gravity',{
+#   # actual function in utils: tag_outlier_windows 
+#   testTibble <- dplyr::tibble(window = NA, error = "Error tagging outlier windows")  
+#   
+#   gravityVec <- dat$gravity$x
+#   
+#   # Given a gravity vector as the function requires, we should not get the error tibble(testTibble back)
+#   # expect_false(all.equal(mhealthtools:::tag_outlier_windows(gravityVec,256,0.5),testTibble)) 
+#   # I think the error is because the input needs to be formatted before feeding it in, or if fed in a gravity vector, 
+#   # it needs to be handled inside (or especially before L 331 of utils, ie the first line after tryCatch in tag_outlier_windows)
+#   
+#   # expect_equal(mhealthtools:::tag_outlier_windows(dat$gravity,256,0.5), testTibble) # Wrong input data format(not a vector, but a dataframe), expect an error tibble 
+#   
+# })
 
 context('Features')
 test_that('Time domain summary given acceleration',{
