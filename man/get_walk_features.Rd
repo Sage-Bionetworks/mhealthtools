@@ -6,7 +6,7 @@
 \usage{
 get_walk_features(accelerometer_data, gyroscope_data, gravity_data = NA,
   funs = NA, window_length = 256, time_range = c(1, 9),
-  frequency_range = c(1, 25), overlap = 0.5)
+  frequency_range = c(1, 25), overlap = 0.5, max_imf = 4)
 }
 \arguments{
 \item{accelerometer_data}{A data frame with columns t, x, y, z containing 
@@ -28,6 +28,9 @@ time-series vector as input.}
 \item{frequency_range}{Frequency range for the bandpass filter.}
 
 \item{overlap}{Window overlap.}
+
+\item{max_imf}{Number of intrinsic mode functions to use for 
+empirical mode decomposition.}
 }
 \value{
 Walk features indexed by axis and window.

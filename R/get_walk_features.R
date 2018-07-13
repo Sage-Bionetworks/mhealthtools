@@ -12,6 +12,8 @@
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @param overlap Window overlap.
+#' @param max_imf Number of intrinsic mode functions to use for 
+#' empirical mode decomposition.
 #' @return Walk features indexed by axis and window.
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
