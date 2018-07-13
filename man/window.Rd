@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{window}
 \alias{window}
-\title{Window the acceleration vector of sensor data by axis}
+\title{Window the value vector of sensor data for each axis}
 \usage{
 window(sensor_data, window_length, overlap)
 }
 \arguments{
-\item{sensor_data}{A data frame with columns t, axis, acceleration.}
+\item{sensor_data}{A data frame with columns t, axis, value.}
 
 \item{window_length}{Length of the filter}
 
@@ -17,5 +17,5 @@ window(sensor_data, window_length, overlap)
 Windowed sensor data
 }
 \description{
-Window the acceleration vector of sensor data by axis
+Window the value vector of sensor data for each axis
 }

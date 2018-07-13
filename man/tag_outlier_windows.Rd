@@ -7,7 +7,7 @@
 tag_outlier_windows(gravity, window_length, overlap)
 }
 \arguments{
-\item{gravity}{A gravity vector}
+\item{gravity}{A dataframe with gravity vectors for columns}
 
 \item{window_length}{Length of the filter.}
 

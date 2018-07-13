@@ -4,10 +4,10 @@
 \alias{getSpectrum}
 \title{Get AR spectrum}
 \usage{
-getSpectrum(accel, sampling_rate = 100, nfreq = 500)
+getSpectrum(values, sampling_rate = 100, nfreq = 500)
 }
 \arguments{
-\item{accel}{A timeseries vector.}
+\item{values}{A timeseries vector.}
 
 \item{sampling_rate}{Sampling rate of the signal (by default it is 100 Hz).}
 
@@ -17,6 +17,6 @@ getSpectrum(accel, sampling_rate = 100, nfreq = 500)
 An AR spectrum.
 }
 \description{
-Given an acceleration vector, this function will return a spectrum
+Given a numeric vector, this function will return a spectrum
 with all pole AR model.
 }

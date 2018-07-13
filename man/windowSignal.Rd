@@ -4,24 +4,24 @@
 \alias{windowSignal}
 \title{Window a signal
  
-Given a acceleration vector this function will return a windowed 
+Given a numeric vector, this function will return a windowed 
 signal with hamming window.}
 \usage{
-windowSignal(accel, window_length = 256, overlap = 0.5)
+windowSignal(values, window_length = 256, overlap = 0.5)
 }
 \arguments{
-\item{accel}{Timeseries vector of length n.}
+\item{values}{Timeseries vector of length n.}
 
 \item{window_length}{Length of the filter.}
 
 \item{overlap}{Window overlap.}
 }
 \value{
-A matrix of window_length x nwindows windowed acceleration matrix.
+A matrix of window_length x nwindows
 }
 \description{
 Window a signal
  
-Given a acceleration vector this function will return a windowed 
+Given a numeric vector, this function will return a windowed 
 signal with hamming window.
 }
