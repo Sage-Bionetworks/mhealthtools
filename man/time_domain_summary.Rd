@@ -4,12 +4,12 @@
 \alias{time_domain_summary}
 \title{Get time domain features}
 \usage{
-time_domain_summary(accel, sampling_rate = NA)
+time_domain_summary(values, sampling_rate = NA)
 }
 \arguments{
-\item{accel}{An acceleration vector.}
+\item{values}{A numeric vector.}
 
-\item{sampling_rate}{Sampling_rate of the acceleration vector.}
+\item{sampling_rate}{Sampling_rate of \code{values}.}
 }
 \value{
 A features data frame of dimension 1 x n_features

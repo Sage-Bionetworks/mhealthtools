@@ -11,7 +11,7 @@ filter_time(sensor_data, t1, t2)
 
 \item{t2}{End time.}
 
-\item{sensor_date}{A data frame with columns t, axis, acceleration.}
+\item{sensor_date}{A data frame with a \code{t} column.}
 }
 \value{
 Sensor data between time t1 and t2 (inclusive)

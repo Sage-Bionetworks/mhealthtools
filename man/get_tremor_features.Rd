@@ -5,8 +5,7 @@
 \title{Extract tremor features from raw accelerometer and gyroscope data.}
 \usage{
 get_tremor_features(accelerometer_data, gyroscope_data, gravity_data = NA,
-  funs = c(time_domain_summary, frequency_domain_summary,
-  frequency_domain_energy), window_length = 256, time_range = c(1, 9),
+  funs = NA, window_length = 256, time_range = c(1, 9),
   frequency_range = c(1, 25), overlap = 0.5)
 }
 \arguments{
@@ -19,8 +18,8 @@ gyroscope measurements.}
 \item{gravity_data}{A data frame with columns t, x, y, z containing 
 gravity sensor measurements.}
 
-\item{funs}{Feature extraction functions that accept a single
-time-series vector as input.}
+\item{funs}{A list of feature extraction functions that accept a single
+numeric vector as input.}
 
 \item{window_length}{Length of sliding windows.}
 

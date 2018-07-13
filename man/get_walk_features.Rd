@@ -5,8 +5,7 @@
 \title{Extract walk features from raw accelerometer and gyroscope data.}
 \usage{
 get_walk_features(accelerometer_data, gyroscope_data, gravity_data = NA,
-  funs = c(time_domain_summary, frequency_domain_summary,
-  frequency_domain_energy), window_length = 256, time_range = c(1, 9),
+  funs = NA, window_length = 256, time_range = c(1, 9),
   frequency_range = c(1, 25), overlap = 0.5)
 }
 \arguments{

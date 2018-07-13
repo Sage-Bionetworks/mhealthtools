@@ -4,15 +4,15 @@
 \alias{detrend}
 \title{Detrend time series data}
 \usage{
-detrend(time, acceleration)
+detrend(time, values)
 }
 \arguments{
 \item{time}{Numeric vector containing the timestamp values.}
 
-\item{acceleration}{Numeric vector containing the acceleration values.}
+\item{values}{Numeric vector the same length as \code{time}.}
 }
 \value{
-Numeric vector with detrended acceleration values.
+Numeric vector with detrended values.
 }
 \description{
 Detrend time series data

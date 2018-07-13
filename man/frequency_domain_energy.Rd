@@ -4,10 +4,10 @@
 \alias{frequency_domain_energy}
 \title{Get frequency domain energy features}
 \usage{
-frequency_domain_energy(accel, sampling_rate = NA)
+frequency_domain_energy(values, sampling_rate = NA)
 }
 \arguments{
-\item{accel}{A timeseries vector.}
+\item{values}{A timeseries vector.}
 
 \item{sampling_rate}{Sampling rate of the signal (by default it is 100 Hz).}
 }
@@ -15,6 +15,6 @@ frequency_domain_energy(accel, sampling_rate = NA)
 A features data frame of dimension 1 x 48.
 }
 \description{
-Given an acceleration vector, this function will return features
-characterising the time series in frequency domain by energy
+Given a numeric vector, this function will return features
+characterising the time series in frequency domain.
 }
