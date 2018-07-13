@@ -75,14 +75,9 @@ kinematic_sensor_features <- function(sensor_data, transform, extract,
 #' @param extract_on A list of column names to calculate statistics from.
 #' @param groups A list of column names to group upon when calculating statistics.
 #' @return Accelerometer features.
-accelerometer_features_ <- function(sensor_data, 
-                                    transform = transform_accelerometer_data,
-                                    extract = c(time_domain_summary, 
-                                                frequency_domain_summary, 
-                                                frequency_domain_energy),
+accelerometer_features_ <- function(sensor_data, transform, extract, groups,
                                     extract_on = c("acceleration", "jerk", 
-                                                   "velocity", "displacement"),
-                                    groups = c("axis", "Window")) {
+                                                   "velocity", "displacement")) {
   kinematic_sensor_features(sensor_data, transform = transform,
                             extract = extract, extract_on = extract_on,
                             groups = groups, acf_col = "acceleration")
@@ -132,6 +127,13 @@ default_kinematic_features <- function(sampling_rate) {
 #' 
 #' @param sensor_data A data frame with columns t, x, y, z containing 
 #' accelerometer measurements.
+#' @param transformation A function which accepts a tidy version of \code{sensor_data},
+#' with columns t, axis, value, as input and outputs a dataframe suitable for 
+#' feature extraction. By default, the tidy sensor data is windowed before feature
+#' extraction. This is a more user-friendly version of the \code{transform} 
+#' parameter required for more generic functions like \code{sensor_features}. Namely,
+#' its input will already be "cleaned" by detrending, bandpassing, etc. See 
+#' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param funs A list of feature extraction functions that each accept
 #' a single numeric vector as input.
 #' @param window_length Length of sliding windows.
@@ -139,9 +141,15 @@ default_kinematic_features <- function(sampling_rate) {
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return Accelerometer features.
-accelerometer_features <- function(sensor_data, funs = NA, window_length = 256, overlap = 0.5,
-                                   time_range = c(1,9), frequency_range=c(1, 25)) {
+accelerometer_features <- function(sensor_data, transformation = NA, funs = NA, 
+                                   groups = c("axis", "Window"), window_length = 256,
+                                   overlap = 0.5, time_range = c(1,9),
+                                   frequency_range=c(1, 25)) {
   sampling_rate <- get_sampling_rate(sensor_data)
+  if(suppressWarnings(is.na(transformation))) {
+    transformation <- transformation_window(window_length = window_length,
+                                            overlap = overlap)
+  }
   if(suppressWarnings(is.na(funs))) {
     funs <- default_kinematic_features(sampling_rate)
   }
@@ -149,14 +157,14 @@ accelerometer_features <- function(sensor_data, funs = NA, window_length = 256, 
     sensor_data = sensor_data,
     transform = purrr::partial(
       transform_accelerometer_data,
-      transform = purrr::partial(window, window_length = window_length,
-                                 overlap = overlap),
+      transformation = transformation,
       window_length = window_length,
       overlap = overlap,
       time_range = time_range,
       frequency_range = frequency_range,
       sampling_rate = sampling_rate),
-    extract = funs)
+    extract = funs,
+    groups = groups)
   return(all_features)
 }
 
@@ -167,6 +175,13 @@ accelerometer_features <- function(sensor_data, funs = NA, window_length = 256, 
 #' 
 #' @param sensor_data A data frame with columns t, x, y, z containing 
 #' gyroscope measurements.
+#' @param transformation A function which accepts a tidy version of \code{sensor_data},
+#' with columns t, axis, value, as input and outputs a dataframe suitable for 
+#' feature extraction. By default, the tidy sensor data is windowed before feature
+#' extraction. This is a more user-friendly version of the \code{transform} 
+#' parameter required for more generic functions like \code{sensor_features}. Namely,
+#' its input will already be "cleaned" by detrending, bandpassing, etc. See 
+#' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param funs A list of feature extraction functions that each accept
 #' a single numeric vector as input.
 #' @param window_length Length of sliding windows.
@@ -174,9 +189,15 @@ accelerometer_features <- function(sensor_data, funs = NA, window_length = 256, 
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return Gyroscope features.
-gyroscope_features <- function(sensor_data, funs = NA, window_length = 256, overlap = 0.5,
-                               time_range = c(1,9), frequency_range=c(1, 25)) {
+gyroscope_features <- function(sensor_data, transformation = NA, funs = NA,
+                               groups = c("axis", "Window"), window_length = 256,
+                               overlap = 0.5, time_range = c(1,9),
+                               frequency_range=c(1, 25)) {
   sampling_rate <- get_sampling_rate(sensor_data)
+  if(suppressWarnings(is.na(transformation))) {
+    transformation <- transformation_window(window_length = window_length,
+                                            overlap = overlap)
+  }
   if(suppressWarnings(is.na(funs))) {
     funs <- default_kinematic_features(sampling_rate)
   }
@@ -184,14 +205,14 @@ gyroscope_features <- function(sensor_data, funs = NA, window_length = 256, over
     sensor_data = sensor_data,
     transform = purrr::partial(
       transform_gyroscope_data,
-      transform = purrr::partial(window, window_length = window_length,
-                                 overlap = overlap),
+      transformation = transformation,
       window_length = window_length,
       overlap = overlap,
       time_range = time_range,
       frequency_range = frequency_range,
       sampling_rate = sampling_rate),
-    extract = funs)
+    extract = funs,
+    groups = groups)
   return(all_features)
 }
 
@@ -202,23 +223,29 @@ gyroscope_features <- function(sensor_data, funs = NA, window_length = 256, over
 #' \code{transform_accelerometer_data} and \code{transform_gyroscope_data}.
 #' 
 #' @param sensor_data A dataframe with columns t, x, y, z.
-#' @param transform A function which accepts a dataframe with columns t, axis, value
-#' as input and outputs a dataframe.
+#' @param transformation A function which accepts a tidy version of \code{sensor_data},
+#' with columns t, axis, value, as input and outputs a dataframe suitable for 
+#' feature extraction. By default, the tidy sensor data is windowed before feature
+#' extraction. This is a more user-friendly version of the \code{transform} 
+#' parameter required for more generic functions like \code{sensor_features}. Namely,
+#' its input will already be "cleaned" by detrending, bandpassing, etc. See 
+#' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param window_length Length of sliding windows.
 #' @param overlap Window overlap.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @param sampling_rate Sampling rate of the acceleration vector.
 #' @return A dataframe.
-transform_kinematic_sensor_data <- function(sensor_data, transform, window_length, overlap,
+transform_kinematic_sensor_data <- function(sensor_data, transformation, 
+                                            window_length, overlap,
                                             time_range, frequency_range, sampling_rate) {
-  if (suppressWarnings(is.na(transform))) transform <- function(x) x
+  if (suppressWarnings(is.na(transformation))) transformation <- function(x) x
   preprocessed_sensor_data <- preprocess_sensor_data(sensor_data = sensor_data,
-                                                    window_length = window_length,
-                                                    sampling_rate = sampling_rate,
-                                                    frequency_range = frequency_range, 
-                                                    time_range = time_range)
-  transformed_sensor_data <- transform(preprocessed_sensor_data)
+                                                     window_length = window_length,
+                                                     sampling_rate = sampling_rate,
+                                                     frequency_range = frequency_range, 
+                                                     time_range = time_range)
+  transformed_sensor_data <- transformation(preprocessed_sensor_data)
   return(transformed_sensor_data)
 }
 
@@ -244,11 +271,49 @@ preprocess_sensor_data <- function(sensor_data, window_length,
   return(preprocessed_sensor_data)
 }
 
+transformation_window <- function(window_length, overlap) {
+  purrr::partial(window, window_length = window_length, overlap = overlap)
+}
+
+transformation_imf_window <- function(window_length, overlap, max_imf) {
+  purrr::partial(
+    function(sensor_data, window_length, overlap, max_imf) {
+      values <- sensor_data %>% 
+        tidyr::spread(key = "axis", value = "value")
+      imf <- purrr::map2(values %>% dplyr::select(t), values %>% dplyr::select(-t),
+                         function(t, v) {
+                           dplyr::as_tibble(
+                             EMD::emd(v, t, max.imf = max_imf)$imf) %>% 
+                             setNames(1:max_imf)
+                         })
+      names(imf) <- names(values %>% dplyr::select(-t))
+      windowed_imf <- purrr::map_dfr(
+        imf, function(df) {
+          windowed_imf <- purrr::map_dfr(
+            df, function(col) {
+              windowSignal(col, window_length = window_length,
+                           overlap = overlap) %>% 
+                dplyr::as_tibble() %>% 
+                tidyr::gather(key="Window", value="value")
+            }, .id = "IMF")
+        }, .id = "axis")
+      return(windowed_imf)
+    },
+    window_length = window_length,
+    overlap = overlap,
+    max_imf = max_imf)
+}
+
 #' Prepare accelerometer sensor data for feature extraction
 #' 
 #' @param sensor_data A dataframe with columns t, x, y, z.
-#' @param transform A function which accepts a dataframe with columns t, axis, value
-#' as input and outputs a dataframe.
+#' @param transformation A function which accepts a tidy version of \code{sensor_data},
+#' with columns t, axis, value, as input and outputs a dataframe suitable for 
+#' feature extraction. By default, the tidy sensor data is windowed before feature
+#' extraction. This is a more user-friendly version of the \code{transform} 
+#' parameter required for more generic functions like \code{sensor_features}. Namely,
+#' its input will already be "cleaned" by detrending, bandpassing, etc. See 
+#' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param window_length Length of sliding windows.
 #' @param overlap Window overlap.
 #' @param time_range Timestamp range to use.
@@ -256,11 +321,12 @@ preprocess_sensor_data <- function(sensor_data, window_length,
 #' @param sampling_rate Sampling rate of the acceleration vector.
 #' @param groups A list of column names to group upon when calculating statistics
 #' @return A dataframe
-transform_accelerometer_data <- function(sensor_data, transform = NA, window_length = 256, 
-                                         overlap = 0.5, time_range = c(1,9), 
-                                         frequency_range=c(1, 25), sampling_rate = 100,
+transform_accelerometer_data <- function(sensor_data, transformation = NA,
+                                         window_length = 256, overlap = 0.5,
+                                         time_range = c(1,9), frequency_range=c(1, 25),
+                                         sampling_rate = 100, 
                                          groups = c("axis", "Window")) {
-  transform_kinematic_sensor_data(sensor_data, transform = transform, 
+  transform_kinematic_sensor_data(sensor_data, transformation = transformation, 
                                   window_length = window_length,
                                   overlap = overlap, time_range = time_range, 
                                   frequency_range = frequency_range,
@@ -277,8 +343,13 @@ transform_accelerometer_data <- function(sensor_data, transform = NA, window_len
 #' Prepare gyroscope sensor data for feature extraction
 #' 
 #' @param sensor_data A dataframe with columns t, x, y, z.
-#' @param transform A function which accepts a dataframe with columns t, axis, value
-#' as input and outputs a dataframe.
+#' @param transformation A function which accepts a tidy version of \code{sensor_data},
+#' with columns t, axis, value, as input and outputs a dataframe suitable for 
+#' feature extraction. By default, the tidy sensor data is windowed before feature
+#' extraction. This is a more user-friendly version of the \code{transform} 
+#' parameter required for more generic functions like \code{sensor_features}. Namely,
+#' its input will already be "cleaned" by detrending, bandpassing, etc. See 
+#' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param window_length Length of sliding windows.
 #' @param overlap Window overlap.
 #' @param time_range Timestamp range to use.
@@ -286,11 +357,11 @@ transform_accelerometer_data <- function(sensor_data, transform = NA, window_len
 #' @param sampling_rate Sampling rate of the acceleration vector.
 #' @param groups A list of column names to group upon when calculating statistics
 #' @return A dataframe
-transform_gyroscope_data <- function(sensor_data, transform = NA, window_length = 256,
+transform_gyroscope_data <- function(sensor_data, transformation = NA, window_length = 256,
                                      overlap = 0.5, time_range = c(1,9),
                                      frequency_range=c(1, 25), sampling_rate = 100,
                                      groups = c("axis", "Window")) {
-  transform_kinematic_sensor_data(sensor_data, transform = transform, 
+  transform_kinematic_sensor_data(sensor_data, transformation = transformation, 
                                   window_length = window_length,
                                   overlap = overlap, time_range = time_range, 
                                   frequency_range = frequency_range,
