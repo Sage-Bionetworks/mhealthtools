@@ -143,9 +143,6 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @return Windowed sensor data
 window <- function(sensor_data, window_length, overlap) {
   if (has_error(sensor_data)) return(sensor_data)
-  if (!all(hasName(sensor_data, c("t", "axis", "acceleration")))) {
-    stop("Sensor data is missing necessary columns.")
-  }
   tryCatch({
     windowed_sensor_data <- sensor_data %>%
       tidyr::spread(axis, value) %>% 
