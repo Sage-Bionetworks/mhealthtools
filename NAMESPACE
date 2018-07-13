@@ -2,6 +2,7 @@
 
 export(get_heartrate)
 export(get_kinetic_tremor_features)
+export(get_rest_features)
 export(get_tremor_features)
 export(get_walk_features)
 importFrom(magrittr,"%>%")
