@@ -129,10 +129,6 @@ filter_time <- function(sensor_data, t1, t2) {
   })
 }
 
-mutate_emd <- function(sensor_data, max.imf=4) {
-  imf <- EMD::emd(sensor_data$value, sensor_data$t)
-}
-
 #' Window the value vector of sensor data for each axis
 #' 
 #' @param sensor_data A data frame with columns t, axis, value.
@@ -367,7 +363,7 @@ calculate_acf <- function(sensor_data, col, groups) {
         dplyr::bind_cols(acf = acf_col, index = index_col)
       })) %>%
       tidyr::unnest(data) %>% 
-      dplyr::select(axis, Window, index, acf)
+      dplyr::select_at(.vars = c(groups, "acf"))
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Error calculating ACF")
   })
@@ -407,9 +403,9 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
     dplyr::bind_rows(.id = 'axis') %>%
     dplyr::mutate(error = sign(max) != sign(min)) %>% 
     dplyr::group_by(Window) %>% 
-    dplyr::summarise(error = any(error, na.rm = T))
+    dplyr::summarise(error = any(error, na.rm = T)) %>% 
+    dplyr::mutate(Window = as.integer(Window))
   gr_error$error[gr_error$error == TRUE] = 'Phone rotated within window'
-  gr_error$error[gr_error$error == FALSE] = 'None'
   return(gr_error)
   }, error = function(e) {
     dplyr::tibble(Window = "NA", error = "Error tagging outlier windows")
