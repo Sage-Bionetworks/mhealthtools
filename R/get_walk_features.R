@@ -12,6 +12,8 @@
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @param overlap Window overlap.
+#' @param max_imf Number of intrinsic mode functions to use for 
+#' empirical mode decomposition.
 #' @return Walk features indexed by axis and window.
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
@@ -19,7 +21,7 @@
 get_walk_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NA,
   funs = NA, window_length = 256, time_range = c(1,9),
-  frequency_range = c(1, 25), overlap = 0.5) {
+  frequency_range = c(1, 25), overlap = 0.5, max_imf = 4) {
   features = dplyr::tibble(Window = NA, error = NA)
   # check input integrity
   if (any(is.na(accelerometer_data))) {
@@ -33,10 +35,11 @@ get_walk_features <- function(
   # Get accelerometer features
   features_accel <- accelerometer_features(
     sensor_data = accelerometer_data, 
-    transformation = transformation_window(window_length = window_length,
-                                           overlap = overlap),
+    transformation = transformation_imf_window(window_length = window_length,
+                                               overlap = overlap,
+                                               max_imf = max_imf),
     funs = funs,
-    groups = c("axis", "Window"),
+    groups = c("axis", "IMF", "Window"),
     window_length = window_length,
     overlap = overlap,
     time_range = time_range,
@@ -45,10 +48,11 @@ get_walk_features <- function(
   # Get gyroscope features
   features_gyro <- gyroscope_features(
     sensor_data = gyroscope_data,
-    transformation = transformation_window(window_length = window_length,
-                                           overlap = overlap),
+    transformation = transformation_imf_window(window_length = window_length,
+                                               overlap = overlap,
+                                               max_imf = max_imf),
     funs = funs,
-    groups = c("axis", "Window"),
+    groups = c("axis", "IMF", "Window"),
     window_length = window_length,
     overlap = overlap,
     time_range = time_range,
