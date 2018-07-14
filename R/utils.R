@@ -230,6 +230,9 @@ window <- function(sensor_data, window_length, overlap) {
       dplyr::select(x, y, z) %>%
       purrr::map(windowSignal, 
                  window_length = window_length, overlap = overlap)
+    start_end_times <- window_start_end_times(spread_sensor_data$t,
+                                              window_length = window_length,
+                                              overlap = overlap)
     tidy_windowed_sensor_data <- lapply(
       windowed_sensor_data,
       function(windowed_matrix) {
