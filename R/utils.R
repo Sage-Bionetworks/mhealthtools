@@ -719,5 +719,5 @@ extract_features <- function(x, col, groups, funs) {
       f = .)) %>%
     purrr::reduce(dplyr::left_join, by = groups) %>%
     dplyr::mutate(measurementType = col) %>%
-    dplyr::select(measurementType, axis, Window, dplyr::everything())
+    dplyr::select(measurementType, dplyr::one_of(groups), dplyr::everything())
 }
