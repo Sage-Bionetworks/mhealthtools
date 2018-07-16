@@ -115,7 +115,7 @@ gyroscope_features_ <- function(sensor_data,
     extract_on = extract_on, groups = groups, acf_col = "velocity")
 }
 
-default_kinematic_features <- function(sampling_rate, npeaks) {
+default_kinematic_features <- function(sampling_rate) {
   funs <- list(
     time_domain_summary = purrr::partial(time_domain_summary,
                                          sampling_rate = sampling_rate),
