@@ -221,7 +221,7 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @param include_timestamp Whether to include columns for starting and ending
 #' timestamps for each row.
 #' @return Windowed sensor data
-window <- function(sensor_data, window_length, overlap) {
+window <- function(sensor_data, window_length, overlap, include_timestamp = F) {
   if (has_error(sensor_data)) return(sensor_data)
   tryCatch({
     spread_sensor_data <- sensor_data %>%
@@ -230,9 +230,6 @@ window <- function(sensor_data, window_length, overlap) {
       dplyr::select(x, y, z) %>%
       purrr::map(windowSignal, 
                  window_length = window_length, overlap = overlap)
-    start_end_times <- window_start_end_times(spread_sensor_data$t,
-                                              window_length = window_length,
-                                              overlap = overlap)
     tidy_windowed_sensor_data <- lapply(
       windowed_sensor_data,
       function(windowed_matrix) {
