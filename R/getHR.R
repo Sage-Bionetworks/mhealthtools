@@ -4,7 +4,6 @@
 #'
 #' @params A dataframe(dat) with columns timestamp, red, green and blue
 #' @return list containing hr and confidence of the estimate for each color (red, green, blue)
-#' @export
 #' @examples
 #' @author Meghasyam Tummalacherla 
 
