@@ -1,7 +1,7 @@
 Package: mhealthtools
 Type: Package
 Title: mhealthtools - Package for processing mobile sensor data and to extract meaningful features
-Version: 0.1.0
+Version: 0.1.1
 Description: mHealthTools package processes data from various mobile sensors such as accelerometer, gyroscope,
     pedometer, screen touches, and microphones. Though this package is specifically designed around mHealth 
     applications developed by Sage Bionetwokrs, it works in general with any mobile sensors, provided the data 
@@ -30,11 +30,9 @@ Imports:
     e1071,
     pracma,
     rlang,
-    tibble
-Remotes: 
-    svn::http://R-Forge.R-project.org/statcomp
-URL: 
-    https://github.com/Sage-Bionetworks/mHealthTools
+    tibble,
+    statcomp
+URL: https://github.com/Sage-Bionetworks/mHealthTools
 RoxygenNote: 6.0.1
 Suggests:
     testthat,
