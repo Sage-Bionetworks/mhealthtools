@@ -27,6 +27,142 @@ sensor_features <- function(sensor_data, transform, extract, extract_on, groups)
   return(features)
 }
 
+###################################################
+# Tapping code starts
+###################################################
+#' Extract tapping (screen sensor) features
+#' 
+#' @param tap_data A dataframe.
+#' @param depressThr A numerical threshold for intertap distance in x axis
+#' @return A dataframe of features.
+tapping_features <- function(tap_data, depressThr = 20) {
+  
+  results <- GetLeftRightEventsAndTapIntervals(tap_data, depressThr)
+  tapInter <- results$tapInter
+  tapData <- results$tapData
+  error <- results$error
+  
+  # check error - if after cleaning tapping data less than 5 data points remain
+  if (error == TRUE) {
+    tapFeatures <- createTappingFeaturesErrorResult("post cleaning less than 5 tap points remain")
+    return(tapFeatures)
+  }
+  
+  meanX <- mean(tapData$x)
+  iL <- tapData$x < meanX
+  iR <- tapData$x >= meanX
+  driftLeft <- calculateDrift(tapData[iL,"x"], tapData[iL, "x"])
+  driftRight <- calculateDrift(tapData[iR,"x"], tapData[iR, "y"])
+  
+  # determine Autocorrelation
+  auxAcf <- try(acf(tapInter, lag.max = 2,
+                    plot = FALSE)$acf, silent = TRUE)
+  if (inherits(auxAcf, "try-error")) {
+    auxAcf <- list(NA, NA, NA)
+  }
+  auxFatigue <- Fatigue(tapInter)
+  
+  # compute other features and organize all features into a dataframe
+  tapFeatures <- data.frame(meanTapInter = mean(tapInter,na.rm = TRUE),
+             medianTapInter = median(tapInter, na.rm = TRUE),
+             iqrTapInter = IQR(tapInter, type = 7, na.rm = TRUE),
+             minTapInter = min(tapInter,na.rm = TRUE),
+             maxTapInter = max(tapInter, na.rm = TRUE),
+             skewTapInter = e1071::skewness(tapInter),
+             kurTapInter = e1071::kurtosis(tapInter),
+             sdTapInter = sd(tapInter,na.rm = TRUE),
+             madTapInter = mad(tapInter, na.rm = TRUE),
+             cvTapInter = Cv(tapInter),
+             rangeTapInter = diff(range(tapInter,na.rm = TRUE)),
+             tkeoTapInter = MeanTkeo(tapInter),
+             ar1TapInter = auxAcf[[2]], ar2TapInter = auxAcf[[3]],
+             fatigue10TapInter = auxFatigue[[1]],
+             fatigue25TapInter = auxFatigue[[2]],
+             fatigue50TapInter = auxFatigue[[3]],
+             meanDriftLeft = mean(driftLeft, na.rm = TRUE),
+             medianDriftLeft = median(driftLeft, na.rm = TRUE),
+             iqrDriftLeft = IQR(driftLeft, type = 7, na.rm = TRUE),
+             minDriftLeft = min(driftLeft, na.rm = TRUE),
+             maxDriftLeft = max(driftLeft, na.rm = TRUE),
+             skewDriftLeft = e1071::skewness(driftLeft),
+             kurDriftLeft = e1071::kurtosis(driftLeft),
+             sdDriftLeft = sd(driftLeft, na.rm = TRUE),
+             madDriftLeft = mad(driftLeft, na.rm = TRUE),
+             cvDriftLeft = Cv(driftLeft), 
+             rangeDriftLeft = diff(range(driftLeft, na.rm = TRUE)), 
+             meanDriftRight = mean(driftRight,na.rm = TRUE), 
+             medianDriftRight = median(driftRight, na.rm = TRUE),
+             iqrDriftRight = IQR(driftRight, type = 7, na.rm = TRUE),
+             minDriftRight = min(driftRight, na.rm = TRUE),
+             maxDriftRight = max(driftRight, na.rm = TRUE),
+             skewDriftRight = e1071::skewness(driftRight),
+             kurDriftRight = e1071::kurtosis(driftRight),
+             sdDriftRight = sd(driftRight, na.rm = TRUE),
+             madDriftRight = mad(driftRight, na.rm = TRUE),
+             cvDriftRight = Cv(driftRight),
+             rangeDriftRight = diff(range(driftRight, na.rm = TRUE)),
+             numberTaps = nrow(tapData),
+             buttonNoneFreq = sum(tapData$buttonid == "TappedButtonNone")/nrow(tapData),
+             corXY = cor(tapData$X, tapData$Y, use = "p"),
+             error = "None")
+  
+  return(tapFeatures)
+}
+
+#' Curate the raw tapping data to get Left and Right events, after applying the threshold
+#' 
+#' @param error_message A text error message which would be reflected in the feature output
+#' @return A dataframe with NAs as feature values and the appropriate error message
+GetLeftRightEventsAndTapIntervals <- function(tapData, depressThr = 20) {
+  tapTime <- tapData$t - tapData$t[1]
+  ## calculate X offset
+  tapX <- tapData$x - mean(tapData$x)
+  ## find left/right finger 'depress' event
+  dX <- diff(tapX)
+  i <- c(1, which(abs(dX) > depressThr) + 1)
+  ## filter data
+  tapData <- tapData[i, ]
+  tapTime <- tapTime[i]
+  ## find depress event intervals
+  tapInter <- diff(tapTime)
+  
+  ### ERROR CHECK -
+  if (nrow(tapData) >= 5) {
+    return(list(tapData = tapData, tapInter = tapInter,
+                error = "None"))
+  } else {
+    return(list(tapData = NA, tapInter = NA, error = TRUE))
+  }
+}
+
+#' Create a tapping feature data frame NAs as features and an appropriate error message given as input
+#' 
+#' @param error_message A text error message which would be reflected in the feature output
+#' @return A dataframe with NAs as feature values and the appropriate error message
+createTappingFeaturesErrorResult <- function(error_message, featNames=c("meanTapInter", "medianTapInter",
+                                                                        "iqrTapInter", "minTapInter", "maxTapInter",
+                                                                        "skewTapInter", "kurTapInter", "sdTapInter",
+                                                                        "madTapInter", "cvTapInter", "rangeTapInter",
+                                                                        "tkeoTapInter", "ar1TapInter", "ar2TapInter",
+                                                                        "fatigue10TapInter", "fatigue25TapInter",
+                                                                        "fatigue50TapInter", "meanDriftLeft",
+                                                                        "medianDriftLeft", "iqrDriftLeft", "minDriftLeft",
+                                                                        "maxDriftLeft", "skewDriftLeft", "kurDriftLeft",
+                                                                        "sdDriftLeft", "madDriftLeft", "cvDriftLeft",
+                                                                        "rangeDriftLeft", "meanDriftRight",
+                                                                        "medianDriftRight", "iqrDriftRight",
+                                                                        "minDriftRight", "maxDriftRight", "skewDriftRight",
+                                                                        "kurDriftRight", "sdDriftRight", "madDriftRight",
+                                                                        "cvDriftRight", "rangeDriftRight", "numberTaps",
+                                                                        "buttonNoneFreq", "corXY")) {
+  df <- data.frame(t(c(rep(NA, length(featNames)), error_message))) %>% 
+    `colnames<-`(c(featNames,'error'))
+  return(df)
+}
+###################################################
+# Tapping code ends
+###################################################
+
 #' Extract kinematic sensor features
 #' 
 #' Extract kinematic (accelerometer/gyroscope) features. This function is not 

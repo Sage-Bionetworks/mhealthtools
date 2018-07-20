@@ -1,3 +1,55 @@
+#' Calculate the fatigue given a vector x
+#' 
+#' @param x A numeric vector containing inter tap intevals
+#' @return A list containing fatigue10, fatigue25, fatigue50 where 
+#' fatigueX is the difference in the mean values of the
+#' first X percent of input x and last X percent of input x
+Fatigue <- function(x) {
+  x <- x[!is.na(x)]
+  n <- length(x)
+  top10 <- round(0.1 * n)
+  top25 <- round(0.25 * n)
+  top50 <- floor(0.5 * n)
+  return(list(fatigue10 = mean(x[1:top10]) - mean(x[(n -top10):n]),
+              fatigue25 = mean(x[1:top25]) - mean(x[(n - top25):n]),
+              fatigue50 = mean(x[1:top50]) - mean(x[(n - top50):n])))
+}
+
+
+#' Calculate the drift given x and y
+#' 
+#' @param x A vecor containing x co-ordinates (same length as that of y)
+#' @param y A vecor containing y co-ordinates (same length as that of x)
+#' @return Drift vector which is sqrt(dx^2 + dy^2)
+calculateDrift <- function(x, y) {
+  dx <- diff(x, lag = 1)
+  dy <- diff(y, lag = 1)
+  return(sqrt(dx^2 + dy^2))
+}
+
+
+#' Calculate the Mean Teager-Kaiser energy, adapted from TKEO function in library(seewave) using f = 1, m = 1, M = 1
+#' 
+#' @param x A vector x whose Mean Taiger-Kaiser Energy Operator value needs to be calculated
+#' @return A numeric value that is representative of the MeanTKEO
+MeanTkeo <- function(x) {
+  x <- x[!is.na(x)] # Remove NAs
+  y <- x^2 - c(x[-1], NA) * c(NA, x[1:(length(x) -
+                                         1)])
+  return(mean(y, na.rm = TRUE))
+}
+
+
+#' Calculate the Coefficient of Variation (Cv) for a given sequence
+#' 
+#' @param x A numeric vector x whose Coefficient of Variation needs to be calculated
+#' @return A numeric value that is representative of the Coefficient of Variation
+Cv <- function(x) {
+  x <- x[!is.na(x)] # Remove NAs
+  return((sd(x)/mean(x)) * 100)
+}
+
+
 #' Calculate the sampling rate.
 #' 
 #' @param sensor_data A data frame with columns t, x, y, z.
