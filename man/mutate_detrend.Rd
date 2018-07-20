@@ -2,16 +2,16 @@
 % Please edit documentation in R/utils.R
 \name{mutate_detrend}
 \alias{mutate_detrend}
-\title{Detrend acceleration within sensor data}
+\title{Detrend sensor data}
 \usage{
 mutate_detrend(sensor_data)
 }
 \arguments{
-\item{sensor_data}{A data frame with columns t, axis, acceleration.}
+\item{sensor_data}{A data frame with columns t, axis, value.}
 }
 \value{
-Sensor data with detrended acceleration values.
+Sensor data with detrended values.
 }
 \description{
-Detrend acceleration within sensor data
+Detrend sensor data
 }

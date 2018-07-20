@@ -4,12 +4,12 @@
 \alias{frequency_domain_summary}
 \title{Get frequency domain features}
 \usage{
-frequency_domain_summary(accel, sampling_rate = NA, npeaks = NA)
+frequency_domain_summary(values, sampling_rate = NA, npeaks = NA)
 }
 \arguments{
-\item{accel}{An acceleration vector.}
+\item{values}{A numeric vector.}
 
-\item{sampling_rate}{Sampling_rate of the acceleration vector.}
+\item{sampling_rate}{Sampling_rate of \code{values}.}
 
 \item{npeaks}{Number of peaks to be computed in EWT}
 }
