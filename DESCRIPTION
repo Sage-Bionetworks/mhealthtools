@@ -32,6 +32,7 @@ Imports:
     rlang,
     tibble,
     statcomp
+Remotes: svn::http://R-Forge.R-project.org/statcomp
 URL: https://github.com/Sage-Bionetworks/mHealthTools
 RoxygenNote: 6.0.1
 Suggests:
