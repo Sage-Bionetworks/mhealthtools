@@ -81,7 +81,7 @@ tidy_sensor_data <- function(sensor_data) {
     normalized_sensor_data <-  sensor_data %>% dplyr::mutate(t = t - t0)
     index = order(sensor_data$t)
     tidy_sensor_data = normalized_sensor_data[index,] %>%
-                    tidyr::gather(axis, value, -t)
+      tidyr::gather(axis, value, -t)
   }, error = function(e) {
     dplyr::tibble(
       Window = NA,
@@ -108,10 +108,10 @@ mutate_detrend <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
   detrended_sensor_data <- tryCatch({
     detrended_sensor_data <- sensor_data %>%
-                             dplyr::group_by(axis) %>%
-                             dplyr::mutate(
-                               value = detrend(t, value)) %>% 
-                             dplyr::ungroup()
+      dplyr::group_by(axis) %>%
+      dplyr::mutate(
+        value = detrend(t, value)) %>% 
+      dplyr::ungroup()
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Detrend error")
   })
@@ -160,7 +160,7 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
       dplyr::group_by(axis) %>%
       dplyr::mutate(
         value = bandpass(value, window_length, sampling_rate,
-                                frequency_range)) %>% 
+                         frequency_range)) %>% 
       dplyr::ungroup()
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Bandpass filter error")
@@ -289,9 +289,9 @@ mutate_jerk <- function(sensor_data, sampling_rate) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_jerk <- tryCatch({
     sensor_data %>%
-    dplyr::group_by(axis, Window) %>% 
-    dplyr::mutate(jerk = jerk(acceleration, sampling_rate)) %>%
-    dplyr::ungroup()
+      dplyr::group_by(axis, Window) %>% 
+      dplyr::mutate(jerk = jerk(acceleration, sampling_rate)) %>%
+      dplyr::ungroup()
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Error calculating jerk")
   })
@@ -317,9 +317,9 @@ mutate_velocity <- function(sensor_data, sampling_rate) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_velocity <- tryCatch({
     sensor_data %>% 
-    dplyr::group_by(axis, Window) %>%
-    dplyr::mutate(velocity = velocity(acceleration, sampling_rate)) %>% 
-    dplyr::ungroup()
+      dplyr::group_by(axis, Window) %>%
+      dplyr::mutate(velocity = velocity(acceleration, sampling_rate)) %>% 
+      dplyr::ungroup()
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Error calculating velocity")
   })
@@ -346,9 +346,9 @@ mutate_displacement <- function(sensor_data, sampling_rate) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_displacement <- tryCatch({
     sensor_data %>%
-    dplyr::group_by(axis, Window) %>%
-    dplyr::mutate(displacement = displacement(acceleration, sampling_rate)) %>% 
-    dplyr::ungroup()
+      dplyr::group_by(axis, Window) %>%
+      dplyr::mutate(displacement = displacement(acceleration, sampling_rate)) %>% 
+      dplyr::ungroup()
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Error calculating displacement")
   })
@@ -369,9 +369,9 @@ mutate_derivative <- function(sensor_data, sampling_rate, groups, col, derived_c
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_derivative <- tryCatch({
     sensor_data %>%
-    dplyr::group_by_at(.vars = groups) %>% 
-    dplyr::mutate(!!derived_col := derivative(!!dplyr::sym(col)) * sampling_rate) %>%
-    dplyr::ungroup()
+      dplyr::group_by_at(.vars = groups) %>% 
+      dplyr::mutate(!!derived_col := derivative(!!dplyr::sym(col)) * sampling_rate) %>%
+      dplyr::ungroup()
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = paste("Error calculating", derived_col))
   })
@@ -392,9 +392,9 @@ mutate_integral <- function(sensor_data, sampling_rate, groups, col, derived_col
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_integral <- tryCatch({
     sensor_data %>% 
-    dplyr::group_by_at(.vars = groups) %>%
-    dplyr::mutate(!!derived_col := integral(!!dplyr::sym(col)) * sampling_rate) %>% 
-    dplyr::ungroup()
+      dplyr::group_by_at(.vars = groups) %>%
+      dplyr::mutate(!!derived_col := integral(!!dplyr::sym(col)) * sampling_rate) %>% 
+      dplyr::ungroup()
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = paste("Error calculating", derived_col))
   })
@@ -458,15 +458,15 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
 tag_outlier_windows <- function(gravity, window_length, overlap) {
   gr_error <- tryCatch({
     gr_error <- gravity %>% 
-    purrr::map(tag_outlier_windows_, window_length, overlap) %>%
-    dplyr::bind_rows(.id = 'axis') %>%
-    dplyr::mutate(error = sign(max) != sign(min)) %>% 
-    dplyr::group_by(Window) %>% 
-    dplyr::summarise(error = any(error, na.rm = T)) %>% 
-    dplyr::mutate(Window = as.integer(Window))
-  gr_error$error[gr_error$error == TRUE] = 'Phone rotated within window'
-  gr_error$error[gr_error$error == FALSE] = 'None'
-  return(gr_error)
+      purrr::map(tag_outlier_windows_, window_length, overlap) %>%
+      dplyr::bind_rows(.id = 'axis') %>%
+      dplyr::mutate(error = sign(max) != sign(min)) %>% 
+      dplyr::group_by(Window) %>% 
+      dplyr::summarise(error = any(error, na.rm = T)) %>% 
+      dplyr::mutate(Window = as.integer(Window))
+    gr_error$error[gr_error$error == TRUE] = 'Phone rotated within window'
+    gr_error$error[gr_error$error == FALSE] = 'None'
+    return(gr_error)
   }, error = function(e) {
     dplyr::tibble(Window = "NA", error = "Error tagging outlier windows")
   })
@@ -527,7 +527,7 @@ frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
     warning("Using default sampling rate of 100 for time_domain_summary")
     sampling_rate = 100
   }
-
+  
   if(is.na(npeaks)) {
     warning("Using default npeaks of 3 for frequency_domain_summary")
     npeaks = 3
