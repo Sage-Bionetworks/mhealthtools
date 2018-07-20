@@ -4,12 +4,12 @@
 \alias{map_groups}
 \title{Map a function to a single column within tibble groups}
 \usage{
-map_groups(x, groups, col, f, ...)
+map_groups(x, col, groups, f, ...)
 }
 \arguments{
-\item{groups}{A character vector specifying which columns to group on.}
-
 \item{col}{Column to pass as a vector to \code{.f}.}
+
+\item{groups}{A character vector specifying which columns to group on.}
 
 \item{...}{Additional arguments to \code{.f}.}
 
