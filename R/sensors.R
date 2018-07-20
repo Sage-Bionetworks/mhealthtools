@@ -142,6 +142,7 @@ default_kinematic_features <- function(sampling_rate, npeaks) {
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return Accelerometer features.
+#' @export
 accelerometer_features <- function(sensor_data, transformation = NA, funs = NA, 
                                    groups = c("axis", "Window"), window_length = 256,
                                    overlap = 0.5, time_range = c(1,9),
@@ -190,6 +191,7 @@ accelerometer_features <- function(sensor_data, transformation = NA, funs = NA,
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return Gyroscope features.
+#' @export
 gyroscope_features <- function(sensor_data, transformation = NA, funs = NA,
                                groups = c("axis", "Window"), window_length = 256,
                                overlap = 0.5, time_range = c(1,9),

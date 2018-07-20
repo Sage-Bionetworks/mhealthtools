@@ -5,7 +5,6 @@
 #' @param tremorJsonFileLoc path to tremor accelerometer json file
 #' @return data frame of tremor features
 #' @export
-#' @examples
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder 
 get_kinetic_tremor_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NA,
@@ -69,5 +68,5 @@ get_kinetic_tremor_features <- function(
   }
   
   return(features)
-
+  
 }  

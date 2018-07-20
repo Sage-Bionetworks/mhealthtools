@@ -18,16 +18,16 @@ get_heartrate <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 1
   #############################################################
   # Main Code Block
   #############################################################
-
+  
   dat1 = data.frame(red = NA, green = NA, blue = NA, error = NA, samplingRate = NA)
-
+  
   # Get sampling rate
   samplingRate = tryCatch({ length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1]) }, 
                           error = function(e){ NA })
   if(!is.finite(samplingRate)){dat1$error = 'Sampling Rate calculated from timestamp is Inf or NaN / timestamp not found in json'; return(dat1) }
   
   if(samplingRate < 55){if(samplingRate > 22){bpforder = 64}else{bpforder = 32}}
-
+  
   # Convert window length from seconds to samples
   windowLen = round(samplingRate*windowLen)
   
@@ -36,8 +36,8 @@ get_heartrate <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 1
   
   # Split each color into segments based on windowLen
   dat = tryCatch({ dat %>% dplyr::select(red, green, blue) %>% na.omit() %>% 
-                  lapply(mhealthtools:::windowSignal, windowLen, 0.5) }, 
-                 error = function(e){ NA })
+      lapply(mhealthtools:::windowSignal, windowLen, 0.5) }, 
+      error = function(e){ NA })
   if(all(is.na(dat))){dat1$error = 'red, green, blue cannot be read from JSON'; return(dat1) }
   
   # Apply filter to each segment of each color

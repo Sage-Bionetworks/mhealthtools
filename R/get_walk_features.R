@@ -63,7 +63,7 @@ get_walk_features <- function(
     return(list(accelerometer = features_accel, gyroscope = features_gyro) %>%
              data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor'))
   }
-
+  
   # Combine all features
   features <- list(accelerometer = features_accel, gyroscope = features_gyro) %>%
     data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>% 
