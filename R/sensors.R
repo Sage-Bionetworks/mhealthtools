@@ -103,7 +103,7 @@ tapping_features <- function(tap_data, depressThr = 20) {
              rangeDriftRight = diff(range(driftRight, na.rm = TRUE)),
              numberTaps = nrow(tapData),
              buttonNoneFreq = sum(tapData$buttonid == "TappedButtonNone")/nrow(tapData),
-             corXY = cor(tapData$X, tapData$Y, use = "p"),
+             corXY = cor(tapData$x, tapData$y, use = "p"),
              error = "None")
   
   return(tapFeatures)
