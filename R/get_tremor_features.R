@@ -6,8 +6,8 @@
 #' gyroscope measurements.
 #' @param gravity_data A data frame with columns t, x, y, z containing 
 #' gravity sensor measurements.
-#' @param funs Feature extraction functions that accept a single
-#' time-series vector as input.
+#' @param funs A list of feature extraction functions that accept a single
+#' numeric vector as input.
 #' @param window_length Length of sliding windows.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
@@ -18,8 +18,7 @@
 #' @importFrom magrittr "%>%"
 get_tremor_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NA,
-  funs = c(time_domain_summary, frequency_domain_summary, frequency_domain_energy),
-  window_length = 256, time_range = c(1,9), 
+  funs = NA, window_length = 256, time_range = c(1,9),
   frequency_range = c(1, 25), overlap = 0.5) {
   features = dplyr::tibble(Window = NA, error = NA)
   # check input integrity
@@ -34,7 +33,10 @@ get_tremor_features <- function(
   # Get accelerometer features
   features_accel <- accelerometer_features(
     sensor_data = accelerometer_data, 
+    transformation = transformation_window(window_length = window_length,
+                                           overlap = overlap),
     funs = funs,
+    groups = c("axis", "Window"),
     window_length = window_length,
     overlap = overlap,
     time_range = time_range,
@@ -43,7 +45,10 @@ get_tremor_features <- function(
   # Get gyroscope features
   features_gyro <- gyroscope_features(
     sensor_data = gyroscope_data,
+    transformation = transformation_window(window_length = window_length,
+                                           overlap = overlap),
     funs = funs,
+    groups = c("axis", "Window"),
     window_length = window_length,
     overlap = overlap,
     time_range = time_range,
@@ -55,20 +60,17 @@ get_tremor_features <- function(
              data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor'))
   }
   
-  # tag outlier windows
-  gr_error <- tag_outlier_windows(gravity_data, window_length, overlap)
-  
   # Combine all features
   features <- list(accelerometer = features_accel, gyroscope = features_gyro) %>%
-    data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>%
-    dplyr::mutate(window = as.character(window))
-  if(is.na(gravity_data)) {
-    features <- features %>%
-      mutate(error = "None")
-  } else {
+    data.table::rbindlist(use.names = TRUE, fill = T, idcol = 'sensor') %>% 
+    dplyr::mutate(error = "None")
+  
+  # Tag outlier windows
+  if(suppressWarnings(!is.na(gravity_data))) {
+    gr_error <- tag_outlier_windows(gravity_data, window_length, overlap)
     features <- features %>%
       dplyr::select(-error) %>% 
-      dplyr::left_join(gr_error, by = 'window')
+      dplyr::left_join(gr_error, by = 'Window')
   }
   
   return(features)

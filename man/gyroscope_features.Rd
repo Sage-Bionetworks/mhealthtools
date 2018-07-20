@@ -4,16 +4,24 @@
 \alias{gyroscope_features}
 \title{Extract gyroscope features}
 \usage{
-gyroscope_features(sensor_data, funs = c(time_domain_summary,
-  frequency_domain_summary, frequency_domain_energy), window_length = 256,
-  overlap = 0.5, time_range = c(1, 9), frequency_range = c(1, 25))
+gyroscope_features(sensor_data, transformation = NA, funs = NA,
+  groups = c("axis", "Window"), window_length = 256, overlap = 0.5,
+  time_range = c(1, 9), frequency_range = c(1, 25))
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, x, y, z containing 
 gyroscope measurements.}
 
-\item{funs}{Feature extraction functions that accept a single
-time-series vector as input.}
+\item{transformation}{A function which accepts a tidy version of \code{sensor_data},
+with columns t, axis, value, as input and outputs a dataframe suitable for 
+feature extraction. By default, the tidy sensor data is windowed before feature
+extraction. This is a more user-friendly version of the \code{transform} 
+parameter required for more generic functions like \code{sensor_features}. Namely,
+its input will already be "cleaned" by detrending, bandpassing, etc. See 
+\code{preprocess_sensor_data} for all the cleaning steps performed.}
+
+\item{funs}{A list of feature extraction functions that each accept
+a single numeric vector as input.}
 
 \item{window_length}{Length of sliding windows.}
 
@@ -28,5 +36,5 @@ Gyroscope features.
 }
 \description{
 Extract features summarizing time domain, frequency domain, and frequency energy
-from gyroscope measurements.
+(by default) from gyroscope measurements.
 }

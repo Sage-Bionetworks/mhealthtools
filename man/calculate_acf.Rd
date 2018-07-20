@@ -4,10 +4,14 @@
 \alias{calculate_acf}
 \title{Construct a dataframe with ACF values}
 \usage{
-calculate_acf(sensor_data)
+calculate_acf(sensor_data, col, groups)
 }
 \arguments{
-\item{sensor_data}{A data frame with columns t, axis, acceleration.}
+\item{sensor_data}{A data frame with columns \code{axis}, \code{Window}, and \code{col}.}
+
+\item{col}{Name of column to calculate acf of.}
+
+\item{groups}{Column names to group on when computing acf.}
 }
 \value{
 A tibble with columns axis, window, index, acf
