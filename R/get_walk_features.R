@@ -14,7 +14,7 @@
 #' @param overlap Window overlap.
 #' @param max_imf Number of intrinsic mode functions to use for 
 #' empirical mode decomposition.
-#' @return Walk features indexed by axis and window.
+#' @return Walk features indexed by axis, window, and IMF.
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @importFrom magrittr "%>%"
