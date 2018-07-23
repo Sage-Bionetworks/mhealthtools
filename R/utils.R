@@ -143,7 +143,7 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @param include_timestamp Whether to include columns for starting and ending
 #' timestamps for each row.
 #' @return Windowed sensor data
-window <- function(sensor_data, window_length, overlap, include_timestamp = T) {
+window <- function(sensor_data, window_length, overlap) {
   if (has_error(sensor_data)) return(sensor_data)
   tryCatch({
     spread_sensor_data <- sensor_data %>%
@@ -155,23 +155,21 @@ window <- function(sensor_data, window_length, overlap, include_timestamp = T) {
     tidy_windowed_sensor_data <- lapply(
       windowed_sensor_data,
       function(windowed_matrix) {
-        windowed_matrix <- cbind(index = 1:dim(windowed_matrix)[1],
+        windowed_matrix <- cbind(window_index = 1:dim(windowed_matrix)[1],
                                  windowed_matrix)
         tidy_tibble <- windowed_matrix %>% 
           dplyr::as_tibble() %>%
-          tidyr::gather(Window, value, -index, convert=T)
+          tidyr::gather(Window, value, -window_index, convert=T)
         return(tidy_tibble)
       }) %>% 
       dplyr::bind_rows(.id = "axis")
-    if (include_timestamp) {
-      start_end_times <- window_start_end_times(spread_sensor_data$t,
-                                                window_length = window_length,
-                                                overlap = overlap)
-      tidy_windowed_sensor_data <- tidy_windowed_sensor_data %>% 
-        dplyr::left_join(start_end_times, by="Window") %>%
-        dplyr::select(axis, Window, index, window_start_time,
-                      window_end_time, value)
-    }
+    start_end_times <- window_start_end_times(spread_sensor_data$t,
+                                              window_length = window_length,
+                                              overlap = overlap)
+    tidy_windowed_sensor_data <- tidy_windowed_sensor_data %>% 
+      dplyr::left_join(start_end_times, by="Window") %>%
+      dplyr::select(axis, Window, window_index, window_start_time,
+                    window_end_time, value)
     return(tidy_windowed_sensor_data)
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Windowing error")
@@ -389,7 +387,7 @@ mutate_integral <- function(sensor_data, sampling_rate, groups, col, derived_col
 #' @param sensor_data A data frame with columns \code{axis}, \code{Window}, and \code{col}.
 #' @param col Name of column to calculate acf of.
 #' @param groups Column names to group on when computing acf.
-#' @return A tibble with columns axis, window, index, acf
+#' @return A tibble with columns axis, window, window_index, acf
 calculate_acf <- function(sensor_data, col, groups) {
   if (has_error(sensor_data)) return(sensor_data)
   acf_data <- tryCatch({
@@ -399,7 +397,7 @@ calculate_acf <- function(sensor_data, col, groups) {
       dplyr::mutate(data = purrr::map(data, function(d) {
         acf_col <- acf(d[,col], plot=F)$acf
         index_col <- 1:length(acf_col)
-        dplyr::bind_cols(acf = acf_col, index = index_col)
+        dplyr::bind_cols(acf = acf_col, window_index = index_col)
       })) %>%
       tidyr::unnest(data) %>% 
       dplyr::select_at(.vars = c(groups, "acf"))
