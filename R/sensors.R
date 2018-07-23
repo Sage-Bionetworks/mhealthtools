@@ -45,6 +45,9 @@ kinematic_sensor_features <- function(sensor_data, transform, extract,
                                       extract_on, groups, acf_col) {
   transformed_sensor_data <- transform(sensor_data)
   if (has_error(transformed_sensor_data)) return(sensor_data)
+  incidental_cols_to_preserve <- transformed_sensor_data %>%
+    select(-dplyr::one_of(extract_on)) %>%
+    distinct() # distinct of group (index) cols and incidental cols
   movement_features <- sensor_features(
     sensor_data = transformed_sensor_data,
     transform = function(x) x,
@@ -57,7 +60,10 @@ kinematic_sensor_features <- function(sensor_data, transform, extract,
     extract = extract,
     extract_on = "acf",
     groups = groups)
-  all_features <- dplyr::bind_rows(movement_features, acf_features)
+  all_features <- dplyr::bind_rows(movement_features, acf_features) %>%
+    dplyr::left_join(incidental_cols_to_preserve, by = groups) %>%
+    select(measurementType, dplyr::one_of(names(incidental_cols_to_preserve)),
+           dplyr::everything())
   return(all_features)
 }
 
