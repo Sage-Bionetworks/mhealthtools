@@ -143,9 +143,10 @@ default_kinematic_features <- function(sampling_rate) {
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return Accelerometer features.
 accelerometer_features <- function(sensor_data, transformation = NA, funs = NA, 
-                                   groups = c("axis", "Window"), window_length = 256,
-                                   overlap = 0.5, time_range = c(1,9),
-                                   frequency_range=c(1, 25)) {
+                                   model = NA, groups = c("axis", "Window"),
+                                   window_length = 256, overlap = 0.5,
+                                   time_range = c(1,9), frequency_range=c(1, 25)) {
+  if (is.function(model)) return(model(sensor_data))
   sampling_rate <- get_sampling_rate(sensor_data)
   if(suppressWarnings(is.na(transformation))) {
     transformation <- transformation_window(window_length = window_length,
@@ -191,9 +192,10 @@ accelerometer_features <- function(sensor_data, transformation = NA, funs = NA,
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return Gyroscope features.
 gyroscope_features <- function(sensor_data, transformation = NA, funs = NA,
-                               groups = c("axis", "Window"), window_length = 256,
-                               overlap = 0.5, time_range = c(1,9),
-                               frequency_range=c(1, 25)) {
+                               model = NA, groups = c("axis", "Window"),
+                               window_length = 256, overlap = 0.5,
+                               time_range = c(1,9), frequency_range=c(1, 25)) {
+  if (is.function(model)) return(model(sensor_data))
   sampling_rate <- get_sampling_rate(sensor_data)
   if(suppressWarnings(is.na(transformation))) {
     transformation <- transformation_window(window_length = window_length,

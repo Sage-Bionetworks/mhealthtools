@@ -4,7 +4,7 @@
 \alias{window}
 \title{Window the value vector of sensor data for each axis}
 \usage{
-window(sensor_data, window_length, overlap)
+window(sensor_data, window_length, overlap, include_timestamp = F)
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, axis, value.}
@@ -12,6 +12,9 @@ window(sensor_data, window_length, overlap)
 \item{window_length}{Length of the filter}
 
 \item{overlap}{window overlap}
+
+\item{include_timestamp}{Whether to include columns for starting and ending
+timestamps for each row.}
 }
 \value{
 Windowed sensor data
