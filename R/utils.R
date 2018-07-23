@@ -169,7 +169,8 @@ window <- function(sensor_data, window_length, overlap, include_timestamp = T) {
                                                 overlap = overlap)
       tidy_windowed_sensor_data <- tidy_windowed_sensor_data %>% 
         dplyr::left_join(start_end_times, by="Window") %>%
-        dplyr::select(axis, Window, index, window_start_time, window_end_time, value)
+        dplyr::select(axis, Window, index, window_start_time,
+                      window_end_time, value)
     }
     return(tidy_windowed_sensor_data)
   }, error = function(e) {
@@ -177,6 +178,13 @@ window <- function(sensor_data, window_length, overlap, include_timestamp = T) {
   })
 }
 
+#' Compute start/end timestamps for each window
+#' 
+#' @param t A numeric time vector
+#' @param window_length Length of the filter
+#' @param overlap Window overlap
+#' @return A dataframe with columns Window, window_start_time,
+#' window_end_time, window_start_index, window_end_index
 window_start_end_times <- function(t, window_length, overlap) {
   seq_length <- length(t)
   if (seq_length < window_length) {
