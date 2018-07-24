@@ -37,7 +37,8 @@ sensor_features <- function(sensor_data, transform, extract, extract_on, groups)
 tapping_features <- function(tap_data,
                              depressThr = 20) {
   
-  results <- GetLeftRightEventsAndTapIntervals(tap_data, depressThr)
+  results <- GetLeftRightEventsAndTapIntervals(tapData = tap_data,
+                                               depressThr = depressThr)
   tapInter <- results$tapInter
   tapData <- results$tapData
   error <- results$error
@@ -51,8 +52,8 @@ tapping_features <- function(tap_data,
   meanX <- mean(tapData$x)
   iL <- tapData$x < meanX
   iR <- tapData$x >= meanX
-  driftLeft <- calculateDrift(tapData[iL,"x"], tapData[iL, "y"])
-  driftRight <- calculateDrift(tapData[iR,"x"], tapData[iR, "y"])
+  driftLeft <- calculateDrift(x = tapData[iL,"x"], y = tapData[iL, "y"])
+  driftRight <- calculateDrift(x = tapData[iR,"x"], y = tapData[iR, "y"])
 
   intertap_features <- intertap_summary_features(tapInter = tapInter)
   if(intertap_features$error == 'None'){

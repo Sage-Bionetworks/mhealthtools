@@ -14,12 +14,12 @@ get_tapping_features <- function(tap_data, depressThr=20, removeDups=TRUE) {
   if (is.data.frame(tap_data) == FALSE) {
     tapFeatures <- dplyr::tibble(error = "expected data frame object")
   } else if (nrow(tap_data) < 5) {
-    tapFeatures <- dplyr::tibble("raw tapping data has less than 5 rows")
+    tapFeatures <- dplyr::tibble(error = "raw tapping data has less than 5 rows")
   } else {
     
     #remove duplicate data points // if selected
     if (removeDups){
-      tap_data <- clean_tapped_button_none(tap_data)
+      tap_data <- clean_tapped_button_none(tap_data = tap_data)
     }
     
     #check if cleaned data has < 5 rows
@@ -27,7 +27,8 @@ get_tapping_features <- function(tap_data, depressThr=20, removeDups=TRUE) {
       tapFeatures <- dplyr::tibble(error="post duplication removal tapping data has less than 5 rows")
     } else {
       # compute the tapping features
-      tapFeatures <- tapping_features(tap_data,depressThr)
+      tapFeatures <- tapping_features(tap_data = tap_data,
+                                      depressThr = depressThr)
     }
   }
   return(tapFeatures %>% as.data.frame())
