@@ -99,31 +99,6 @@ tapping_features <- function(tap_data,
 }
 
 
-#' Create a tapping feature data frame NAs as features and an appropriate error message given as input
-#' 
-#' @param error_message A text error message which would be reflected in the feature output
-#' @return A dataframe with NAs as feature values and the appropriate error message
-createTappingFeaturesErrorResult <- function(error_message, featNames=c("meanTapInter", "medianTapInter",
-                                                                        "iqrTapInter", "minTapInter", "maxTapInter",
-                                                                        "skewTapInter", "kurTapInter", "sdTapInter",
-                                                                        "madTapInter", "cvTapInter", "rangeTapInter",
-                                                                        "tkeoTapInter", "ar1TapInter", "ar2TapInter",
-                                                                        "fatigue10TapInter", "fatigue25TapInter",
-                                                                        "fatigue50TapInter", "meanDriftLeft",
-                                                                        "medianDriftLeft", "iqrDriftLeft", "minDriftLeft",
-                                                                        "maxDriftLeft", "skewDriftLeft", "kurDriftLeft",
-                                                                        "sdDriftLeft", "madDriftLeft", "cvDriftLeft",
-                                                                        "rangeDriftLeft", "meanDriftRight",
-                                                                        "medianDriftRight", "iqrDriftRight",
-                                                                        "minDriftRight", "maxDriftRight", "skewDriftRight",
-                                                                        "kurDriftRight", "sdDriftRight", "madDriftRight",
-                                                                        "cvDriftRight", "rangeDriftRight", "numberTaps",
-                                                                        "buttonNoneFreq", "corXY")) {
-  df <- data.frame(t(c(rep(NA, length(featNames)), error_message))) %>% 
-    `colnames<-`(c(featNames,'error'))
-  return(df)
-}
-
 #' Extract kinematic sensor features
 #' 
 #' Extract kinematic (accelerometer/gyroscope) features. This function is not 
