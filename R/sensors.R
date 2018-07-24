@@ -32,7 +32,9 @@ sensor_features <- function(sensor_data, transform, extract, extract_on, groups)
 #' @param tap_data A dataframe.
 #' @param depressThr A numerical threshold for intertap distance in x axis
 #' @return A dataframe of features.
-tapping_features <- function(tap_data, depressThr = 20) {
+tapping_features <- function(tap_data,
+                             depressThr = 20,
+                             funs = NA) {
   
   results <- GetLeftRightEventsAndTapIntervals(tap_data, depressThr)
   tapInter <- results$tapInter
@@ -48,7 +50,7 @@ tapping_features <- function(tap_data, depressThr = 20) {
   meanX <- mean(tapData$x)
   iL <- tapData$x < meanX
   iR <- tapData$x >= meanX
-  driftLeft <- calculateDrift(tapData[iL,"x"], tapData[iL, "x"])
+  driftLeft <- calculateDrift(tapData[iL,"x"], tapData[iL, "y"])
   driftRight <- calculateDrift(tapData[iR,"x"], tapData[iR, "y"])
   
   # determine Autocorrelation

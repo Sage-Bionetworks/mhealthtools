@@ -499,6 +499,84 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
   return(gr_error)
 }
 
+#' Get default tapping features for intertap distance
+#' 
+#' Calculates features characterising a timeseries data 
+#' 
+#' @param tapInter A numeric vector containing intertap intervals
+#' @return A features data frame of dimension 1 x n_features
+intertap_summary_features <- function(tapInter){
+  
+  # Remove NAs
+  tapInter <- tapInter %>% na.omit()
+  
+  # determine Autocorrelation
+  auxAcf <- tryCatch({acf(tapInter, lag.max = 2,
+                          plot = FALSE)$acf},
+                     error = function(x){
+                       return(list(NA,NA,NA))
+                     })
+  
+  # calculate fatigue
+  auxFatigue <- Fatigue(tapInter)
+  
+  ftrs <- tryCatch({
+    dplyr::tibble(mean = mean(tapInter,na.rm = TRUE),
+                  median = median(tapInter, na.rm = TRUE),
+                  iqr = IQR(tapInter, type = 7, na.rm = TRUE),
+                  min = min(tapInter,na.rm = TRUE),
+                  max = max(tapInter, na.rm = TRUE),
+                  skew = e1071::skewness(tapInter),
+                  kur = e1071::kurtosis(tapInter),
+                  sd = sd(tapInter,na.rm = TRUE),
+                  mad = mad(tapInter, na.rm = TRUE),
+                  cv = Cv(tapInter),
+                  range = diff(range(tapInter,na.rm = TRUE)),
+                  tkeo = MeanTkeo(tapInter),
+                  ar1 = auxAcf[[2]],
+                  ar2 = auxAcf[[3]],
+                  fatigue10 = auxFatigue[[1]],
+                  fatigue25 = auxFatigue[[2]],
+                  fatigue50 = auxFatigue[[3]],
+                  error = 'None')
+  },
+  error = function(x){
+    return(dplyr::tibble(error = 'Error Calculating intertap summary features'))
+  })
+  return(ftrs)
+}
+
+#' Get default tapping features for tap drift
+#' 
+#' Calculates features characterising a timeseries data 
+#' 
+#' @param tapDrift A numeric vector 
+#' @return A features data frame of dimension 1 x n_features
+tapdrift_summary_features <- function(tapDrift){
+  
+  # Remove NAs
+  tapDrift <- tapDrift %>% na.omit()
+  
+  ftrs <- tryCatch({
+    dplyr::tibble(mean = mean(tapDrift, na.rm = TRUE),
+                  median = median(tapDrift, na.rm = TRUE),
+                  iqr = IQR(tapDrift, type = 7, na.rm = TRUE),
+                  min = min(tapDrift, na.rm = TRUE),
+                  max = max(tapDrift, na.rm = TRUE),
+                  skew = e1071::skewness(tapDrift),
+                  kur = e1071::kurtosis(tapDrift),
+                  sd = sd(tapDrift, na.rm = TRUE),
+                  mad = mad(tapDrift, na.rm = TRUE),
+                  cv = Cv(tapDrift), 
+                  range = diff(range(tapDrift, na.rm = TRUE)) 
+    )
+  },
+  error = function(x){
+    return(dplyr::tibble(error = 'Error Calculating tapdrift summary features'))
+  })
+  return(ftrs)
+}
+
 #' Get time domain features
 #' 
 #' Calculates features characterising a time series in the time domain.

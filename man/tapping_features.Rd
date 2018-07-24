@@ -7,7 +7,9 @@
 tapping_features(tap_data, depressThr = 20)
 }
 \arguments{
-\item{tap_data}{A dataframe.}
+\item{tap_data}{A data frame with columns t, x, y, buttonid containing 
+tapping measurements. buttonid can be from c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
+indicating a tap that has been classified as to the left, right or neither of those places on the screen}
 
 \item{depressThr}{A numerical threshold for intertap distance in x axis}
 }
