@@ -499,6 +499,26 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
   return(gr_error)
 }
 
+#' Get default tapping features for metrics that use the tapping dataframe as a whole
+#' 
+#' Calculates features characterising tapping data (interaction terms etc., from the tap data frame)
+#' 
+#' @param tap_data A data frame with columns t, x, y, buttonid containing 
+#' tapping measurements. buttonid can be from c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
+#' indicating a tap that has been classified as to the left, right or neither of those places on the screen
+#' @return A features data frame of dimension 1 x n_features
+tap_data_summary_features <- function(tapData){
+  ftrs <- tryCatch({
+    dplyr::tibble(numberTaps = nrow(tapData),
+                  buttonNoneFreq = sum(tapData$buttonid == "TappedButtonNone")/nrow(tapData),
+                  corXY = cor(tapData$x, tapData$y, use = "p"),
+                  error = 'None')
+  },
+  error = function(x){
+    return(dplyr::tibble(error = 'Error calculating tap data(frame) summary features'))
+  })
+}
+
 #' Get default tapping features for intertap distance
 #' 
 #' Calculates features characterising a timeseries data 
@@ -568,14 +588,16 @@ tapdrift_summary_features <- function(tapDrift){
                   sd = sd(tapDrift, na.rm = TRUE),
                   mad = mad(tapDrift, na.rm = TRUE),
                   cv = Cv(tapDrift), 
-                  range = diff(range(tapDrift, na.rm = TRUE)) 
-    )
+                  range = diff(range(tapDrift, na.rm = TRUE)),
+                  error = 'None')
   },
   error = function(x){
     return(dplyr::tibble(error = 'Error Calculating tapdrift summary features'))
   })
   return(ftrs)
 }
+
+
 
 #' Get time domain features
 #' 

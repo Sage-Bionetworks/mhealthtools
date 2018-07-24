@@ -29,12 +29,13 @@ sensor_features <- function(sensor_data, transform, extract, extract_on, groups)
 
 #' Extract tapping (screen sensor) features
 #' 
-#' @param tap_data A dataframe.
+#' @param tap_data A data frame with columns t, x, y, buttonid containing 
+#' tapping measurements. buttonid can be from c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
+#' indicating a tap that has been classified as to the left, right or neither of those places on the screen
 #' @param depressThr A numerical threshold for intertap distance in x axis
 #' @return A dataframe of features.
 tapping_features <- function(tap_data,
-                             depressThr = 20,
-                             funs = NA) {
+                             depressThr = 20) {
   
   results <- GetLeftRightEventsAndTapIntervals(tap_data, depressThr)
   tapInter <- results$tapInter
@@ -43,7 +44,7 @@ tapping_features <- function(tap_data,
   
   # check error - if after cleaning tapping data less than 5 data points remain
   if (error == TRUE) {
-    tapFeatures <- createTappingFeaturesErrorResult("post cleaning less than 5 tap points remain")
+    tapFeatures <- dplyr::tibble(error = "post cleaning less than 5 tap points remain")
     return(tapFeatures)
   }
   
@@ -52,60 +53,49 @@ tapping_features <- function(tap_data,
   iR <- tapData$x >= meanX
   driftLeft <- calculateDrift(tapData[iL,"x"], tapData[iL, "y"])
   driftRight <- calculateDrift(tapData[iR,"x"], tapData[iR, "y"])
-  
-  # determine Autocorrelation
-  auxAcf <- try(acf(tapInter, lag.max = 2,
-                    plot = FALSE)$acf, silent = TRUE)
-  if (inherits(auxAcf, "try-error")) {
-    auxAcf <- list(NA, NA, NA)
+
+  intertap_features <- intertap_summary_features(tapInter = tapInter)
+  if(intertap_features$error == 'None'){
+    intertap_features <- intertap_features %>% dplyr::select(-error)
+    colnames(intertap_features) <- paste0(colnames(intertap_features),'TapInter')
+  }else{
+    colnames(intertap_features) <- paste0(colnames(intertap_features),'TapInter')
   }
-  auxFatigue <- Fatigue(tapInter)
+
+  tapdrift_left_features <- tapdrift_summary_features(tapDrift = driftLeft)
+  if(tapdrift_left_features$error == 'None'){
+    tapdrift_left_features <- tapdrift_left_features %>% dplyr::select(-error)
+    colnames(tapdrift_left_features) <- paste0(colnames(tapdrift_left_features),'DriftLeft')
+  }else{
+    colnames(tapdrift_left_features) <- paste0(colnames(tapdrift_left_features),'DriftLeft')
+  }
   
-  # compute other features and organize all features into a dataframe
-  tapFeatures <- data.frame(meanTapInter = mean(tapInter,na.rm = TRUE),
-             medianTapInter = median(tapInter, na.rm = TRUE),
-             iqrTapInter = IQR(tapInter, type = 7, na.rm = TRUE),
-             minTapInter = min(tapInter,na.rm = TRUE),
-             maxTapInter = max(tapInter, na.rm = TRUE),
-             skewTapInter = e1071::skewness(tapInter),
-             kurTapInter = e1071::kurtosis(tapInter),
-             sdTapInter = sd(tapInter,na.rm = TRUE),
-             madTapInter = mad(tapInter, na.rm = TRUE),
-             cvTapInter = Cv(tapInter),
-             rangeTapInter = diff(range(tapInter,na.rm = TRUE)),
-             tkeoTapInter = MeanTkeo(tapInter),
-             ar1TapInter = auxAcf[[2]], ar2TapInter = auxAcf[[3]],
-             fatigue10TapInter = auxFatigue[[1]],
-             fatigue25TapInter = auxFatigue[[2]],
-             fatigue50TapInter = auxFatigue[[3]],
-             meanDriftLeft = mean(driftLeft, na.rm = TRUE),
-             medianDriftLeft = median(driftLeft, na.rm = TRUE),
-             iqrDriftLeft = IQR(driftLeft, type = 7, na.rm = TRUE),
-             minDriftLeft = min(driftLeft, na.rm = TRUE),
-             maxDriftLeft = max(driftLeft, na.rm = TRUE),
-             skewDriftLeft = e1071::skewness(driftLeft),
-             kurDriftLeft = e1071::kurtosis(driftLeft),
-             sdDriftLeft = sd(driftLeft, na.rm = TRUE),
-             madDriftLeft = mad(driftLeft, na.rm = TRUE),
-             cvDriftLeft = Cv(driftLeft), 
-             rangeDriftLeft = diff(range(driftLeft, na.rm = TRUE)), 
-             meanDriftRight = mean(driftRight,na.rm = TRUE), 
-             medianDriftRight = median(driftRight, na.rm = TRUE),
-             iqrDriftRight = IQR(driftRight, type = 7, na.rm = TRUE),
-             minDriftRight = min(driftRight, na.rm = TRUE),
-             maxDriftRight = max(driftRight, na.rm = TRUE),
-             skewDriftRight = e1071::skewness(driftRight),
-             kurDriftRight = e1071::kurtosis(driftRight),
-             sdDriftRight = sd(driftRight, na.rm = TRUE),
-             madDriftRight = mad(driftRight, na.rm = TRUE),
-             cvDriftRight = Cv(driftRight),
-             rangeDriftRight = diff(range(driftRight, na.rm = TRUE)),
-             numberTaps = nrow(tapData),
-             buttonNoneFreq = sum(tapData$buttonid == "TappedButtonNone")/nrow(tapData),
-             corXY = cor(tapData$x, tapData$y, use = "p"),
-             error = "None")
+  tapdrift_right_features <- tapdrift_summary_features(tapDrift = driftRight)
+  if(tapdrift_right_features$error == 'None'){
+    tapdrift_right_features <- tapdrift_right_features %>% dplyr::select(-error)
+    colnames(tapdrift_right_features) <- paste0(colnames(tapdrift_right_features),'DriftRight')
+  }else{
+    colnames(tapdrift_right_features) <- paste0(colnames(tapdrift_right_features),'DriftRight')
+  }
   
-  return(tapFeatures)
+  tapdata_features <- tap_data_summary_features(tapData = tap_data)
+  if(tapdata_features$error == 'None'){
+    tapdata_features <- tapdata_features %>% dplyr::select(-error)
+  }
+  
+  tapFeatures <- dplyr::bind_cols(intertap_features,
+                           tapdrift_left_features,
+                           tapdrift_right_features,
+                           tapdata_features)
+  
+  ftrs_error <- grep('error', colnames(tapFeatures))
+  ftrs_error <- paste(tapFeatures[ftrs_error], collapse = ' ; ')
+  if(ftrs_error == ''){
+    ftrs_error = 'None'
+  }
+  
+  tapFeatures$error <- ftrs_error
+  return(tapFeatures %>% as.data.frame())
 }
 
 
