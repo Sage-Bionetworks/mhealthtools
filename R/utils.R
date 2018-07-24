@@ -49,6 +49,32 @@ Cv <- function(x) {
   return((sd(x)/mean(x)) * 100)
 }
 
+#' Curate the raw tapping data to get Left and Right events, after applying the threshold
+#' 
+#' @param tapData A dataframe with t,x,y and buttonid columns
+#' @param depressThr The threshold for intertap distance
+#' @return A dataframe with feature values and the appropriate error message
+GetLeftRightEventsAndTapIntervals <- function(tapData, depressThr = 20) {
+  tapTime <- tapData$t - tapData$t[1]
+  ## calculate X offset
+  tapX <- tapData$x - mean(tapData$x)
+  ## find left/right finger 'depress' event
+  dX <- diff(tapX)
+  i <- c(1, which(abs(dX) > depressThr) + 1)
+  ## filter data
+  tapData <- tapData[i, ]
+  tapTime <- tapTime[i]
+  ## find depress event intervals
+  tapInter <- diff(tapTime)
+  
+  ### ERROR CHECK -
+  if (nrow(tapData) >= 5) {
+    return(list(tapData = tapData, tapInter = tapInter,
+                error = "None"))
+  } else {
+    return(list(tapData = NA, tapInter = NA, error = TRUE))
+  }
+}
 
 #' Calculate the sampling rate.
 #' 

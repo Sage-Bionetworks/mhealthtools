@@ -27,9 +27,6 @@ sensor_features <- function(sensor_data, transform, extract, extract_on, groups)
   return(features)
 }
 
-###################################################
-# Tapping code starts
-###################################################
 #' Extract tapping (screen sensor) features
 #' 
 #' @param tap_data A dataframe.
@@ -109,31 +106,6 @@ tapping_features <- function(tap_data, depressThr = 20) {
   return(tapFeatures)
 }
 
-#' Curate the raw tapping data to get Left and Right events, after applying the threshold
-#' 
-#' @param error_message A text error message which would be reflected in the feature output
-#' @return A dataframe with NAs as feature values and the appropriate error message
-GetLeftRightEventsAndTapIntervals <- function(tapData, depressThr = 20) {
-  tapTime <- tapData$t - tapData$t[1]
-  ## calculate X offset
-  tapX <- tapData$x - mean(tapData$x)
-  ## find left/right finger 'depress' event
-  dX <- diff(tapX)
-  i <- c(1, which(abs(dX) > depressThr) + 1)
-  ## filter data
-  tapData <- tapData[i, ]
-  tapTime <- tapTime[i]
-  ## find depress event intervals
-  tapInter <- diff(tapTime)
-  
-  ### ERROR CHECK -
-  if (nrow(tapData) >= 5) {
-    return(list(tapData = tapData, tapInter = tapInter,
-                error = "None"))
-  } else {
-    return(list(tapData = NA, tapInter = NA, error = TRUE))
-  }
-}
 
 #' Create a tapping feature data frame NAs as features and an appropriate error message given as input
 #' 
@@ -159,9 +131,6 @@ createTappingFeaturesErrorResult <- function(error_message, featNames=c("meanTap
     `colnames<-`(c(featNames,'error'))
   return(df)
 }
-###################################################
-# Tapping code ends
-###################################################
 
 #' Extract kinematic sensor features
 #' 

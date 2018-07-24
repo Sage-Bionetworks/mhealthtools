@@ -43,7 +43,7 @@ datGyro  <- flatten_data(dat,'rotationRate')
 datGravity <- flatten_data(dat, 'gravity')
 
 ### Individual test functions
-
+context('Sampling rate')
 test_that("Check Sampling rate calculation",{
   # actual function in utils: get_sampling_rate
   samplingRate = (length(datAccel$t))/(max(datAccel$t)-min(datAccel$t))
@@ -51,6 +51,18 @@ test_that("Check Sampling rate calculation",{
   expect_that(mhealthtools:::get_sampling_rate(NA), equals(NA)) # Is the function giving NA for an invalid input
   
 })
+
+context('Tapping')
+test_that('Function to extract left, right tapping events and intertap intervals',{
+  # actual function in sensors.R: GetLeftRightEventsAndTapIntervals
+  
+  expect_is(mhealthtools:::GetLeftRightEventsAndTapIntervals(tapData = datTap), 'list') # Check if output is in correct format
+  
+  tempDat <- datTap[1:2,] # Only 2 rows, lesser than the required 5, Should expect an error
+  expect_equal(mhealthtools:::GetLeftRightEventsAndTapIntervals(tapData = tempDat),
+               list(tapData = NA, tapInter = NA, error = TRUE))
+})
+
 
 context('Tidy the data')
 test_that("Tidying sensor data",{

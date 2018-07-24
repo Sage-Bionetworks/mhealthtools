@@ -12,19 +12,25 @@
 #' @author Elias Chaibub Neto, Meghasyam Tummalacherla
 get_tapping_features <- function(tap_data, depressThr=20, removeDups=TRUE) {
   if (is.data.frame(tap_data) == FALSE) {
-    tapFeatures <- createTappingFeaturesErrorResult("expected data frame object after reading tapping json file")
+    tapFeatures <- createTappingFeaturesErrorResult(
+      "expected data frame object after reading tapping json file"
+      )
   } else if (nrow(tap_data) < 5) {
-    tapFeatures <- createTappingFeaturesErrorResult("raw tapping data has less than 5 rows")
+    tapFeatures <- createTappingFeaturesErrorResult(
+      "raw tapping data has less than 5 rows"
+      )
   } else {
     
     #remove duplicate data points // if selected
-    if (removeDups == TRUE){
-      tap_data <- CleanTappedButtonNone(tap_data)
+    if (removeDups){
+      tap_data <- clean_tapped_button_none(tap_data)
     }
     
     #check if cleaned data has < 5 rows
     if (nrow(tap_data) < 5) {
-      tapFeatures <- createTappingFeaturesErrorResult("post duplication removal tapping data has less than 5 rows")
+      tapFeatures <- createTappingFeaturesErrorResult(
+        "post duplication removal tapping data has less than 5 rows"
+        )
     } else {
       # compute the tapping features
       tapFeatures <- tapping_features(tap_data,depressThr)
@@ -38,7 +44,7 @@ get_tapping_features <- function(tap_data, depressThr=20, removeDups=TRUE) {
 #' 
 #' @param tap_data A dataframe with colums t,x,y and buttonid
 #' @return A dataframe with duplicates corresponding to buttonid == 'TappedButtonNone' removed
-CleanTappedButtonNone <- function(tap_data) {
+clean_tapped_button_none <- function(tap_data) {
   # Get seperate dataframes for taps on left,right buttons, and None
   tapLeftRight <- tap_data %>% 
     dplyr::filter(buttonid %in% c('TappedButtonLeft','TappedButtonRight'))
