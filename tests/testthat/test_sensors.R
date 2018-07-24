@@ -107,18 +107,6 @@ test_that('Function to extract tapping features',{
   expect_is(mhealthtools:::tapping_features(tap_data = datTap), 'data.frame') # Check if output is in correct format
 })
 
-test_that('Function to generate tap feature list with NAs and an error message',{
-  # actual function in sensors.R: createTappingFeaturesErrorResult
-  
-  # Create a test dataframe with 5 feature columns named 'f1','f2','f3','f4','f5' and another column named 'error' for error
-  testTibble <- data.frame(t(c(rep(NA, 5), 'test error message'))) %>% 
-    `colnames<-`(c('f1','f2','f3','f4','f5','error'))
-  
-  expect_equal(mhealthtools:::createTappingFeaturesErrorResult(error_message = 'test error message',
-                                                               featNames = c('f1','f2','f3','f4','f5')),
-               testTibble)
-})
-
 context('Transformation functions')
 test_that('Function to transform accelometer data with given input parameters',{
   # actual function in sensors.R: transform_accelerometer_data

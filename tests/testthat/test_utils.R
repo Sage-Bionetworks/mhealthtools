@@ -27,6 +27,8 @@ library(stringr)
 ### Load data file
 data("sensor_data")
 dat <- sensor_data
+data("tap_data")
+datTap <- tap_data
 
 ### flatten data to the format needed for mHealthTools
 flatten_data <- function(dat, metric) {

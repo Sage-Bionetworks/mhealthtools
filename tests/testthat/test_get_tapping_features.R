@@ -26,15 +26,18 @@ context('Extract tapping features')
 test_that('Wrapper to extract tapping features',{
   # actual function in get_tapping_features.R: get_tapping_features
   
+  
   expect_is(mhealthtools::get_tapping_features(tap_data = dat), 'data.frame') # Is output in the correct format
   
   tempDat <- 'not a dataframe' # The input is not a data frame, we should expect the relevant error
+  testTibble <- dplyr::tibble(error = "expected data frame object")
   expect_equal(mhealthtools::get_tapping_features(tap_data = tempDat), 
-               mhealthtools:::createTappingFeaturesErrorResult("expected data frame object after reading tapping json file"))
+               testTibble)
   
   tempDat <- dat[1:2,] # tempDat now has just 2 rows of observations, we should expect the relevant error as this is less that the required 5
+  testTibble <- dplyr::tibble(error = "raw tapping data has less than 5 rows")
   expect_equal(mhealthtools::get_tapping_features(tap_data = tempDat), 
-               mhealthtools:::createTappingFeaturesErrorResult("raw tapping data has less than 5 rows"))
+               testTibble)
   
   tempDat <- dat[1:2,]
   tempDat$buttonid[1:2] <- 'TappedButtonNone'
