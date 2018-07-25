@@ -56,16 +56,16 @@ test_that("Check Sampling rate calculation",{
 
 context('Tapping')
 test_that('Function to extract left, right tapping events and intertap intervals',{
-  # actual function in sensors.R: GetLeftRightEventsAndTapIntervals
+  # actual function in sensors.R: get_left_right_events_and_tap_intervals
   
-  expect_is(mhealthtools:::GetLeftRightEventsAndTapIntervals(tapData = datTap), 'list') # Check if output is in correct format
+  expect_is(mhealthtools:::get_left_right_events_and_tap_intervals(tapData = datTap), 'list') # Check if output is in correct format
   
   tempDat <- datTap[1:2,] # Only 2 rows, lesser than the required 5, Should expect an error
-  expect_equal(mhealthtools:::GetLeftRightEventsAndTapIntervals(tapData = tempDat),
+  expect_equal(mhealthtools:::get_left_right_events_and_tap_intervals(tapData = tempDat),
                list(tapData = NA, tapInter = NA, error = TRUE))
 })
 
-tapInter <- mhealthtools:::GetLeftRightEventsAndTapIntervals(datTap)$tapInter 
+tapInter <- mhealthtools:::get_left_right_events_and_tap_intervals(datTap)$tapInter 
 # Get inter tap intervals
 
 test_that('Extract default inter tap time features',{
@@ -84,7 +84,7 @@ test_that('Extract default tap drift features',{
 
 test_that('Extract deafult tap data features(features based on interaction between x and y, etc.)',{
   # actual function in utils.R: tap_data_summary_features
-
+  
   expect_is(mhealthtools:::tap_data_summary_features(tapData = datTap),'data.frame')  
 })
 
@@ -92,17 +92,17 @@ context('Tidy the data')
 test_that("Tidying sensor data",{
   # actual function in utils: tidy_sensor_data
   expect_is(mhealthtools:::tidy_sensor_data(datAccel), 'data.frame') # Is the function returning expected data.frame output for a valid input
-
+  
   tempDat <- data.table::copy(datAccel)
   tempDat$t[1] <- NA # time column now has a NA in it
   # Does the function throw an error when t values are missing
   expect_error(mhealthtools:::tidy_sensor_data(tempDat))
-
+  
   tempDat$error <- rep(NA, length(tempDat$t))
   tempDat$error[1] <- 'some error' # Just a non NA value for error
   # This should make the tidy_sensor_data return the input, i.e, an identity function
   expect_that(mhealthtools:::tidy_sensor_data(tempDat), equals(tempDat))
-
+  
   # this will set off warnings of not having columns error and t, so we are supressing warnings and then will re-start them
   options(warn = 0) # Turn off warnings
   tempDat <- tempDat %>% dplyr::select(x,y,z) # Removing the t and error columns, this should make the tidy_sensor_data throw an error
@@ -130,7 +130,7 @@ test_that("Detrend the data given a time series",{
 test_that("Detrend the given sensor data",{
   # actual function in utils: mutate_detrend
   expect_is(mhealthtools:::mutate_detrend(datAccelTidy),'data.frame') # Should give a dataframe if data is input in tidy format
-
+  
   # Given wrong format of data, the function should throw an error
   testTibble <- dplyr::tibble(Window = NA, error = "Detrend error")
   expect_equal(mhealthtools:::mutate_detrend(datAccel), testTibble)
@@ -144,23 +144,23 @@ test_that('Bandpass a timeseries data',{
   testTimeSeries <- datAccel$x
   # This is 990 points long timeseries, sampled at 100Hz
   expect_is(mhealthtools:::bandpass(testTimeSeries, 120, 100,c(1,25)), 'numeric') # 120 sample window, 100Hz sampling rate, 1-25Hz freq range
-
+  
   expect_error(mhealthtools:::bandpass(testTimeSeries, 120, 100, c(1, 100)), "Frequency parameters can be at most half the sampling rate.")
   # Frequency parameters violating Nyquist criterion
-
+  
   # introduce an NA timeseries data, this should throw an error (Should be the same if atleast one point was NA)
   expect_error(mhealthtools:::bandpass(rep(NA,990), 120, 100, c(1,10))) # Input is NA, so expect an error
-
+  
 })
 
 test_that('Bandpass the tidy sensor data', {
   # actual function in utils: mutate_bandpass
   testTibble <- dplyr::tibble(Window = NA, error = "Bandpass filter error")
-
+  
   expect_is(mhealthtools:::mutate_bandpass(datAccelTidy, 120, 100, c(1,25)), 'data.frame') # Check if output is of the correct format
   expect_equal(mhealthtools:::mutate_bandpass(datAccel, 120, 100, c(1,25)), testTibble) # Error if input data is of wrong format
   expect_equal(mhealthtools:::mutate_bandpass(datAccelTidy, 120, 100, c(1,51)), testTibble) # Error if freq ranges of bandpass filter violate Nyquist criterion
-
+  
 })
 
 test_that('Filtering the time series data by selecting a time range',{
@@ -171,7 +171,7 @@ test_that('Filtering the time series data by selecting a time range',{
   expect_error(mhealthtools:::filter_time(datAccel[,"x"],1,2)) # throw an error if there is no t column
   # Maybe throw an error if t2(100s) of the window (t1,t2) is more than the actual time in the sensor data (0-10s)
   # Maybe throw an error if t1(11s) of the window (t1,t2) is more than the actual time in the sensor data (0-10s)
-
+  
 })
 
 context('Windowing')
@@ -195,7 +195,7 @@ context('Jerk Calculation')
 test_that('Calculate Jerk given acceleration and sampling rate',{
   # actual function in utils: jerk  
   expect_is(mhealthtools:::jerk(datAccel$x,100), 'numeric') # Check if output is in correct format
-
+  
 })
 
 test_that('Calculate and add Jerk column for the tidy sensor data',{
@@ -204,7 +204,7 @@ test_that('Calculate and add Jerk column for the tidy sensor data',{
   
   expect_is(mhealthtools:::mutate_jerk(datAccelTidy,100),'data.frame') # Check if output is in correct format
   expect_equal(mhealthtools:::mutate_jerk(datAccel,100),testTibble) # Throw an error if input is not in correct format
-
+  
 })
 
 context('Velocity Calculation')
@@ -330,33 +330,33 @@ test_that('Get EWT spectrum',{
   accelVecSpec <- mhealthtools:::getSpectrum(accelVec,sampling_rate = 100, nfreq = 500) # 500x2 spectrum
   
   expect_is(mhealthtools:::getEWTspectrum(accelVecSpec),'matrix') # Check if output is in correct format
-
+  
 })
 
 context('Individual feature extraction functions')
-test_that('Fatigue',{
-  # actual function in utils.R: Fatigue 
+test_that('fatigue',{
+  # actual function in utils.R: fatigue 
   
-  expect_is(mhealthtools:::Fatigue(x = tapInter),'list')
+  expect_is(mhealthtools:::fatigue(x = tapInter),'list')
 })
 
 test_that('Calculate Drift',{
-  # actual function in utils.R: calculateDrift
+  # actual function in utils.R: calculate_drift
   
-  expect_is(mhealthtools:::calculateDrift(x = datTap$x,
-                                          y = datTap$y),
+  expect_is(mhealthtools:::calculate_drift(x = datTap$x,
+                                           y = datTap$y),
             'numeric')
 })
 
 test_that('Mean Teager-Kaiser Energy (mtkeo)',{
-  # actual function in utils.R: Meantkeo 
+  # actual function in utils.R: mean_tkeo 
   
-  expect_is(mhealthtools:::MeanTkeo(tapInter), 'numeric')
+  expect_is(mhealthtools:::mean_tkeo(tapInter), 'numeric')
 })
 
-test_that('Co-efficient of Variation (Cv)',{
-  # actual function in utils.R: Cv
+test_that('Co-efficient of Variation (coef_var)',{
+  # actual function in utils.R: coef_var
   
-  expect_is(mhealthtools:::Cv(tapInter), 'numeric')
+  expect_is(mhealthtools:::coef_var(tapInter), 'numeric')
 })
 

@@ -4,7 +4,7 @@
 #' @return A list containing fatigue10, fatigue25, fatigue50 where 
 #' fatigueX is the difference in the mean values of the
 #' first X percent of input x and last X percent of input x
-Fatigue <- function(x) {
+fatigue <- function(x) {
   x <- x[!is.na(x)]
   n <- length(x)
   top10 <- round(0.1 * n)
@@ -21,7 +21,7 @@ Fatigue <- function(x) {
 #' @param x A vecor containing x co-ordinates (same length as that of y)
 #' @param y A vecor containing y co-ordinates (same length as that of x)
 #' @return Drift vector which is sqrt(dx^2 + dy^2)
-calculateDrift <- function(x, y) {
+calculate_drift <- function(x, y) {
   dx <- diff(x, lag = 1)
   dy <- diff(y, lag = 1)
   return(sqrt(dx^2 + dy^2))
@@ -32,7 +32,7 @@ calculateDrift <- function(x, y) {
 #' 
 #' @param x A vector x whose Mean Taiger-Kaiser Energy Operator value needs to be calculated
 #' @return A numeric value that is representative of the MeanTKEO
-MeanTkeo <- function(x) {
+mean_tkeo <- function(x) {
   x <- x[!is.na(x)] # Remove NAs
   y <- x^2 - c(x[-1], NA) * c(NA, x[1:(length(x) -
                                          1)])
@@ -40,11 +40,11 @@ MeanTkeo <- function(x) {
 }
 
 
-#' Calculate the Coefficient of Variation (Cv) for a given sequence
+#' Calculate the Coefficient of Variation (coef_var) for a given sequence
 #' 
 #' @param x A numeric vector x whose Coefficient of Variation needs to be calculated
 #' @return A numeric value that is representative of the Coefficient of Variation
-Cv <- function(x) {
+coef_var <- function(x) {
   x <- x[!is.na(x)] # Remove NAs
   return((sd(x)/mean(x)) * 100)
 }
@@ -54,7 +54,7 @@ Cv <- function(x) {
 #' @param tapData A dataframe with t,x,y and buttonid columns
 #' @param depressThr The threshold for intertap distance
 #' @return A dataframe with feature values and the appropriate error message
-GetLeftRightEventsAndTapIntervals <- function(tapData, depressThr = 20) {
+get_left_right_events_and_tap_intervals <- function(tapData, depressThr = 20) {
   tapTime <- tapData$t - tapData$t[1]
   ## calculate X offset
   tapX <- tapData$x - mean(tapData$x)
@@ -70,7 +70,7 @@ GetLeftRightEventsAndTapIntervals <- function(tapData, depressThr = 20) {
   ### ERROR CHECK -
   if (nrow(tapData) >= 5) {
     return(list(tapData = tapData, tapInter = tapInter,
-                error = "None"))
+                error = FALSE))
   } else {
     return(list(tapData = NA, tapInter = NA, error = TRUE))
   }
@@ -538,7 +538,7 @@ intertap_summary_features <- function(tapInter){
                      })
   
   # calculate fatigue
-  auxFatigue <- Fatigue(tapInter)
+  auxFatigue <- fatigue(tapInter)
   
   ftrs <- tryCatch({
     dplyr::tibble(mean = mean(tapInter,na.rm = TRUE),
@@ -550,9 +550,9 @@ intertap_summary_features <- function(tapInter){
                   kur = e1071::kurtosis(tapInter),
                   sd = sd(tapInter,na.rm = TRUE),
                   mad = mad(tapInter, na.rm = TRUE),
-                  cv = Cv(tapInter),
+                  cv = coef_var(tapInter),
                   range = diff(range(tapInter,na.rm = TRUE)),
-                  tkeo = MeanTkeo(tapInter),
+                  tkeo = mean_tkeo(tapInter),
                   ar1 = auxAcf[[2]],
                   ar2 = auxAcf[[3]],
                   fatigue10 = auxFatigue[[1]],
@@ -587,7 +587,7 @@ tapdrift_summary_features <- function(tapDrift){
                   kur = e1071::kurtosis(tapDrift),
                   sd = sd(tapDrift, na.rm = TRUE),
                   mad = mad(tapDrift, na.rm = TRUE),
-                  cv = Cv(tapDrift), 
+                  cv = coef_var(tapDrift), 
                   range = diff(range(tapDrift, na.rm = TRUE)),
                   error = 'None')
   },

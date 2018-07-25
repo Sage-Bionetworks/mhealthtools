@@ -11,7 +11,7 @@
 #' @export
 #' @author Elias Chaibub Neto, Meghasyam Tummalacherla
 get_tapping_features <- function(tap_data, depressThr=20, removeDups=TRUE) {
-  if (is.data.frame(tap_data) == FALSE) {
+  if (!is.data.frame(tap_data)) {
     tapFeatures <- dplyr::tibble(error = "expected data frame object")
   } else if (nrow(tap_data) < 5) {
     tapFeatures <- dplyr::tibble(error = "raw tapping data has less than 5 rows")
