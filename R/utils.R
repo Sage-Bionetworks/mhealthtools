@@ -1,3 +1,81 @@
+#' Calculate the fatigue given a vector x
+#' 
+#' @param x A numeric vector containing inter tap intevals
+#' @return A list containing fatigue10, fatigue25, fatigue50 where 
+#' fatigueX is the difference in the mean values of the
+#' first X percent of input x and last X percent of input x
+fatigue <- function(x) {
+  x <- x[!is.na(x)]
+  n <- length(x)
+  top10 <- round(0.1 * n)
+  top25 <- round(0.25 * n)
+  top50 <- floor(0.5 * n)
+  return(list(fatigue10 = mean(x[1:top10]) - mean(x[(n -top10):n]),
+              fatigue25 = mean(x[1:top25]) - mean(x[(n - top25):n]),
+              fatigue50 = mean(x[1:top50]) - mean(x[(n - top50):n])))
+}
+
+
+#' Calculate the drift given x and y
+#' 
+#' @param x A vecor containing x co-ordinates (same length as that of y)
+#' @param y A vecor containing y co-ordinates (same length as that of x)
+#' @return Drift vector which is sqrt(dx^2 + dy^2)
+calculate_drift <- function(x, y) {
+  dx <- diff(x, lag = 1)
+  dy <- diff(y, lag = 1)
+  return(sqrt(dx^2 + dy^2))
+}
+
+
+#' Calculate the Mean Teager-Kaiser energy, adapted from TKEO function in library(seewave) using f = 1, m = 1, M = 1
+#' 
+#' @param x A vector x whose Mean Taiger-Kaiser Energy Operator value needs to be calculated
+#' @return A numeric value that is representative of the MeanTKEO
+mean_tkeo <- function(x) {
+  x <- x[!is.na(x)] # Remove NAs
+  y <- x^2 - c(x[-1], NA) * c(NA, x[1:(length(x) -
+                                         1)])
+  return(mean(y, na.rm = TRUE))
+}
+
+
+#' Calculate the Coefficient of Variation (coef_var) for a given sequence
+#' 
+#' @param x A numeric vector x whose Coefficient of Variation needs to be calculated
+#' @return A numeric value that is representative of the Coefficient of Variation
+coef_var <- function(x) {
+  x <- x[!is.na(x)] # Remove NAs
+  return((sd(x)/mean(x)) * 100)
+}
+
+#' Curate the raw tapping data to get Left and Right events, after applying the threshold
+#' 
+#' @param tapData A dataframe with t,x,y and buttonid columns
+#' @param depressThr The threshold for intertap distance
+#' @return A dataframe with feature values and the appropriate error message
+get_left_right_events_and_tap_intervals <- function(tapData, depressThr = 20) {
+  tapTime <- tapData$t - tapData$t[1]
+  ## calculate X offset
+  tapX <- tapData$x - mean(tapData$x)
+  ## find left/right finger 'depress' event
+  dX <- diff(tapX)
+  i <- c(1, which(abs(dX) > depressThr) + 1)
+  ## filter data
+  tapData <- tapData[i, ]
+  tapTime <- tapTime[i]
+  ## find depress event intervals
+  tapInter <- diff(tapTime)
+  
+  ### ERROR CHECK -
+  if (nrow(tapData) >= 5) {
+    return(list(tapData = tapData, tapInter = tapInter,
+                error = FALSE))
+  } else {
+    return(list(tapData = NA, tapInter = NA, error = TRUE))
+  }
+}
+
 #' Calculate the sampling rate.
 #' 
 #' @param sensor_data A data frame with columns t, x, y, z.
@@ -421,6 +499,106 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
   return(gr_error)
 }
 
+#' Get default tapping features for metrics that use the tapping dataframe as a whole
+#' 
+#' Calculates features characterising tapping data (interaction terms etc., from the tap data frame)
+#' 
+#' @param tap_data A data frame with columns t, x, y, buttonid containing 
+#' tapping measurements. buttonid can be from c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
+#' indicating a tap that has been classified as to the left, right or neither of those places on the screen
+#' @return A features data frame of dimension 1 x n_features
+tap_data_summary_features <- function(tapData){
+  ftrs <- tryCatch({
+    dplyr::tibble(numberTaps = nrow(tapData),
+                  buttonNoneFreq = sum(tapData$buttonid == "TappedButtonNone")/nrow(tapData),
+                  corXY = cor(tapData$x, tapData$y, use = "p"),
+                  error = 'None')
+  },
+  error = function(x){
+    return(dplyr::tibble(error = 'Error calculating tap data(frame) summary features'))
+  })
+}
+
+#' Get default tapping features for intertap distance
+#' 
+#' Calculates features characterising a timeseries data 
+#' 
+#' @param tapInter A numeric vector containing intertap intervals
+#' @return A features data frame of dimension 1 x n_features
+intertap_summary_features <- function(tapInter){
+  
+  # Remove NAs
+  tapInter <- tapInter %>% na.omit()
+  
+  # determine Autocorrelation
+  auxAcf <- tryCatch({acf(tapInter, lag.max = 2,
+                          plot = FALSE)$acf},
+                     error = function(x){
+                       return(list(NA,NA,NA))
+                     })
+  
+  # calculate fatigue
+  auxFatigue <- fatigue(tapInter)
+  
+  ftrs <- tryCatch({
+    dplyr::tibble(mean = mean(tapInter,na.rm = TRUE),
+                  median = median(tapInter, na.rm = TRUE),
+                  iqr = IQR(tapInter, type = 7, na.rm = TRUE),
+                  min = min(tapInter,na.rm = TRUE),
+                  max = max(tapInter, na.rm = TRUE),
+                  skew = e1071::skewness(tapInter),
+                  kur = e1071::kurtosis(tapInter),
+                  sd = sd(tapInter,na.rm = TRUE),
+                  mad = mad(tapInter, na.rm = TRUE),
+                  cv = coef_var(tapInter),
+                  range = diff(range(tapInter,na.rm = TRUE)),
+                  tkeo = mean_tkeo(tapInter),
+                  ar1 = auxAcf[[2]],
+                  ar2 = auxAcf[[3]],
+                  fatigue10 = auxFatigue[[1]],
+                  fatigue25 = auxFatigue[[2]],
+                  fatigue50 = auxFatigue[[3]],
+                  error = 'None')
+  },
+  error = function(x){
+    return(dplyr::tibble(error = 'Error Calculating intertap summary features'))
+  })
+  return(ftrs)
+}
+
+#' Get default tapping features for tap drift
+#' 
+#' Calculates features characterising a timeseries data 
+#' 
+#' @param tapDrift A numeric vector 
+#' @return A features data frame of dimension 1 x n_features
+tapdrift_summary_features <- function(tapDrift){
+  
+  # Remove NAs
+  tapDrift <- tapDrift %>% na.omit()
+  
+  ftrs <- tryCatch({
+    dplyr::tibble(mean = mean(tapDrift, na.rm = TRUE),
+                  median = median(tapDrift, na.rm = TRUE),
+                  iqr = IQR(tapDrift, type = 7, na.rm = TRUE),
+                  min = min(tapDrift, na.rm = TRUE),
+                  max = max(tapDrift, na.rm = TRUE),
+                  skew = e1071::skewness(tapDrift),
+                  kur = e1071::kurtosis(tapDrift),
+                  sd = sd(tapDrift, na.rm = TRUE),
+                  mad = mad(tapDrift, na.rm = TRUE),
+                  cv = coef_var(tapDrift), 
+                  range = diff(range(tapDrift, na.rm = TRUE)),
+                  error = 'None')
+  },
+  error = function(x){
+    return(dplyr::tibble(error = 'Error Calculating tapdrift summary features'))
+  })
+  return(ftrs)
+}
+
+
+
 #' Get time domain features
 #' 
 #' Calculates features characterising a time series in the time domain.
@@ -537,7 +715,7 @@ frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
 #' @param nfreq Number of frequecy points to be interpolated.
 #' @return An AR spectrum.
 getSpectrum <- function(values, sampling_rate = 100, nfreq = 500){
-  tmp = stats::spec.ar(values, nfreq = nfreq, plot = F)
+  tmp = stats::spec.ar(values, n.freq = nfreq, plot = F)
   spect = data.frame(freq = tmp$freq * sampling_rate, pdf = tmp$spec)
   return(spect)
 }
