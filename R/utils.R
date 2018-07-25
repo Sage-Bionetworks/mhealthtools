@@ -715,7 +715,7 @@ frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
 #' @param nfreq Number of frequecy points to be interpolated.
 #' @return An AR spectrum.
 getSpectrum <- function(values, sampling_rate = 100, nfreq = 500){
-  tmp = stats::spec.ar(values, nfreq = nfreq, plot = F)
+  tmp = stats::spec.ar(values, n.freq = nfreq, plot = F)
   spect = data.frame(freq = tmp$freq * sampling_rate, pdf = tmp$spec)
   return(spect)
 }

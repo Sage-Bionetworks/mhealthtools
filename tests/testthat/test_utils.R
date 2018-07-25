@@ -65,6 +65,28 @@ test_that('Function to extract left, right tapping events and intertap intervals
                list(tapData = NA, tapInter = NA, error = TRUE))
 })
 
+tapInter <- mhealthtools:::GetLeftRightEventsAndTapIntervals(datTap)$tapInter 
+# Get inter tap intervals
+
+test_that('Extract default inter tap time features',{
+  # actual function in utils.R: intertap_summary_features
+  
+  expect_is(mhealthtools:::intertap_summary_features(tapInter = tapInter),'data.frame')  
+})
+
+test_that('Extract default tap drift features',{
+  # actual function in utils.R: tapdrift_summary_features
+  
+  # tap drift is a numeric vector, like tapInter. So we are going to use tapInter to test the function 
+  # rather than creating a seperate tapDrift numeric vector
+  expect_is(mhealthtools:::tapdrift_summary_features(tapDrift = tapInter),'data.frame')
+})
+
+test_that('Extract deafult tap data features(features based on interaction between x and y, etc.)',{
+  # actual function in utils.R: tap_data_summary_features
+
+  expect_is(mhealthtools:::tap_data_summary_features(tapData = datTap),'data.frame')  
+})
 
 context('Tidy the data')
 test_that("Tidying sensor data",{
@@ -235,14 +257,14 @@ test_that('Identify min, max gravity values for each window of tidy sensor data'
   expect_is(mhealthtools:::tag_outlier_windows_(gravityVec, 256, 0.5), 'data.frame')
   # Check if output is in correct format. 256 Window length and 0.5 overlap
   
-  gravityVec <- c(rep(NA,255),1) 
+  # gravityVec <- c(rep(NA,255),1) 
   # All values are NA except for the last value, our window length is 256, same as the length of gravityVec
   # min(gravityVec) and max(gravityVec) should be NA, so the testOutput needs to be a dataframe with one obs. for all
   # the three output vars with max and min having NAs
   
-  testOutput <- mhealthtools:::tag_outlier_windows_(seq(256), 256, 0.5) # Initialize the data
-  testOutput$max <- NA
-  testOutput$min <- NA
+  # testOutput <- mhealthtools:::tag_outlier_windows_(seq(256), 256, 0.5) # Initialize the data
+  # testOutput$max <- NA
+  # testOutput$min <- NA
   
   # expect_equal(mhealthtools:::tag_outlier_windows_(gravityVec, 256, 0.5), testOutput) 
   # Min and Max should be NA if any window has NAs in it
@@ -310,3 +332,31 @@ test_that('Get EWT spectrum',{
   expect_is(mhealthtools:::getEWTspectrum(accelVecSpec),'matrix') # Check if output is in correct format
 
 })
+
+context('Individual feature extraction functions')
+test_that('Fatigue',{
+  # actual function in utils.R: Fatigue 
+  
+  expect_is(mhealthtools:::Fatigue(x = tapInter),'list')
+})
+
+test_that('Calculate Drift',{
+  # actual function in utils.R: calculateDrift
+  
+  expect_is(mhealthtools:::calculateDrift(x = datTap$x,
+                                          y = datTap$y),
+            'numeric')
+})
+
+test_that('Mean Teager-Kaiser Energy (mtkeo)',{
+  # actual function in utils.R: Meantkeo 
+  
+  expect_is(mhealthtools:::MeanTkeo(tapInter), 'numeric')
+})
+
+test_that('Co-efficient of Variation (Cv)',{
+  # actual function in utils.R: Cv
+  
+  expect_is(mhealthtools:::Cv(tapInter), 'numeric')
+})
+
