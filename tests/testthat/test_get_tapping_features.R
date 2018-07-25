@@ -42,12 +42,13 @@ test_that('Wrapper to extract tapping features',{
   tempDat <- dat[1:2,]
   tempDat$buttonid[1:2] <- 'TappedButtonNone'
   tempDat <- rbind(tempDat, tempDat, tempDat, tempDat, tempDat)
+  testTibble <- dplyr::tibble(error = "post duplication removal tapping data has less than 5 rows")
   # tempDat now has 10 rows, but they are all duplicates of the first two (of the buttonid 'TappedButtonNone'),
   # so ideally speaking it just has two rows of non-duplicated unique data
   # so if we remove duplicates (we can only remove duplicates of buttonid 'TappedButtonNone'),
   # we should get an errow saying that the number of rows is less than 5
   expect_equal(mhealthtools::get_tapping_features(tap_data = tempDat, removeDups = TRUE), 
-               mhealthtools:::createTappingFeaturesErrorResult("post duplication removal tapping data has less than 5 rows"))
+               testTibble)
   
 })
 
