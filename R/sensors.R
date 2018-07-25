@@ -226,6 +226,7 @@ gyroscope_features <- function(sensor_data, transformation = NA, funs = NA,
 #' indicating a tap that has been classified as to the left, right or neither of those places on the screen
 #' @param depressThr A numerical threshold for intertap distance in x axis
 #' @return A dataframe of features.
+#' @export
 tapping_features <- function(tap_data,
                              depressThr = 20) {
   
