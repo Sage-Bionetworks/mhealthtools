@@ -7,7 +7,7 @@ submission to the 2017 Parkinson's Disease Digital
 Biomarker DREAM Challenge, Subchallenge 1
 (https://www.synapse.org/#!Synapse:syn8717496/wiki/422884).}
 \usage{
-guanlab_model(sensor_data, model = load_guanlab_model)
+guanlab_model(sensor_data, models = load_guanlab_model)
 }
 \arguments{
 \item{sensor_data}{Kinematic sensor data containing columns

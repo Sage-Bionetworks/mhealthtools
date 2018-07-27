@@ -13,7 +13,7 @@ keras sequential model
 This neural net architecture was used to generate the top 
 scoring submission to the 2017 Parkinson's Disease Digital
 Biomarker DREAM Challenge, Subchallenge 1
-(https://www.synapse.org/#!Synapse:syn8717496/wiki/422884).
+\url{https://www.synapse.org/#!Synapse:syn8717496/wiki/422884}.
 }
 \details{
 It should be noted that GuanLab themselves wrote that:
