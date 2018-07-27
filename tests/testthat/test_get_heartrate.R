@@ -1,12 +1,8 @@
 ####################################################
-# File to test getHR.R of the mHealthTools package
+# File to test get_heartrate.R of the mHealthTools package
 # Author: Meghasyam Tummalacherla
 # email: meghasyam@sagebase.org
 ####################################################
-
-######################## *** NOTE *** ########################
-## Still have to write tests for getfilteredsignal
-######################## *** NOTE *** ########################
 
 ### Require mHealthTools
 require(mhealthtools)
@@ -38,20 +34,20 @@ test_that('Function to extract heart rate per channel(R,G,B)',{
                            samplingRate = NA)
   testTibble$error = 'Sampling Rate calculated from timestamp is Inf or NaN / timestamp not found in json'
   
-  expect_is(mhealthtools:::get_heartrate(datHR), 'list') # Check if output is in correct format
+  expect_is(mhealthtools:::get_heartrate(dat = datHR), 'list') # Check if output is in correct format
   
   tempDat <- copy(datHR)
   tempDat <- tempDat %>% dplyr::rename('t' = 'timestamp') # Changed the column name of timestamp to t
-  expect_equal(mhealthtools:::get_heartrate(tempDat), testTibble) # Error if timestamp column is missing
+  expect_equal(mhealthtools:::get_heartrate(dat = tempDat), testTibble) # Error if timestamp column is missing
   
   tempDat <- copy(datHR)
   tempDat$timestamp <- rep(1, length(datHR$timestamp))
-  expect_equal(mhealthtools:::get_heartrate(tempDat), testTibble) # Error if sampling rate cannot be calculated from timestamp
+  expect_equal(mhealthtools:::get_heartrate(dat = tempDat), testTibble) # Error if sampling rate cannot be calculated from timestamp
   
   tempDat <- copy(datHR)
   tempDat <- tempDat %>% dplyr::rename('rex' = 'red') # Changed the column name of red to rex
   testTibble$error = 'red, green, blue cannot be read from JSON'
-  expect_equal(mhealthtools:::get_heartrate(tempDat), testTibble) # Error if any channel red, green or blue is missing
+  expect_equal(mhealthtools:::get_heartrate(dat = tempDat), testTibble) # Error if any channel red, green or blue is missing
   
   tempDat <- copy(datHR)
   tempDat$red <- rep(NA, length(datHR$red))
@@ -61,13 +57,22 @@ test_that('Extract heart rate given a timeseries',{
   # actual function in get_heartRate: getHrFromTimeSeries
   timeSeries <- datHR$red
   
-  expect_is(mhealthtools:::getHrFromTimeSeries(timeSeries,100), 'numeric') # Check if output is in correct format
+  expect_is(mhealthtools:::getHrFromTimeSeries(x = timeSeries,samplingRate = 100), 'numeric') # Check if output is in correct format
   
   # NA's are handled as 0s, so even if the input has NA's (not all of them we should get a numeric output)
   timeSeries[1:10] <- NA
-  expect_is(mhealthtools:::getHrFromTimeSeries(timeSeries,100), 'numeric') # Check if output is in correct format
+  expect_is(mhealthtools:::getHrFromTimeSeries(x = timeSeries,samplingRate = 100), 'numeric') # Check if output is in correct format
 
   # If all the input is NA's then the output will be c(NA,NA)
-  expect_equal(mhealthtools:::getHrFromTimeSeries(rep(NA,1000),100), c(NA,NA)) # Check if output is in correct format
+  expect_equal(mhealthtools:::getHrFromTimeSeries(x = rep(NA,1000),samplingRate = 100), c(NA,NA)) # Check if output is in correct format
+  
+})
+
+context('Filtering the raw avg pixel waveform')
+test_that('Bandpass filter the input signal',{
+  # actual function in get_heartRate: getfilteredsignal
+  timeSeries <- datHR$red
+  
+  expect_is(mhealthtools:::getfilteredsignal(x = timeSeries,samplingRate = 60), 'numeric') # Check if output is in correct format
   
 })
