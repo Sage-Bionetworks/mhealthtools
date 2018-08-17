@@ -14,7 +14,7 @@
 #' @param overlap Window overlap.
 #' @param max_imf Number of intrinsic mode functions to use for 
 #' empirical mode decomposition.
-#' @return Walk features indexed by axis and window.
+#' @return Walk features indexed by axis, window, and IMF.
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @importFrom magrittr "%>%"
@@ -22,7 +22,9 @@ get_walk_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NA,
   funs = NA, window_length = 256, time_range = c(1,9),
   frequency_range = c(1, 25), overlap = 0.5, max_imf = 4) {
+  
   features = dplyr::tibble(Window = NA, error = NA)
+  
   # check input integrity
   if (any(is.na(accelerometer_data))) {
     features$error = 'Malformed accelerometer data'

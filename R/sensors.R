@@ -45,6 +45,9 @@ kinematic_sensor_features <- function(sensor_data, transform, extract,
                                       extract_on, groups, acf_col) {
   transformed_sensor_data <- transform(sensor_data)
   if (has_error(transformed_sensor_data)) return(sensor_data)
+  incidental_cols_to_preserve <- transformed_sensor_data %>%
+    select(-dplyr::one_of(extract_on)) %>%
+    distinct() # distinct of group (table index) cols and incidental cols
   movement_features <- sensor_features(
     sensor_data = transformed_sensor_data,
     transform = function(x) x,
@@ -57,7 +60,10 @@ kinematic_sensor_features <- function(sensor_data, transform, extract,
     extract = extract,
     extract_on = "acf",
     groups = groups)
-  all_features <- dplyr::bind_rows(movement_features, acf_features)
+  all_features <- dplyr::bind_rows(movement_features, acf_features) %>%
+    dplyr::left_join(incidental_cols_to_preserve, by = groups) %>%
+    select(measurementType, dplyr::one_of(names(incidental_cols_to_preserve)),
+           dplyr::everything())
   return(all_features)
 }
 
@@ -109,7 +115,7 @@ gyroscope_features_ <- function(sensor_data,
     extract_on = extract_on, groups = groups, acf_col = "velocity")
 }
 
-default_kinematic_features <- function(sampling_rate, npeaks) {
+default_kinematic_features <- function(sampling_rate) {
   funs <- list(
     time_domain_summary = purrr::partial(time_domain_summary,
                                          sampling_rate = sampling_rate),
@@ -217,6 +223,81 @@ gyroscope_features <- function(sensor_data, transformation = NA, funs = NA,
     extract = funs,
     groups = groups)
   return(all_features)
+}
+
+#' Extract tapping (screen sensor) features
+#' 
+#' @param tap_data A data frame with columns t, x, y, buttonid containing 
+#' tapping measurements. buttonid can be from c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
+#' indicating a tap that has been classified as to the left, right or neither of those places on the screen
+#' @param depressThr A numerical threshold for intertap distance in x axis
+#' @return A dataframe of features.
+#' @export
+tapping_features <- function(tap_data,
+                             depressThr = 20) {
+  
+  results <- get_left_right_events_and_tap_intervals(tapData = tap_data,
+                                                     depressThr = depressThr)
+  tapInter <- results$tapInter
+  tapData <- results$tapData
+  error <- results$error
+  
+  # check error - if after cleaning tapping data less than 5 data points remain
+  if (error) {
+    tapFeatures <- dplyr::tibble(error = "post cleaning less than 5 tap points remain")
+    return(tapFeatures)
+  }
+  
+  meanX <- mean(tapData$x)
+  iL <- tapData$x < meanX
+  iR <- tapData$x >= meanX
+  driftLeft <- calculate_drift(x = tapData[iL,"x"], y = tapData[iL, "y"])
+  driftRight <- calculate_drift(x = tapData[iR,"x"], y = tapData[iR, "y"])
+  
+  intertap_features <- intertap_summary_features(tapInter = tapInter)
+  if(intertap_features$error == 'None'){
+    intertap_features <- intertap_features %>% dplyr::select(-error)
+    colnames(intertap_features) <- paste0(colnames(intertap_features),'TapInter')
+  }else{
+    colnames(intertap_features) <- paste0(colnames(intertap_features),'TapInter')
+  }
+  
+  tapdrift_left_features <- tapdrift_summary_features(tapDrift = driftLeft)
+  if(tapdrift_left_features$error == 'None'){
+    tapdrift_left_features <- tapdrift_left_features %>% dplyr::select(-error)
+    colnames(tapdrift_left_features) <- paste0(colnames(tapdrift_left_features),'DriftLeft')
+  }else{
+    colnames(tapdrift_left_features) <- paste0(colnames(tapdrift_left_features),'DriftLeft')
+  }
+  
+  tapdrift_right_features <- tapdrift_summary_features(tapDrift = driftRight)
+  if(tapdrift_right_features$error == 'None'){
+    tapdrift_right_features <- tapdrift_right_features %>% dplyr::select(-error)
+    colnames(tapdrift_right_features) <- paste0(colnames(tapdrift_right_features),'DriftRight')
+  }else{
+    colnames(tapdrift_right_features) <- paste0(colnames(tapdrift_right_features),'DriftRight')
+  }
+  
+  tapdata_features <- tap_data_summary_features(tapData = tap_data)
+  if(tapdata_features$error == 'None'){
+    tapdata_features <- tapdata_features %>% dplyr::select(-error)
+  }
+  
+  tapFeatures <- dplyr::bind_cols(intertap_features,
+                                  tapdrift_left_features,
+                                  tapdrift_right_features,
+                                  tapdata_features)
+  
+  ftrs_error <- grep('error', colnames(tapFeatures))
+  ftrs_error <- paste(tapFeatures[ftrs_error], collapse = ' ; ')
+  if(ftrs_error == ''){
+    ftrs_error = 'None'
+  }
+  
+  tapFeatures$error <- ftrs_error
+  tapFeatures <- tapFeatures %>% 
+    as.data.frame()
+  return(tapFeatures)
 }
 
 #' Apply standard transformations to kinematic sensor data

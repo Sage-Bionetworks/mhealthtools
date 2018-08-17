@@ -1,3 +1,81 @@
+#' Calculate the fatigue given a vector x
+#' 
+#' @param x A numeric vector containing inter tap intevals
+#' @return A list containing fatigue10, fatigue25, fatigue50 where 
+#' fatigueX is the difference in the mean values of the
+#' first X percent of input x and last X percent of input x
+fatigue <- function(x) {
+  x <- x[!is.na(x)]
+  n <- length(x)
+  top10 <- round(0.1 * n)
+  top25 <- round(0.25 * n)
+  top50 <- floor(0.5 * n)
+  return(list(fatigue10 = mean(x[1:top10]) - mean(x[(n -top10):n]),
+              fatigue25 = mean(x[1:top25]) - mean(x[(n - top25):n]),
+              fatigue50 = mean(x[1:top50]) - mean(x[(n - top50):n])))
+}
+
+
+#' Calculate the drift given x and y
+#' 
+#' @param x A vecor containing x co-ordinates (same length as that of y)
+#' @param y A vecor containing y co-ordinates (same length as that of x)
+#' @return Drift vector which is sqrt(dx^2 + dy^2)
+calculate_drift <- function(x, y) {
+  dx <- diff(x, lag = 1)
+  dy <- diff(y, lag = 1)
+  return(sqrt(dx^2 + dy^2))
+}
+
+
+#' Calculate the Mean Teager-Kaiser energy, adapted from TKEO function in library(seewave) using f = 1, m = 1, M = 1
+#' 
+#' @param x A vector x whose Mean Taiger-Kaiser Energy Operator value needs to be calculated
+#' @return A numeric value that is representative of the MeanTKEO
+mean_tkeo <- function(x) {
+  x <- x[!is.na(x)] # Remove NAs
+  y <- x^2 - c(x[-1], NA) * c(NA, x[1:(length(x) -
+                                         1)])
+  return(mean(y, na.rm = TRUE))
+}
+
+
+#' Calculate the Coefficient of Variation (coef_var) for a given sequence
+#' 
+#' @param x A numeric vector x whose Coefficient of Variation needs to be calculated
+#' @return A numeric value that is representative of the Coefficient of Variation
+coef_var <- function(x) {
+  x <- x[!is.na(x)] # Remove NAs
+  return((sd(x)/mean(x)) * 100)
+}
+
+#' Curate the raw tapping data to get Left and Right events, after applying the threshold
+#' 
+#' @param tapData A dataframe with t,x,y and buttonid columns
+#' @param depressThr The threshold for intertap distance
+#' @return A dataframe with feature values and the appropriate error message
+get_left_right_events_and_tap_intervals <- function(tapData, depressThr = 20) {
+  tapTime <- tapData$t - tapData$t[1]
+  ## calculate X offset
+  tapX <- tapData$x - mean(tapData$x)
+  ## find left/right finger 'depress' event
+  dX <- diff(tapX)
+  i <- c(1, which(abs(dX) > depressThr) + 1)
+  ## filter data
+  tapData <- tapData[i, ]
+  tapTime <- tapTime[i]
+  ## find depress event intervals
+  tapInter <- diff(tapTime)
+  
+  ### ERROR CHECK -
+  if (nrow(tapData) >= 5) {
+    return(list(tapData = tapData, tapInter = tapInter,
+                error = FALSE))
+  } else {
+    return(list(tapData = NA, tapInter = NA, error = TRUE))
+  }
+}
+
 #' Calculate the sampling rate.
 #' 
 #' @param sensor_data A data frame with columns t, x, y, z.
@@ -140,30 +218,67 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @param sensor_data A data frame with columns t, axis, value.
 #' @param window_length Length of the filter
 #' @param overlap window overlap
+#' @param include_timestamp Whether to include columns for starting and ending
+#' timestamps for each row.
 #' @return Windowed sensor data
 window <- function(sensor_data, window_length, overlap) {
   if (has_error(sensor_data)) return(sensor_data)
   tryCatch({
-    windowed_sensor_data <- sensor_data %>%
-      tidyr::spread(axis, value) %>% 
+    spread_sensor_data <- sensor_data %>%
+      tidyr::spread(axis, value)
+    windowed_sensor_data <- spread_sensor_data %>% 
       dplyr::select(x, y, z) %>%
       purrr::map(windowSignal, 
                  window_length = window_length, overlap = overlap)
     tidy_windowed_sensor_data <- lapply(
       windowed_sensor_data,
       function(windowed_matrix) {
-        windowed_matrix <- cbind(index = 1:dim(windowed_matrix)[1],
+        windowed_matrix <- cbind(window_index = 1:dim(windowed_matrix)[1],
                                  windowed_matrix)
         tidy_tibble <- windowed_matrix %>% 
           dplyr::as_tibble() %>%
-          tidyr::gather(Window, value, -index, convert=T)
+          tidyr::gather(Window, value, -window_index, convert=T)
         return(tidy_tibble)
       }) %>% 
       dplyr::bind_rows(.id = "axis")
+    start_end_times <- window_start_end_times(spread_sensor_data$t,
+                                              window_length = window_length,
+                                              overlap = overlap)
+    tidy_windowed_sensor_data <- tidy_windowed_sensor_data %>% 
+      dplyr::left_join(start_end_times, by="Window") %>%
+      dplyr::select(axis, Window, window_index, window_start_time,
+                    window_end_time, value)
     return(tidy_windowed_sensor_data)
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Windowing error")
   })
+}
+
+#' Compute start/end timestamps for each window
+#' 
+#' @param t A numeric time vector
+#' @param window_length Length of the filter
+#' @param overlap Window overlap
+#' @return A dataframe with columns Window, window_start_time,
+#' window_end_time, window_start_index, window_end_index
+window_start_end_times <- function(t, window_length, overlap) {
+  seq_length <- length(t)
+  if (seq_length < window_length) {
+    window_length <- seq_length
+    overlap <- 1
+  }  
+  start_indices <- seq(1, seq_length, window_length*overlap)
+  end_indices <- seq(window_length, seq_length, window_length*overlap)
+  start_indices <- start_indices[1:length(end_indices)]
+  start_times <- t[start_indices]
+  end_times <- t[end_indices]
+  window_start_end_times <- dplyr::tibble(
+    Window = seq(1, length(start_indices)),
+    window_start_time = start_times,
+    window_end_time = end_times,
+    window_start_index = start_indices,
+    window_end_index = end_indices)
+  return(window_start_end_times)
 }
 
 #' Window a signal
@@ -176,16 +291,10 @@ window <- function(sensor_data, window_length, overlap) {
 #' @param overlap Window overlap.
 #' @return A matrix of window_length x nwindows
 windowSignal <- function(values, window_length = 256, overlap = 0.5){
-  nlen = length(values)
-  
-  # If length of signal is less than window length
-  if (nlen < window_length){
-    window_length = nlen; overlap = 1;
-  }
-  
-  nstart = seq(1, nlen, window_length*overlap)
-  nend = seq(window_length, nlen, window_length*overlap)
-  nstart = nstart[1:length(nend)]
+  start_end_times <- window_start_end_times(values, window_length = window_length,
+                                            overlap = overlap)
+  nstart = start_end_times$window_start_index
+  nend = start_end_times$window_end_index
   wn = seewave::hamming.w(window_length)
   
   a = apply(cbind(nstart,nend), 1, function(x, a, wn){
@@ -356,7 +465,7 @@ mutate_integral <- function(sensor_data, sampling_rate, groups, col, derived_col
 #' @param sensor_data A data frame with columns \code{axis}, \code{Window}, and \code{col}.
 #' @param col Name of column to calculate acf of.
 #' @param groups Column names to group on when computing acf.
-#' @return A tibble with columns axis, window, index, acf
+#' @return A tibble with columns axis, window, window_index, acf
 calculate_acf <- function(sensor_data, col, groups) {
   if (has_error(sensor_data)) return(sensor_data)
   acf_data <- tryCatch({
@@ -366,7 +475,7 @@ calculate_acf <- function(sensor_data, col, groups) {
       dplyr::mutate(data = purrr::map(data, function(d) {
         acf_col <- acf(d[,col], plot=F)$acf
         index_col <- 1:length(acf_col)
-        dplyr::bind_cols(acf = acf_col, index = index_col)
+        dplyr::bind_cols(acf = acf_col, window_index = index_col)
       })) %>%
       tidyr::unnest(data) %>% 
       dplyr::select_at(.vars = c(groups, "acf"))
@@ -420,6 +529,106 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
   })
   return(gr_error)
 }
+
+#' Get default tapping features for metrics that use the tapping dataframe as a whole
+#' 
+#' Calculates features characterising tapping data (interaction terms etc., from the tap data frame)
+#' 
+#' @param tap_data A data frame with columns t, x, y, buttonid containing 
+#' tapping measurements. buttonid can be from c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
+#' indicating a tap that has been classified as to the left, right or neither of those places on the screen
+#' @return A features data frame of dimension 1 x n_features
+tap_data_summary_features <- function(tapData){
+  ftrs <- tryCatch({
+    dplyr::tibble(numberTaps = nrow(tapData),
+                  buttonNoneFreq = sum(tapData$buttonid == "TappedButtonNone")/nrow(tapData),
+                  corXY = cor(tapData$x, tapData$y, use = "p"),
+                  error = 'None')
+  },
+  error = function(x){
+    return(dplyr::tibble(error = 'Error calculating tap data(frame) summary features'))
+  })
+}
+
+#' Get default tapping features for intertap distance
+#' 
+#' Calculates features characterising a timeseries data 
+#' 
+#' @param tapInter A numeric vector containing intertap intervals
+#' @return A features data frame of dimension 1 x n_features
+intertap_summary_features <- function(tapInter){
+  
+  # Remove NAs
+  tapInter <- tapInter %>% na.omit()
+  
+  # determine Autocorrelation
+  auxAcf <- tryCatch({acf(tapInter, lag.max = 2,
+                          plot = FALSE)$acf},
+                     error = function(x){
+                       return(list(NA,NA,NA))
+                     })
+  
+  # calculate fatigue
+  auxFatigue <- fatigue(tapInter)
+  
+  ftrs <- tryCatch({
+    dplyr::tibble(mean = mean(tapInter,na.rm = TRUE),
+                  median = median(tapInter, na.rm = TRUE),
+                  iqr = IQR(tapInter, type = 7, na.rm = TRUE),
+                  min = min(tapInter,na.rm = TRUE),
+                  max = max(tapInter, na.rm = TRUE),
+                  skew = e1071::skewness(tapInter),
+                  kur = e1071::kurtosis(tapInter),
+                  sd = sd(tapInter,na.rm = TRUE),
+                  mad = mad(tapInter, na.rm = TRUE),
+                  cv = coef_var(tapInter),
+                  range = diff(range(tapInter,na.rm = TRUE)),
+                  tkeo = mean_tkeo(tapInter),
+                  ar1 = auxAcf[[2]],
+                  ar2 = auxAcf[[3]],
+                  fatigue10 = auxFatigue[[1]],
+                  fatigue25 = auxFatigue[[2]],
+                  fatigue50 = auxFatigue[[3]],
+                  error = 'None')
+  },
+  error = function(x){
+    return(dplyr::tibble(error = 'Error Calculating intertap summary features'))
+  })
+  return(ftrs)
+}
+
+#' Get default tapping features for tap drift
+#' 
+#' Calculates features characterising a timeseries data 
+#' 
+#' @param tapDrift A numeric vector 
+#' @return A features data frame of dimension 1 x n_features
+tapdrift_summary_features <- function(tapDrift){
+  
+  # Remove NAs
+  tapDrift <- tapDrift %>% na.omit()
+  
+  ftrs <- tryCatch({
+    dplyr::tibble(mean = mean(tapDrift, na.rm = TRUE),
+                  median = median(tapDrift, na.rm = TRUE),
+                  iqr = IQR(tapDrift, type = 7, na.rm = TRUE),
+                  min = min(tapDrift, na.rm = TRUE),
+                  max = max(tapDrift, na.rm = TRUE),
+                  skew = e1071::skewness(tapDrift),
+                  kur = e1071::kurtosis(tapDrift),
+                  sd = sd(tapDrift, na.rm = TRUE),
+                  mad = mad(tapDrift, na.rm = TRUE),
+                  cv = coef_var(tapDrift), 
+                  range = diff(range(tapDrift, na.rm = TRUE)),
+                  error = 'None')
+  },
+  error = function(x){
+    return(dplyr::tibble(error = 'Error Calculating tapdrift summary features'))
+  })
+  return(ftrs)
+}
+
+
 
 #' Get time domain features
 #' 
@@ -537,7 +746,7 @@ frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
 #' @param nfreq Number of frequecy points to be interpolated.
 #' @return An AR spectrum.
 getSpectrum <- function(values, sampling_rate = 100, nfreq = 500){
-  tmp = stats::spec.ar(values, nfreq = nfreq, plot = F)
+  tmp = stats::spec.ar(values, n.freq = nfreq, plot = F)
   spect = data.frame(freq = tmp$freq * sampling_rate, pdf = tmp$spec)
   return(spect)
 }
@@ -699,5 +908,5 @@ extract_features <- function(x, col, groups, funs) {
       f = .)) %>%
     purrr::reduce(dplyr::left_join, by = groups) %>%
     dplyr::mutate(measurementType = col) %>%
-    dplyr::select(measurementType, axis, Window, dplyr::everything())
+    dplyr::select(measurementType, dplyr::one_of(groups), dplyr::everything())
 }
