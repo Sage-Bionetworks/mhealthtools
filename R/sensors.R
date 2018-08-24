@@ -137,6 +137,10 @@ default_kinematic_features <- function(sampling_rate) {
 #' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param funs A list of feature extraction functions that each accept
 #' a single numeric vector as input.
+#' @param model A function which accepts as input \code{sensor_data} and
+#' outputs features. Useful for models which compute individual statistics
+#' using multiple input variables, or models that otherwise don't fit well
+#' into the feature extraction paradigm as implemented in \code{sensor_features}.
 #' @param window_length Length of sliding windows.
 #' @param overlap Window overlap.
 #' @param time_range Timestamp range to use.
@@ -186,6 +190,10 @@ accelerometer_features <- function(sensor_data, transformation = NA, funs = NA,
 #' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param funs A list of feature extraction functions that each accept
 #' a single numeric vector as input.
+#' @param model A function which accepts as input \code{sensor_data} and
+#' outputs features. Useful for models which compute individual statistics
+#' using multiple input variables, or models that otherwise don't fit well
+#' into the feature extraction paradigm as implemented in \code{sensor_features}.
 #' @param window_length Length of sliding windows.
 #' @param overlap Window overlap.
 #' @param time_range Timestamp range to use.

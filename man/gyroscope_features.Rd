@@ -23,6 +23,11 @@ its input will already be "cleaned" by detrending, bandpassing, etc. See
 \item{funs}{A list of feature extraction functions that each accept
 a single numeric vector as input.}
 
+\item{model}{A function which accepts as input \code{sensor_data} and
+outputs features. Useful for models which compute individual statistics
+using multiple input variables, or models that otherwise don't fit well
+into the feature extraction paradigm as implemented in \code{sensor_features}.}
+
 \item{window_length}{Length of sliding windows.}
 
 \item{overlap}{Window overlap.}
