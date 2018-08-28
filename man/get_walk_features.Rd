@@ -33,7 +33,7 @@ time-series vector as input.}
 empirical mode decomposition.}
 }
 \value{
-Walk features indexed by axis and window.
+Walk features indexed by axis, window, and IMF.
 }
 \description{
 Extract walk features from raw accelerometer and gyroscope data.
