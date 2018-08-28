@@ -47,7 +47,7 @@ kinematic_sensor_features <- function(sensor_data, transform, extract,
   if (has_error(transformed_sensor_data)) return(sensor_data)
   incidental_cols_to_preserve <- transformed_sensor_data %>%
     dplyr::select(-dplyr::one_of(extract_on)) %>%
-    distinct() # distinct of group (table index) cols and incidental cols
+    dplyr::distinct() # distinct of group (table index) cols and incidental cols
   movement_features <- sensor_features(
     sensor_data = transformed_sensor_data,
     transform = function(x) x,
