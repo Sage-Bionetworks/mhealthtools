@@ -1,12 +1,22 @@
-####### MAIN
-#' extracts features from tremor task handToNose accelerometer and gyroscope JSON data file
+#' Extract kinetic tremor features from raw accelerometer and gyroscope data.
 #'
-#'
-#' @param tremorJsonFileLoc path to tremor accelerometer json file
-#' @return data frame of tremor features
+#' @param accelerometer_data A data frame with columns t, x, y, z containing 
+#' accelerometer measurements. 
+#' @param gyroscope_data A data frame with columns t, x, y, z containing 
+#' gyroscope measurements.
+#' @param gravity_data A data frame with columns t, x, y, z containing 
+#' gravity sensor measurements.
+#' @param funs A list of feature extraction functions that accept a single
+#' numeric vector as input.
+#' @param window_length Length of sliding windows.
+#' @param time_range Timestamp range to use.
+#' @param frequency_range Frequency range for the bandpass filter.
+#' @param overlap Window overlap.
+#' @param max_imf Number of intrinsic mode functions to use for 
+#' empirical mode decomposition.
+#' @return Kinetic tremor features indexed by axis, window, and IMF.
 #' @export
-#' @examples
-#' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder 
+#' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 get_kinetic_tremor_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NA,
   funs = NA, window_length = 256, time_range = c(1,9), 
@@ -69,5 +79,4 @@ get_kinetic_tremor_features <- function(
   }
   
   return(features)
-
 }  

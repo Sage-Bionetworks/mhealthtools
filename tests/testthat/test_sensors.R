@@ -4,10 +4,6 @@
 # email: meghasyam@sagebase.org
 ####################################################
 
-######################## *** NOTE *** ########################
-## Still have to write tests for extract_features (started, commented code at bottom)
-######################## *** NOTE *** ########################
-
 ### Require mHealthTools
 require(mhealthtools)
 
@@ -27,6 +23,7 @@ library(purrr)
 
 ### Load data file
 data("sensor_data")
+data('tap_data')
 dat <- sensor_data
 
 ### flatten data to the format needed for mHealthTools
@@ -38,77 +35,191 @@ flatten_data <- function(dat, metric) {
   return(as_tibble(dat))
 }
 
-### Get the formatted accelerometer and gyroscope data to use in testing below
+### Get the formatted tapping, accelerometer and gyroscope data to use in testing below
+datTap <- tap_data
 datAccel <- flatten_data(dat,'userAcceleration')
 datGyro  <- flatten_data(dat,'rotationRate')
 datGravity <- flatten_data(dat, 'gravity')
 
 ### Individual test functions
-context('Extract Accelerometer features')
+context('Accelerometer features')
+test_that('Wrapper to extract accelerometer features',{
+  # actual function in sensors.R: accelerometer_features
+  
+  expect_is(mhealthtools:::accelerometer_features(sensor_data = datAccel), 'data.frame') # Check if output is in correct format
+  
+})
+
 test_that('Function to extract accelerometer features',{
-  # actual function in sensors: accelerometer_features
-  testTibble <- dplyr::tibble(window = "NA", error = "Could not calculate sampling rate.")
-    
-  expect_is(mhealthtools:::accelerometer_features(datAccel), 'data.frame') # Check if output is in correct format
+  # actual function in sensors.R: accelerometer_features_
   
-  tempData <- data.table::copy(datAccel)
-  tempData$t[1:2] <- NA
-  expect_equal(mhealthtools:::accelerometer_features(tempData), testTibble) # Check for error tibble for sampling rate issue
+  transformation <- mhealthtools:::transformation_window(window_length = 256,
+                                                         overlap = 0.5) # Required default transformation for the data
+  funs <- mhealthtools:::default_kinematic_features(sampling_rate = 100) # Required default feature extraction functions
+  
+  expect_is(mhealthtools:::accelerometer_features_(sensor_data = datAccel,
+                                                   transform = purrr::partial(
+                                                     mhealthtools:::transform_accelerometer_data,
+                                                     transformation = transformation,
+                                                     window_length = 256,
+                                                     overlap = 0.5,
+                                                     time_range = c(1,9),
+                                                     frequency_range = c(1,25),
+                                                     sampling_rate = 100),
+                                                   extract = funs,
+                                                   groups = c('axis','Window')), 'data.frame') # Check if output is in correct format
+  
 })
 
-context('Extract Gyroscope features')
+context('Gyroscope features')
+test_that('Wrapper to extract gyroscope features',{
+  # actual function in sensors.R: gyroscope_features
+  
+  expect_is(mhealthtools:::gyroscope_features(sensor_data = datGyro), 'data.frame') # Check if output is in correct format
+  
+})
+
 test_that('Function to extract gyroscope features',{
-  # actual function in sensors: gyroscope_features
-  testTibble <- dplyr::tibble(window = "NA", error = "Could not calculate sampling rate.")
+  # actual function in sensors.R: gyroscope_features_
   
-  expect_is(mhealthtools:::gyroscope_features(datGyro), 'data.frame') # Check if output is in correct format
+  transformation <- mhealthtools:::transformation_window(window_length = 256,
+                                                         overlap = 0.5) # Required default transformation for the data
+  funs <- mhealthtools:::default_kinematic_features(sampling_rate = 100) # Required default feature extraction functions
   
-  tempData <- data.table::copy(datGyro)
-  tempData$t[1:2] <- NA
-  expect_equal(mhealthtools:::gyroscope_features(tempData), testTibble) # Check for error tibble for sampling rate issue
+  expect_is(mhealthtools:::gyroscope_features_(sensor_data = datAccel,
+                                               transform = purrr::partial(
+                                                 mhealthtools:::transform_accelerometer_data,
+                                                 transformation = transformation,
+                                                 window_length = 256,
+                                                 overlap = 0.5,
+                                                 time_range = c(1,9),
+                                                 frequency_range = c(1,25),
+                                                 sampling_rate = 100),
+                                               extract = funs,
+                                               groups = c('axis','Window')), 'data.frame') # Check if output is in correct format
+  
 })
 
-# context('Function Mapping onto a column')
-# test_that('Extract features for a column from a list of given functions',{
-#   # actual function in sensors: extract_features
-#    
-#   funs <- list(
-#     time_domain_summary = function(sensor_data) {
-#       sampling_rate <- mhealthtools:::get_sampling_rate(sensor_data)
-#       return(function(accel) {
-#         mhealthtools:::time_domain_summary(accel, sampling_rate = sampling_rate)
-#       })
-#     },
-#     frequency_domain_summary = function(sensor_data) {
-#       sampling_rate <- mhealthtools:::get_sampling_rate(sensor_data)
-#       return(function(accel) {
-#         mhealthtools:::frequency_domain_summary(accel, sampling_rate = sampling_rate)
-#       })
-#     },
-#     frequency_domain_energy = function(sensor_data) {
-#       sampling_rate <- mhealthtools:::get_sampling_rate(sensor_data)
-#       return(function(accel) {
-#         mhealthtools:::frequency_domain_energy(accel, sampling_rate = sampling_rate)
-#       })
-#     }
-#   )
-#   sensor_data <- data.table::copy(datAccel)
-#   
-#   # Preprocess data to be fed into extract_features
-#   sampling_rate <- mhealthtools:::get_sampling_rate(sensor_data)
-#   window_length <- 256
-#   frequency_range <- c(1,25)
-#   time_range = c(1,9)
-#   overlap = 0.5
-#   # preprocess and calculate jerk, velocity, displacement
-#   sensor_data <- sensor_data %>%
-#     mhealthtools:::tidy_sensor_data() %>% 
-#     mhealthtools:::mutate_detrend() %>%
-#     mhealthtools:::mutate_bandpass(window_length, sampling_rate, frequency_range) %>%
-#     mhealthtools:::filter_time(time_range[1], time_range[2]) %>%
-#     mhealthtools:::window(window_length, overlap) %>%
-#     mhealthtools:::mutate_jerk(sampling_rate) %>%
-#     mhealthtools:::mutate_velocity(sampling_rate) %>%
-#     mhealthtools:::mutate_displacement(sampling_rate)
-#      
-#  })
+context('Tapping features')
+test_that('Function to extract tapping features',{
+  # actual function in sensors.R: tapping_features
+  
+  expect_is(mhealthtools:::tapping_features(tap_data = datTap), 'data.frame') # Check if output is in correct format
+})
+
+context('Transformation functions')
+test_that('Function to transform accelometer data with given input parameters',{
+  # actual function in sensors.R: transform_accelerometer_data
+  
+  expect_is(mhealthtools:::transform_accelerometer_data(sensor_data = datAccel), 'data.frame') # Check if output is in correct format
+})
+
+test_that('Function to transform gyroscope data with given input parameters',{
+  # actual function in sensors.R: transform_gyroscope_data
+  
+  expect_is(mhealthtools:::transform_gyroscope_data(sensor_data = datGyro), 'data.frame') # Check if output is in correct format
+})
+
+test_that('Function to transform kinematic sensor with given input parameters',{
+  # actual function in sensors.R: transform_kinematic_sensor_data
+  
+  expect_is(mhealthtools:::transform_kinematic_sensor_data(sensor_data = datAccel,
+                                                           transformation = NA,
+                                                           window_length = 256,
+                                                           overlap = 0.5,
+                                                           time_range = c(1,9),
+                                                           frequency_range = c(1,25),
+                                                           sampling_rate = 100),
+            'data.frame') # Check if output is in correct format
+})
+
+test_that('Function to initialize windowing transformation function with input parameters',{
+  # actual function in sensors.R: transformation_window
+  
+  expect_is(mhealthtools:::transformation_window(window_length = 256,
+                                                 overlap = 0.5),
+            'function') # Check if output is in correct format
+})
+
+test_that('Function to initialize IMF windowing transformation function with input parameters',{
+  # actual function in sensors.R: transformation_imf_window
+  
+  expect_is(mhealthtools:::transformation_imf_window(window_length = 256, 
+                                                     overlap = 0.5,
+                                                     max_imf = 4),
+            'function') # Check if output is in correct format
+})
+
+test_that('Function to initialize list of default kinematic feature extraction functions',{
+  # actual function in sensors.R: default_kinematic_features
+  
+  expect_is(mhealthtools:::default_kinematic_features(sampling_rate = 100,
+                                                      npeaks = 4),
+            'list') # Check if output is in correct format  
+})
+
+context('Processing sensor data')
+test_that('Preprocess sensor data',{
+  # actual function in sensors.R: preprocess_sensor_data
+  
+  expect_is(mhealthtools:::preprocess_sensor_data(sensor_data = datAccel,
+                                                  window_length = 256,
+                                                  sampling_rate = 100,
+                                                  frequency_range = c(1,25),
+                                                  time_range = c(1,9)),
+            'data.frame') # Check if output is in correct format
+})
+
+context('Kinematic sensor features')
+test_that('Extract kinematic sensor features',{
+  # actual function in sensors.R: kinematic_sensor_features
+
+  transformation <- mhealthtools:::transformation_window(window_length = 256,
+                                                         overlap = 0.5) # Required default transformation for the data
+  funs <- mhealthtools:::default_kinematic_features(sampling_rate = 100) # Required default feature extraction functions
+  
+  expect_is(mhealthtools:::kinematic_sensor_features(sensor_data = datAccel,
+                                                     transform = purrr::partial(
+                                                       mhealthtools:::transform_accelerometer_data,
+                                                       transformation = transformation,
+                                                       window_length = 256,
+                                                       overlap = 0.5,
+                                                       time_range = c(1,9),
+                                                       frequency_range = c(1,25),
+                                                       sampling_rate = 100),
+                                                     extract = funs,
+                                                     extract_on = c("acceleration", "jerk", 
+                                                                    "velocity", "displacement"),
+                                                     
+                                                     groups = c('axis','Window'),
+                                                     acf_col = "acceleration"),
+            'data.frame') # Check if output is in correct format
+})
+
+
+context('sensor features')
+test_that('Extract sensor features',{
+  # actual function in sensors.R: sensor_features
+  
+  transformation <- mhealthtools:::transformation_window(window_length = 256,
+                                                         overlap = 0.5) # Required default transformation for the data
+  funs <- mhealthtools:::default_kinematic_features(sampling_rate = 100) # Required default feature extraction functions
+  transform = purrr::partial(mhealthtools:::transform_accelerometer_data,
+                             transformation = transformation,
+                             window_length = 256,
+                             overlap = 0.5,
+                             time_range = c(1,9),
+                             frequency_range = c(1,25),
+                             sampling_rate = 100)
+
+  transformed_accelerometer_data <- transform(datAccel)
+    
+  expect_is(mhealthtools:::sensor_features(sensor_data = transformed_accelerometer_data,
+                                           transform = function(x) x,
+                                           extract = funs,
+                                           extract_on = c("acceleration", "jerk", 
+                                                          "velocity", "displacement"),
+                                           
+                                           groups = c('axis','Window')),
+            'data.frame') # Check if output is in correct format
+})

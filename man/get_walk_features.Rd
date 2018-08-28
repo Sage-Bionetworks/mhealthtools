@@ -38,7 +38,7 @@ into the feature extraction paradigm as implemented in \code{sensor_features}.}
 empirical mode decomposition.}
 }
 \value{
-Walk features indexed by axis and window.
+Walk features indexed by axis, window, and IMF.
 }
 \description{
 Extract walk features from raw accelerometer and gyroscope data.

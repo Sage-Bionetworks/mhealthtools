@@ -1,7 +1,7 @@
 Package: mhealthtools
 Type: Package
 Title: mhealthtools - Package for processing mobile sensor data and to extract meaningful features
-Version: 0.1.0
+Version: 0.1.1
 Description: mHealthTools package processes data from various mobile sensors such as accelerometer, gyroscope,
     pedometer, screen touches, and microphones. Though this package is specifically designed around mHealth 
     applications developed by Sage Bionetwokrs, it works in general with any mobile sensors, provided the data 
@@ -17,20 +17,21 @@ License: GPL-3
 LazyData: TRUE
 Imports:
     seewave,
-    tidyverse,
     dplyr,
     data.table,
     purrr,
     tibble,
     tidyr,
     signal,
-    pracma,
     e1071,
-    fractal,
-    rlang,
-    statcomp,
     stringr,
-    stats
+    stats,
+    EMD,
+    e1071,
+    pracma,
+    rlang,
+    tibble
+Remotes: url::http://download.r-forge.r-project.org/src/contrib/statcomp_0.0.1.1000.tar.gz
 URL: https://github.com/Sage-Bionetworks/mHealthTools
 RoxygenNote: 6.0.1
 Suggests:
