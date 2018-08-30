@@ -221,7 +221,7 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @param include_timestamp Whether to include columns for starting and ending
 #' timestamps for each row.
 #' @return Windowed sensor data
-window <- function(sensor_data, window_length, overlap, include_timestamp = F) {
+window <- function(sensor_data, window_length, overlap) {
   if (has_error(sensor_data)) return(sensor_data)
   tryCatch({
     spread_sensor_data <- sensor_data %>%
