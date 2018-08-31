@@ -5,8 +5,8 @@
 \title{Extract accelerometer features}
 \usage{
 accelerometer_features(sensor_data, transformation = NA, funs = NA,
-  groups = c("axis", "Window"), window_length = 256, overlap = 0.5,
-  time_range = c(1, 9), frequency_range = c(1, 25))
+  model = NA, groups = c("axis", "Window"), window_length = 256,
+  overlap = 0.5, time_range = c(1, 9), frequency_range = c(1, 25))
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, x, y, z containing 
@@ -22,6 +22,11 @@ its input will already be "cleaned" by detrending, bandpassing, etc. See
 
 \item{funs}{A list of feature extraction functions that each accept
 a single numeric vector as input.}
+
+\item{model}{A function which accepts as input \code{sensor_data} and
+outputs features. Useful for models which compute individual statistics
+using multiple input variables, or models that otherwise don't fit well
+into the feature extraction paradigm as implemented in \code{sensor_features}.}
 
 \item{window_length}{Length of sliding windows.}
 
