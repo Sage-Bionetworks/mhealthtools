@@ -1,0 +1,42 @@
+---
+title: "mhealthtools"
+author: "Meghasyam Tummalacherla"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{mhealthtools}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Purpose
+
+The current Vignette is something of a metaVignette list as in the sense it gives a list of entities that need Vignettes for the mhealthtools package
+
+## List of required Vignettes
+1. Introduction:    
+    1.1 Installation of the package     
+    1.2 Loading the data     
+    1.3 Tasks / activities the package is applicable to     
+
+2. Functionality:    
+  2.1 Structure of package (Using in built model vs specifying a model)    
+  2.2 List of functions    
+
+3. Applicability of Package:    
+  3.1 Tremor tasks    
+  3.2 Tapping tasks    
+  3.3 Voice tasks    
+  3.4 Specifying your own model    
+
+4. Sensors    
+  4.1 Accelerometer    
+  4.2 Gyroscope    
+  4.3 Screen (tap data)    

@@ -1,0 +1,115 @@
+---
+title: "Sensors"
+author: "Meghasyam Tummalacherla"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Sensors}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+`mhealthtools` offers a set of tools to extract features from some of the sensors present in almost all of the modern day phones. These include accelerometer and gyroscope data. We present examples to do so
+
+## Accelerometer
+
+#### Data format and Sample data
+
+`mhealthtools` already comes preloaded with sample accelerometer data. You can access the data through `mhealthtools::accelerometer_data`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract accelerometer features). Where `t` is the timestamp; `x`,`y` and `z` are the X,Y and Z- axis respectively
+
+```{r}
+require(mhealthtools)
+accel_data <- mhealthtools::accelerometer_data
+head(accel_data,5)
+```
+
+Let's plot to see how the data actually looks like (after adjusting for start of the timestamp to be `0`)
+
+```{r, echo=FALSE, fig.width=8, fig.height=4}
+library(ggplot2)
+a <- accel_data
+a$t <- a$t - a$t[1]
+a <- tidyr::gather(a, 'axis' , 'val', -t)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis) + ylim(c(-0.025, 0.025))
+```
+
+#### Extracting features (using pre-existing pipeline)
+To use the existing feature set (you can define your own features or feed in your own model to extract features in `mhealthtools`!!). Note: You need to get the data in the proper format (as that of the sample data) to use the feature extraction pipeline.
+
+```{r, warning=FALSE, error=FALSE, message=FALSE}
+require(mhealthtools)
+library(dplyr)
+accel_features <- mhealthtools::accelerometer_features(accel_data)
+```
+```{r}
+head(accel_features)
+```
+
+
+## Gyroscope
+
+#### Data format and Sample data
+
+`mhealthtools` already comes preloaded with sample gyroscope data. You can access the data through `mhealthtools::gyroscope_data`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract gyroscope features). Where `t` is the timestamp; `x`,`y` and `z` are the X,Y and Z- axis respectively
+
+```{r}
+require(mhealthtools)
+gyro_data <- mhealthtools::gyroscope_data
+head(gyro_data,5)
+```
+
+Let's plot to see how the data actually looks like (after adjusting for start of the timestamp to be `0`)
+
+```{r, echo=FALSE, fig.width=8, fig.height=4}
+library(ggplot2)
+g <- gyro_data
+g$t <- g$t - g$t[1]
+g <- tidyr::gather(g, 'axis' , 'val', -t)
+ggplot(g, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis) + ylim(c(-0.025, 0.025))
+```
+
+#### Extracting features (using pre-existing pipeline)
+To use the existing feature set (you can define your own features or feed in your own model to extract features in `mhealthtools`!!). Note: You need to get the data in the proper format (as that of the sample data) to use the feature extraction pipeline.
+
+```{r, warning=FALSE, error=FALSE, message=FALSE}
+require(mhealthtools)
+library(dplyr)
+gyro_features <- mhealthtools::gyroscope_features(gyro_data)
+```
+```{r}
+head(gyro_features)
+```
+
+## Screen (Tap data)
+
+For more information on how this data was collected please look into the Parkinson mpower study conducted by Sage Bionetworks (https://parkinsonmpower.org/)
+
+#### Data format and Sample data
+
+`mhealthtools` already comes preloaded with sample tapping data. You can access the data through `mhealthtools::tap_data`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract gyroscope features). Where `t` is the timestamp; `x` and `y` are the co-ordinates of the tap, and `buttonid` is to indicate whether the user tapped the left or the right button.
+
+```{r}
+require(mhealthtools)
+tap_data <- mhealthtools::tap_data
+head(tap_data,5)
+```
+
+
+#### Extracting features (using pre-existing pipeline)
+To use the existing feature set (you can define your own features or feed in your own model to extract features in `mhealthtools`!!). Note: You need to get the data in the proper format (as that of the sample data) to use the feature extraction pipeline.
+
+```{r, warning=FALSE, error=FALSE, message=FALSE}
+require(mhealthtools)
+library(dplyr)
+tap_features <- mhealthtools::tapping_features(tap_data)
+```
+```{r}
+head(tap_features)
+```
