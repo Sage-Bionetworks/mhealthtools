@@ -206,7 +206,7 @@ kinetic_tremor_gyroscope_data <- kinetic_tremor_data$rotationRate
 kinetic_tremor_gyroscope_data$t <- kinetic_tremor_data$timestamp
 ```
 
-Now let's get the kinetic_tremor features using the tidy data
+Now let's get the kinetic tremor features using the tidy data
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
 kinetic_tremor_features <- get_kinetic_tremor_features(kinetic_tremor_accelerometer_data, kinetic_tremor_gyroscope_data)
