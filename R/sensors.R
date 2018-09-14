@@ -143,6 +143,10 @@ default_kinematic_features <- function(sampling_rate) {
 #' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param funs A list of feature extraction functions that each accept
 #' a single numeric vector as input.
+#' @param model A function which accepts as input \code{sensor_data} and
+#' outputs features. Useful for models which compute individual statistics
+#' using multiple input variables, or models that otherwise don't fit well
+#' into the feature extraction paradigm as implemented in \code{sensor_features}.
 #' @param window_length Length of sliding windows.
 #' @param overlap Window overlap.
 #' @param time_range Timestamp range to use.
@@ -150,9 +154,10 @@ default_kinematic_features <- function(sampling_rate) {
 #' @return Accelerometer features.
 #' @export
 accelerometer_features <- function(sensor_data, transformation = NA, funs = NA, 
-                                   groups = c("axis", "Window"), window_length = 256,
-                                   overlap = 0.5, time_range = c(1,9),
-                                   frequency_range=c(1, 25)) {
+                                   model = NA, groups = c("axis", "Window"),
+                                   window_length = 256, overlap = 0.5,
+                                   time_range = c(1,9), frequency_range=c(1, 25)) {
+  if (is.function(model)) return(model(sensor_data))
   sampling_rate <- get_sampling_rate(sensor_data)
   if(suppressWarnings(is.na(transformation))) {
     transformation <- transformation_window(window_length = window_length,
@@ -192,6 +197,10 @@ accelerometer_features <- function(sensor_data, transformation = NA, funs = NA,
 #' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param funs A list of feature extraction functions that each accept
 #' a single numeric vector as input.
+#' @param model A function which accepts as input \code{sensor_data} and
+#' outputs features. Useful for models which compute individual statistics
+#' using multiple input variables, or models that otherwise don't fit well
+#' into the feature extraction paradigm as implemented in \code{sensor_features}.
 #' @param window_length Length of sliding windows.
 #' @param overlap Window overlap.
 #' @param time_range Timestamp range to use.
@@ -199,9 +208,10 @@ accelerometer_features <- function(sensor_data, transformation = NA, funs = NA,
 #' @return Gyroscope features.
 #' @export
 gyroscope_features <- function(sensor_data, transformation = NA, funs = NA,
-                               groups = c("axis", "Window"), window_length = 256,
-                               overlap = 0.5, time_range = c(1,9),
-                               frequency_range=c(1, 25)) {
+                               model = NA, groups = c("axis", "Window"),
+                               window_length = 256, overlap = 0.5,
+                               time_range = c(1,9), frequency_range=c(1, 25)) {
+  if (is.function(model)) return(model(sensor_data))
   sampling_rate <- get_sampling_rate(sensor_data)
   if(suppressWarnings(is.na(transformation))) {
     transformation <- transformation_window(window_length = window_length,

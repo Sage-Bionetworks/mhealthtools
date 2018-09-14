@@ -5,7 +5,7 @@
 \title{Extract walk features from raw accelerometer and gyroscope data.}
 \usage{
 get_walk_features(accelerometer_data, gyroscope_data, gravity_data = NA,
-  funs = NA, window_length = 256, time_range = c(1, 9),
+  funs = NA, model = NA, window_length = 256, time_range = c(1, 9),
   frequency_range = c(1, 25), overlap = 0.5, max_imf = 4)
 }
 \arguments{
@@ -21,6 +21,11 @@ gravity sensor measurements.}
 \item{funs}{Feature extraction functions that accept a single
 time-series vector as input.}
 
+\item{model}{A function which accepts as input \code{sensor_data} and
+outputs features. Useful for models which compute individual statistics
+using multiple input variables, or models that otherwise don't fit well
+into the feature extraction paradigm as implemented in \code{sensor_features}.}
+
 \item{window_length}{Length of sliding windows.}
 
 \item{time_range}{Timestamp range to use.}
@@ -33,7 +38,7 @@ time-series vector as input.}
 empirical mode decomposition.}
 }
 \value{
-Walk features indexed by axis and window.
+Walk features indexed by axis, window, and IMF.
 }
 \description{
 Extract walk features from raw accelerometer and gyroscope data.

@@ -14,7 +14,7 @@ calculate_acf(sensor_data, col, groups)
 \item{groups}{Column names to group on when computing acf.}
 }
 \value{
-A tibble with columns axis, window, index, acf
+A tibble with columns axis, window, window_index, acf
 }
 \description{
 Estimate the ACF for windowed sensor data.
