@@ -339,6 +339,7 @@ transform_kinematic_sensor_data <- function(sensor_data, transformation,
                                                      sampling_rate = sampling_rate,
                                                      frequency_range = frequency_range, 
                                                      time_range = time_range)
+  if (has_error(preprocessed_sensor_data)) return(preprocessed_sensor_data)
   transformed_sensor_data <- transformation(preprocessed_sensor_data)
   return(transformed_sensor_data)
 }
@@ -421,11 +422,15 @@ transform_accelerometer_data <- function(sensor_data, transformation = NA,
                                          time_range = c(1,9), frequency_range=c(1, 25),
                                          sampling_rate = 100, 
                                          groups = c("axis", "Window")) {
-  transform_kinematic_sensor_data(sensor_data, transformation = transformation, 
-                                  window_length = window_length,
-                                  overlap = overlap, time_range = time_range, 
-                                  frequency_range = frequency_range,
-                                  sampling_rate = sampling_rate) %>% 
+  transformed_sensor_data <- transform_kinematic_sensor_data(
+    sensor_data, transformation = transformation,
+    window_length = window_length,
+    overlap = overlap,
+    time_range = time_range,
+    frequency_range = frequency_range,
+    sampling_rate = sampling_rate)
+  if (has_error(transformed_sensor_data)) return(transformed_sensor_data)
+  transformed_sensor_data <- transformed_sensor_data %>% 
     dplyr::rename(acceleration = value) %>% 
     mutate_derivative(sampling_rate = sampling_rate, groups = groups,
                       col = "acceleration", derived_col = "jerk") %>% 
@@ -433,6 +438,7 @@ transform_accelerometer_data <- function(sensor_data, transformation = NA,
                     col = "acceleration", derived_col = "velocity") %>% 
     mutate_integral(sampling_rate = sampling_rate, groups = groups,
                     col = "velocity", derived_col = "displacement")
+  return(transformed_sensor_data)
 }
 
 #' Prepare gyroscope sensor data for feature extraction
@@ -456,14 +462,18 @@ transform_gyroscope_data <- function(sensor_data, transformation = NA, window_le
                                      overlap = 0.5, time_range = c(1,9),
                                      frequency_range=c(1, 25), sampling_rate = 100,
                                      groups = c("axis", "Window")) {
-  transform_kinematic_sensor_data(sensor_data, transformation = transformation, 
-                                  window_length = window_length,
-                                  overlap = overlap, time_range = time_range, 
-                                  frequency_range = frequency_range,
-                                  sampling_rate = sampling_rate) %>% 
+  transformed_sensor_data <- transform_kinematic_sensor_data(
+    sensor_data, transformation = transformation, 
+    window_length = window_length,
+    overlap = overlap, time_range = time_range, 
+    frequency_range = frequency_range,
+    sampling_rate = sampling_rate)
+  if (has_error(transformed_sensor_data)) return(transformed_sensor_data)
+  transformed_sensor_data <- transformed_sensor_data %>% 
     dplyr::rename(velocity = value) %>% 
     mutate_derivative(sampling_rate = sampling_rate, groups = groups,
                       col = "velocity", derived_col = "acceleration") %>% 
     mutate_integral(sampling_rate = sampling_rate, groups = groups,
                     col = "velocity", derived_col = "displacement")
+  return(transformed_sensor_data)
 }
