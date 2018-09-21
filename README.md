@@ -12,13 +12,21 @@ First, install the `mhealthtools` package using `devtools`:
 devtools::install_github("Sage-Bionetworks/mhealthtools")
 ```
 
-A common issue when installing the `seewave` dependency is to be missing the system dependencies `libfftw3` and ` libsndfile1`. In a shell, run:
+A common issue when installing the `seewave` dependency on Linux systems is to be missing the system dependencies `libfftw3` and ` libsndfile1`. In a shell, run:
 
 ```
 $ apt install libfftw3-3 libfftw3-dev libsndfile1 libsndfile1-dev
 ```
 
 to install these system dependencies, then retry the above `devtools` command.
+
+If you are still having issues installing `seewave`, it may be necessary to also install the `rgl` library system-wide.
+
+```
+$ apt install r-cran-rgl
+```
+
+See the `seewave` installation page for more info: http://rug.mnhn.fr/seewave/
 
 ### Usage
 
