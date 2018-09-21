@@ -20,7 +20,7 @@ $ apt install libfftw3-3 libfftw3-dev libsndfile1 libsndfile1-dev
 
 to install these system dependencies, then retry the above `devtools` command.
 
-If you are still having issues installing `seewave`, it may be necessary to also install the `rgl` library system-wide.
+If you are still having issues installing `seewave`, it may be necessary to also install the `rgl` library.
 
 ```
 $ apt install r-cran-rgl
