@@ -8,6 +8,10 @@
 #' gravity sensor measurements.
 #' @param funs Feature extraction functions that accept a single
 #' time-series vector as input. 
+#' @param model A function which accepts as input \code{sensor_data} and
+#' outputs features. Useful for models which compute individual statistics
+#' using multiple input variables, or models that otherwise don't fit well
+#' into the feature extraction paradigm as implemented in \code{sensor_features}.
 #' @param window_length Length of sliding windows.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
@@ -20,9 +24,9 @@
 #' @importFrom magrittr "%>%"
 get_walk_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NA,
-  funs = NA, window_length = 256, time_range = c(1,9),
+  funs = NA, model = NA, window_length = 256, time_range = c(1,9),
   frequency_range = c(1, 25), overlap = 0.5, max_imf = 4) {
-  
+  if (is.function(model)) return(model(sensor_data))
   features = dplyr::tibble(Window = NA, error = NA)
   
   # check input integrity

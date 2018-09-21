@@ -1,0 +1,197 @@
+---
+title: "Sensors"
+author: "Meghasyam Tummalacherla"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Sensors}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE, echo=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+`mhealthtools` offers a set of tools to extract features from some of the sensors present in almost all of the modern day phones. These include accelerometer and gyroscope data. We present examples to do so
+
+Let's load the package first
+```{r}
+library(mhealthtools)
+```
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE, error=FALSE, prompt=FALSE}
+library(dplyr)
+```
+
+## Accelerometer
+
+#### Data format and Sample data
+
+`mhealthtools` already comes preloaded with sample accelerometer data. You can access the data through `data(accelerometer_data)`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract accelerometer features). Where `t` is the timestamp; `x`,`y` and `z` are the X,Y and Z- axis respectively
+
+```{r data, echo = FALSE}
+data(accelerometer_data)
+head(accelerometer_data,5)
+```
+
+Let's plot to see how the data actually looks like 
+
+```{r, echo=FALSE, fig.width=8, fig.height=4}
+library(ggplot2)
+a <- accelerometer_data
+a$t <- a$t - a$t[1]
+a <- tidyr::gather(a, 'axis' , 'val', -t)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis) + ylim(c(-0.025, 0.025))
+```
+
+#### Extracting features (using pre-existing pipeline)
+To use the existing feature set (you can define your own features or feed in your own model to extract features in `mhealthtools`!!). Note: You need to get the data in the proper format (as that of the sample data) to use the feature extraction pipeline.
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+accel_features <- accelerometer_features(accelerometer_data)
+# using default parameters
+```
+
+```{r}
+dplyr::glimpse(accel_features)
+```
+
+`accelerometer_features` also offers multiple parameter options. The follwing examples are an effort to make the user aware of the options. 
+
+In the following example, we change the window length (to 128, with 256 being the default), having the same overlap for the same `accel_data` used before
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+accel_features <- accelerometer_features(accelerometer_data, window_length = 128)
+# Consider a window length of 128 samples
+```
+
+```{r}
+dplyr::glimpse(accel_features)
+```
+
+There are many other possible use cases to calculate the accelerometer features. The `time_range` parameter decides the time window to be operated on in the accelerometer signal. The `overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_range` parameter specifies the frequency range to keep for the analysis.
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+accel_features <- accelerometer_features(accelerometer_data, overlap = 0.4, time_range = c(2,5))
+# Consider windows with 40% overlap, and consider the time ranges between 2 and 5s only
+```
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+accel_features <- accelerometer_features(accelerometer_data, frequency_range = c(4,16))
+# Consider the frequencies only from 4Hz to 16Hz
+```
+
+Please read the function documentation `?accelerometer_features` for more info.
+
+## Gyroscope
+
+#### Data format and Sample data
+
+`mhealthtools` already comes preloaded with sample gyroscope data. You can access the data through `data(gyroscope_data)`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract gyroscope features). Where `t` is the timestamp; `x`,`y` and `z` are the X,Y and Z- axis respectively
+
+```{r, echo = FALSE}
+data(gyroscope_data)
+head(gyroscope_data,5)
+```
+
+Let's plot to see how the data actually looks like 
+
+```{r, echo=FALSE, fig.width=8, fig.height=4}
+library(ggplot2)
+g <- gyroscope_data
+g$t <- g$t - g$t[1]
+g <- tidyr::gather(g, 'axis' , 'val', -t)
+ggplot(g, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis) + ylim(c(-0.025, 0.025))
+```
+
+#### Extracting features (using pre-existing pipeline)
+To use the existing feature set (you can define your own features or feed in your own model to extract features in `mhealthtools`!!). Note: You need to get the data in the proper format (as that of the sample data) to use the feature extraction pipeline.
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+gyro_features <- gyroscope_features(gyroscope_data)
+# using default parameters
+```
+
+```{r}
+dplyr::glimpse(gyro_features)
+```
+
+`gyroscope_features` also offers multiple parameter options. The follwing examples are an effort to make the user aware of the options. 
+
+The following example, we change the window length (to 512, with 256 being the default), having the same overlap for the same `gyro_data` used before
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+gyro_features <- gyroscope_features(gyroscope_data, window_length = 512)
+# Consider a window length of 512 samples
+```
+
+```{r}
+dplyr::glimpse(gyro_features)
+```
+
+There are many other possible use cases to calculate the gyroscope features. The `time_range` parameter decides the time window to be operated on in the accelerometer signal. The `overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_range` parameter specifies the frequency range to keep for the analysis.
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+gyro_features <- gyroscope_features(gyroscope_data, overlap = 0.6)
+# Consider windows with 60% overlap
+```
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+gyro_features <- gyroscope_features(gyroscope_data, frequency_range = c(2,18), time_range = c(1,6))
+# Consider the frequencies only from 2Hz to 18Hz, and consider the time ranges between 1 and 6s only
+```
+
+Please read the function documentation `?gyroscope_features` for more info.
+
+## Screen (Tap data)
+
+For more information on how this data was collected please look into the Parkinson mpower study conducted by Sage Bionetworks (https://parkinsonmpower.org/)
+
+#### Data format and Sample data
+
+`mhealthtools` already comes preloaded with sample tapping data. You can access the data through `data(tap_data)`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract gyroscope features). Where `t` is the timestamp; `x` and `y` are the co-ordinates of the tap, and `buttonid` is to indicate whether the user tapped the left or the right button.
+
+```{r, echo = FALSE}
+data(tap_data)
+head(tap_data,5)
+```
+
+Let's look at a plot of the `x` and `y` co-ordinates of the tap data against `t`
+
+```{r, echo=FALSE, fig.width=8, fig.height=4}
+library(ggplot2)
+a <- tap_data
+a <- tidyr::gather(a %>% dplyr::select(-buttonid), 'axis' , 'val', -t)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+```
+
+
+#### Extracting features (using pre-existing pipeline)
+To use the existing feature set (you can define your own features or feed in your own model to extract features in `mhealthtools`!!). Note: You need to get the data in the proper format (as that of the sample data) to use the feature extraction pipeline.
+
+```{r, warning=FALSE, error=FALSE, message=FALSE, echo = FALSE}
+library(mhealthtools)
+library(dplyr)
+```
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+tap_features <- tapping_features(tap_data)
+```
+```{r}
+dplyr::glimpse(tap_features)
+```
+
+You can also specify the threshold for the intertap distance in the x-axis using the `depressThr` parameter of the tapping_features function
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+tap_features <- tapping_features(tap_data, depressThr = 10)
+# Changing the threshold for intertap distance in x-axis, depressThr to 10 (default is 20)
+```
+```{r}
+dplyr::glimpse(tap_features)
+```
+
+Please read the function documentation `?tapping_features` for more info.

@@ -4,7 +4,7 @@
 \alias{window}
 \title{Window the value vector of sensor data for each axis}
 \usage{
-window(sensor_data, window_length, overlap)
+window(sensor_data, window_length, overlap, include_timestamp = F)
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, axis, value.}
