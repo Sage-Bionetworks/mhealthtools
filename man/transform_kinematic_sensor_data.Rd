@@ -5,7 +5,7 @@
 \title{Apply standard transformations to kinematic sensor data}
 \usage{
 transform_kinematic_sensor_data(sensor_data, transformation, window_length,
-  overlap, time_range, frequency_range, sampling_rate)
+  time_range, frequency_range, sampling_rate)
 }
 \arguments{
 \item{sensor_data}{A dataframe with columns t, x, y, z.}
@@ -19,8 +19,6 @@ its input will already be "cleaned" by detrending, bandpassing, etc. See
 \code{preprocess_sensor_data} for all the cleaning steps performed.}
 
 \item{window_length}{Length of sliding windows.}
-
-\item{overlap}{Window overlap.}
 
 \item{time_range}{Timestamp range to use.}
 

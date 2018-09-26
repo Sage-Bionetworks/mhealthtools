@@ -4,7 +4,7 @@
 \alias{accelerometer_features_}
 \title{Extract accelerometer features}
 \usage{
-accelerometer_features_(sensor_data, transform, extract, groups,
+accelerometer_features_(sensor_data, transform, extract,
   extract_on = c("acceleration", "jerk", "velocity", "displacement"))
 }
 \arguments{
@@ -16,8 +16,6 @@ and outputs a dataframe.}
 
 \item{extract}{A list of functions to be applied to each of the columns
 in \code{extract_on} from the output of \code{transform}.}
-
-\item{groups}{A list of column names to group upon when calculating statistics.}
 
 \item{extract_on}{A list of column names to calculate statistics from.}
 }

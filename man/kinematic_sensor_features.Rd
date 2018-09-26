@@ -4,8 +4,7 @@
 \alias{kinematic_sensor_features}
 \title{Extract kinematic sensor features}
 \usage{
-kinematic_sensor_features(sensor_data, transform, extract, extract_on, groups,
-  acf_col)
+kinematic_sensor_features(sensor_data, transform, extract, extract_on, acf_col)
 }
 \arguments{
 \item{sensor_data}{A dataframe.}
@@ -17,8 +16,6 @@ and outputs a dataframe.}
 in \code{extract_on} from the output of \code{transform}.}
 
 \item{extract_on}{A list of column names to calculate statistics from.}
-
-\item{groups}{A list of column names to group upon when calculating statistics.}
 
 \item{acf_col}{Column name to calculate acf upon.}
 }

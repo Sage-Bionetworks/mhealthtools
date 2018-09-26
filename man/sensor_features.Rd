@@ -4,7 +4,7 @@
 \alias{sensor_features}
 \title{Extract features from sensor data}
 \usage{
-sensor_features(sensor_data, transform, extract, extract_on, groups)
+sensor_features(sensor_data, transform, extract, extract_on)
 }
 \arguments{
 \item{sensor_data}{A dataframe.}
@@ -16,8 +16,6 @@ and outputs a dataframe.}
 in \code{extract_on} from the output of \code{transform}.}
 
 \item{extract_on}{A list of column names to calculate statistics from.}
-
-\item{groups}{A list of column names to group upon when calculating statistics.}
 }
 \value{
 A dataframe of features

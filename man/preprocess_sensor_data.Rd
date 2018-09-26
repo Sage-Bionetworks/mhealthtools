@@ -16,8 +16,6 @@ sensor measurements.}
 \item{frequency_range}{Frequency range for the bandpass filter.}
 
 \item{time_range}{Timestamp range to use.}
-
-\item{overlap}{Window overlap.}
 }
 \value{
 A data frame in tidy format

@@ -4,14 +4,12 @@
 \alias{mutate_derivative}
 \title{Add a column which is the "derivative" of an existing column to a time-series dataframe.}
 \usage{
-mutate_derivative(sensor_data, sampling_rate, groups, col, derived_col)
+mutate_derivative(sensor_data, sampling_rate, col, derived_col)
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, axis, acceleration.}
 
 \item{sampling_rate}{Sampling rate of \code{col}.}
-
-\item{groups}{Column names to group \code{sensor_data} on before differentiating.}
 
 \item{col}{Name of column to differentiate.}
 
