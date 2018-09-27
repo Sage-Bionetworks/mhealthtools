@@ -17,12 +17,25 @@
 #' in \code{extract_on} from the output of \code{transform}.
 #' @param extract_on A list of column names to calculate statistics from.
 #' @return A dataframe of features
-sensor_features <- function(sensor_data, transform, extract, extract_on) {
+sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
+                            extract_on = NULL, models = NULL) {
+  features <- list()
+  if (is.null(transform)) {
+    transform <- function(x) x
+  }
   transformed_sensor_data <- transform(sensor_data)
-  if (has_error(transformed_sensor_data)) return(transformed_sensor_data)
-  features <- purrr::map_dfr(
-    extract_on,
-    ~ extract_features(transformed_sensor_data, ., extract))
+  if (has_error(transformed_sensor_data)) {
+    features[["error"]] <- transformed_sensor_data
+    return(features)
+  }
+  if (!is.null(extract) && !is.null(extract_on)) {
+    features[["extracted_features"]] <- purrr::map_dfr(
+      extract_on,
+      ~ extract_features(transformed_sensor_data, ., extract))
+  }
+  if (!is.null(models)) {
+    features[["model_features"]] <- purrr::map(models, ~ .(transformed_sensor_data))
+  }
   return(features)
 }
 
@@ -39,16 +52,19 @@ sensor_features <- function(sensor_data, transform, extract, extract_on) {
 #' @param extract_on A list of column names to calculate statistics from.
 #' @param acf_col Column name to calculate acf upon.
 #' @return A dataframe of features.
-kinematic_sensor_features <- function(sensor_data, transform, extract, 
-                                      extract_on, acf_col) {
+kinematic_sensor_features <- function(sensor_data, acf_col, transform = NULL,
+                                      extract = NULL, extract_on = NULL, models = NULL) {
+  features <- list()
+  if (is.null(transform)) {
+    transform <- function(x) x
+  }
   transformed_sensor_data <- transform(sensor_data)
-  if (has_error(transformed_sensor_data)) return(sensor_data)
   incidental_cols_to_preserve <- transformed_sensor_data %>%
     dplyr::select(-dplyr::one_of(extract_on)) %>%
     dplyr::distinct() # distinct of group (table index) cols and incidental cols
   movement_features <- sensor_features(
     sensor_data = transformed_sensor_data,
-    transform = function(x) x,
+    transform = NULL,
     extract = extract,
     extract_on = extract_on)
   acf_features <- sensor_features(
@@ -56,11 +72,27 @@ kinematic_sensor_features <- function(sensor_data, transform, extract,
     transform = purrr::partial(calculate_acf, col = acf_col),
     extract = extract,
     extract_on = "acf")
-  all_features <- dplyr::bind_rows(movement_features, acf_features) %>%
-    dplyr::left_join(incidental_cols_to_preserve) %>%
-    dplyr::select(measurementType, dplyr::one_of(names(incidental_cols_to_preserve)),
-           dplyr::everything())
-  return(all_features)
+  model_features <- sensor_features(
+    sensor_data = transformed_sensor_data,
+    transform = NULL,
+    models = models)
+  if (tibble::has_name(movement_features, "extracted_features") &&
+      tibble::has_name(acf_features, "extracted_features")) {
+    features[["extracted_features"]] <- dplyr::bind_rows(
+      movement_features[["extracted_features"]], acf_features[["extracted_features"]]) %>%
+      dplyr::left_join(incidental_cols_to_preserve) %>%
+      dplyr::select(measurementType, dplyr::one_of(names(incidental_cols_to_preserve)),
+             dplyr::everything())
+  } else if (tibble::has_name(movement_features, "error") ||
+             tibble::has_name(acf_features, "error")) {
+    features[["extracted_features"]] <- list(
+      error = list(movement_features = movement_features[[1]],
+                   acf_features = acf_features[[1]]))
+  }
+  if (tibble::has_name(model_features, "model_features")) {
+    features[["model_features"]] <- model_features[["model_features"]]
+  }
+  return(features)
 }
 
 #' Extract accelerometer features
@@ -76,11 +108,12 @@ kinematic_sensor_features <- function(sensor_data, transform, extract,
 #' in \code{extract_on} from the output of \code{transform}.
 #' @param extract_on A list of column names to calculate statistics from.
 #' @return Accelerometer features.
-accelerometer_features_ <- function(sensor_data, transform, extract,
-                                    extract_on = c("acceleration", "jerk", 
-                                                   "velocity", "displacement")) {
+accelerometer_features_ <- function(sensor_data, transform = NULL,
+                                    extract = NULL, extract_on = c(
+                                      "acceleration", "jerk", "velocity", "displacement"),
+                                    models = NULL) {
   kinematic_sensor_features(sensor_data, transform = transform, extract = extract,
-                            extract_on = extract_on, acf_col = "acceleration")
+                            extract_on = extract_on, models = models, acf_col = "acceleration")
 }
 
 #' Extract gyroscope features
@@ -96,12 +129,12 @@ accelerometer_features_ <- function(sensor_data, transform, extract,
 #' in \code{extract_on} from the output of \code{transform}.
 #' @param extract_on A list of column names to calculate statistics from.
 #' @return gyroscope features.
-gyroscope_features_ <- function(sensor_data, transform, extract,
+gyroscope_features_ <- function(sensor_data, transform = NULL, extract = NULL,
                                 extract_on = c("acceleration", "velocity",
-                                               "displacement")) {
+                                               "displacement"), models = NULL) {
   kinematic_sensor_features(
     sensor_data = sensor_data, transform = transform, extract = extract,
-    extract_on = extract_on, acf_col = "velocity")
+    extract_on = extract_on, models = models, acf_col = "velocity")
 }
 
 default_kinematic_features <- function(sampling_rate) {
@@ -132,7 +165,7 @@ default_kinematic_features <- function(sampling_rate) {
 #' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param funs A list of feature extraction functions that each accept
 #' a single numeric vector as input.
-#' @param model A function which accepts as input \code{sensor_data} and
+#' @param models A function which accepts as input \code{sensor_data} and
 #' outputs features. Useful for models which compute individual statistics
 #' using multiple input variables, or models that otherwise don't fit well
 #' into the feature extraction paradigm as implemented in \code{sensor_features}.
@@ -143,23 +176,20 @@ default_kinematic_features <- function(sampling_rate) {
 #' @return Accelerometer features.
 #' @export
 accelerometer_features <- function(sensor_data, transformation = NULL, funs = NULL, 
-                                   model = NULL, window_length = 256, overlap = 0.5,
+                                   models = NULL, window_length = 256, overlap = 0.5,
                                    time_range = c(1,9), frequency_range=c(1, 25)) {
   sampling_rate <- get_sampling_rate(sensor_data)
-  if (is.null(transformation)) {
-    transformation <- function(x) x
-  }
-  transformed_sensor_data <- transform_accelerometer_data(
-    sensor_data = sensor_data,
-    transformation = transformation,
-    window_length = window_length,
-    time_range = time_range,
-    frequency_range = frequency_range,
-    sampling_rate = sampling_rate)
   extracted_features <- accelerometer_features_(
-    sensor_data = transformed_sensor_data,
-    transform = function(x) x,
-    extract = funs)
+    sensor_data = sensor_data,
+    transform = purrr::partial(
+      transform_accelerometer_data,
+      transformation = transformation,
+      window_length = window_length,
+      time_range = time_range,
+      frequency_range = frequency_range,
+      sampling_rate = sampling_rate),
+    extract = funs,
+    models = models)
   return(extracted_features)
 }
 
@@ -179,7 +209,7 @@ accelerometer_features <- function(sensor_data, transformation = NULL, funs = NU
 #' \code{preprocess_sensor_data} for all the cleaning steps performed.
 #' @param funs A list of feature extraction functions that each accept
 #' a single numeric vector as input.
-#' @param model A function which accepts as input \code{sensor_data} and
+#' @param models A function which accepts as input \code{sensor_data} and
 #' outputs features. Useful for models which compute individual statistics
 #' using multiple input variables, or models that otherwise don't fit well
 #' into the feature extraction paradigm as implemented in \code{sensor_features}.
@@ -190,17 +220,9 @@ accelerometer_features <- function(sensor_data, transformation = NULL, funs = NU
 #' @return Gyroscope features.
 #' @export
 gyroscope_features <- function(sensor_data, transformation = NULL, funs = NULL,
-                               model = NULL, window_length = 256, overlap = 0.5,
+                               models = NULL, window_length = 256, overlap = 0.5,
                                time_range = c(1,9), frequency_range=c(1, 25)) {
-  if (is.function(model)) return(model(sensor_data))
   sampling_rate <- get_sampling_rate(sensor_data)
-  if(suppressWarnings(is.null(transformation))) {
-    transformation <- transformation_window(window_length = window_length,
-                                            overlap = overlap)
-  }
-  if(suppressWarnings(is.null(funs))) {
-    funs <- default_kinematic_features(sampling_rate)
-  }
   all_features <- gyroscope_features_(
     sensor_data = sensor_data,
     transform = purrr::partial(
@@ -210,7 +232,8 @@ gyroscope_features <- function(sensor_data, transformation = NULL, funs = NULL,
       time_range = time_range,
       frequency_range = frequency_range,
       sampling_rate = sampling_rate),
-    extract = funs)
+    extract = funs,
+    models = models)
   return(all_features)
 }
 
@@ -311,13 +334,13 @@ tapping_features <- function(tap_data,
 transform_kinematic_sensor_data <- function(sensor_data, transformation, 
                                             window_length, time_range,
                                             frequency_range, sampling_rate) {
-  if (is.null(transformation)) transformation <- function(x) x
   preprocessed_sensor_data <- preprocess_sensor_data(sensor_data = sensor_data,
                                                      window_length = window_length,
                                                      sampling_rate = sampling_rate,
                                                      frequency_range = frequency_range, 
                                                      time_range = time_range)
   if (has_error(preprocessed_sensor_data)) return(preprocessed_sensor_data)
+  if (is.null(transformation)) transformation <- function(x) x
   transformed_sensor_data <- transformation(preprocessed_sensor_data)
   return(transformed_sensor_data)
 }
@@ -402,7 +425,8 @@ transform_accelerometer_data <- function(sensor_data, transformation = NULL,
                                          window_length = 256, time_range = c(1,9),
                                          frequency_range=c(1, 25), sampling_rate = 100) {
   transformed_sensor_data <- transform_kinematic_sensor_data(
-    sensor_data, transformation = transformation,
+    sensor_data = sensor_data,
+    transformation = transformation,
     window_length = window_length,
     time_range = time_range,
     frequency_range = frequency_range,
