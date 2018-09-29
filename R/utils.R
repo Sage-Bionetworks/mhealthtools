@@ -895,7 +895,7 @@ map_groups <- function(x, col, f, ...) {
 #' @param funs A list of functions that accept a single vector as input.
 #' @return a data frame with columns axis, window, and other feature columns.
 extract_features <- function(x, col, funs) {
-  groups <- group_vars(x)
+  groups <- dplyr::group_vars(x)
   funs_output <- purrr::map(
     funs, ~ map_groups(
       x = x,

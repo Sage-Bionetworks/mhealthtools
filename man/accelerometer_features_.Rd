@@ -4,8 +4,9 @@
 \alias{accelerometer_features_}
 \title{Extract accelerometer features}
 \usage{
-accelerometer_features_(sensor_data, transform, extract,
-  extract_on = c("acceleration", "jerk", "velocity", "displacement"))
+accelerometer_features_(sensor_data, transform = NULL, extract = NULL,
+  extract_on = c("acceleration", "jerk", "velocity", "displacement"),
+  models = NULL)
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, x, y, z containing 

@@ -4,7 +4,8 @@
 \alias{sensor_features}
 \title{Extract features from sensor data}
 \usage{
-sensor_features(sensor_data, transform, extract, extract_on)
+sensor_features(sensor_data, transform = NULL, extract = NULL,
+  extract_on = NULL, models = NULL)
 }
 \arguments{
 \item{sensor_data}{A dataframe.}
@@ -15,10 +16,17 @@ and outputs a dataframe.}
 \item{extract}{A list of functions to be applied to each of the columns
 in \code{extract_on} from the output of \code{transform}.}
 
-\item{extract_on}{A list of column names to calculate statistics from.}
+\item{extract_on}{A list of column names to compute statistics on.}
+
+\item{models}{A list of functions which accept the output from
+\code{transform} as input and output a dataframe.}
 }
 \value{
-A dataframe of features
+A list of feature dataframes. The output from \code{extract} will
+be stored under \code{$extracted_features} and the output from \code{models}
+will be stored under \code{$model_features}. If \code{transform} returns
+an error dataframe (see \code{has_error}), the error dataframe is stored
+under \code{$error}.
 }
 \description{
 A 'pure' implementation of the feature extraction process. This function
@@ -27,8 +35,9 @@ is not normally called directly.
 \details{
 The feature extraction paradigm is implemented as such:
 
-Input: raw feature data
-Transform: into a format suitable for calculating statistics upon
-Extract: features by calculating statistics upon individual, grouped columns
-Return: statistics/features for each group
+Input: raw feature data  
+Transform: into a format suitable for calculating statistics upon  
+Extract: features by calculating statistics upon individual, grouped columns --
+         or with a model.  
+Return: statistics/features
 }

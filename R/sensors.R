@@ -7,16 +7,23 @@
 #' 
 #' Input: raw feature data
 #' Transform: into a format suitable for calculating statistics upon
-#' Extract: features by calculating statistics upon individual, grouped columns
-#' Return: statistics/features for each group
+#' Extract: features by calculating statistics upon individual, grouped columns --
+#'          or with a model.
+#' Return: statistics/features
 #' 
 #' @param sensor_data A dataframe.
 #' @param transform A function which accepts \code{sensor_data} as input
 #' and outputs a dataframe.
 #' @param extract A list of functions to be applied to each of the columns
 #' in \code{extract_on} from the output of \code{transform}.
-#' @param extract_on A list of column names to calculate statistics from.
-#' @return A dataframe of features
+#' @param extract_on A list of column names to compute statistics on.
+#' @param models A list of functions which accept the output from
+#' \code{transform} as input and output a dataframe.
+#' @return A list of feature dataframes. The output from \code{extract} will
+#' be stored under \code{$extracted_features} and the output from \code{models}
+#' will be stored under \code{$model_features}. If \code{transform} returns
+#' an error dataframe (see \code{has_error}), the error dataframe is stored
+#' under \code{$error}.
 sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
                             extract_on = NULL, models = NULL) {
   features <- list()
@@ -45,13 +52,17 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
 #' normally called directly. See \code{accelerometer_features} and \code{gyroscope_features}.
 #' 
 #' @param sensor_data A dataframe.
+#' @param acf_col Column name to calculate acf upon.
 #' @param transform A function which accepts \code{sensor_data} as input
 #' and outputs a dataframe.
 #' @param extract A list of functions to be applied to each of the columns
 #' in \code{extract_on} from the output of \code{transform}.
 #' @param extract_on A list of column names to calculate statistics from.
-#' @param acf_col Column name to calculate acf upon.
-#' @return A dataframe of features.
+#' @param models A list of functions which accept the output from
+#' \code{transform} as input and output a dataframe.
+#' @return A list of feature dataframes. The output from \code{extract} will
+#' be stored under \code{$extracted_features} and the output from \code{models}
+#' will be stored under \code{$model_features}.
 kinematic_sensor_features <- function(sensor_data, acf_col, transform = NULL,
                                       extract = NULL, extract_on = NULL, models = NULL) {
   features <- list()
@@ -76,19 +87,11 @@ kinematic_sensor_features <- function(sensor_data, acf_col, transform = NULL,
     sensor_data = transformed_sensor_data,
     transform = NULL,
     models = models)
-  if (tibble::has_name(movement_features, "extracted_features") &&
-      tibble::has_name(acf_features, "extracted_features")) {
-    features[["extracted_features"]] <- dplyr::bind_rows(
-      movement_features[["extracted_features"]], acf_features[["extracted_features"]]) %>%
-      dplyr::left_join(incidental_cols_to_preserve) %>%
-      dplyr::select(measurementType, dplyr::one_of(names(incidental_cols_to_preserve)),
-             dplyr::everything())
-  } else if (tibble::has_name(movement_features, "error") ||
-             tibble::has_name(acf_features, "error")) {
-    features[["extracted_features"]] <- list(
-      error = list(movement_features = movement_features[[1]],
-                   acf_features = acf_features[[1]]))
-  }
+  features[["extracted_features"]] <- dplyr::bind_rows(
+    movement_features[[1]], acf_features[[1]]) %>% 
+    dplyr::left_join(incidental_cols_to_preserve) %>%
+    dplyr::select(measurementType, dplyr::one_of(names(incidental_cols_to_preserve)),
+           dplyr::everything())
   if (tibble::has_name(model_features, "model_features")) {
     features[["model_features"]] <- model_features[["model_features"]]
   }
@@ -369,7 +372,7 @@ preprocess_sensor_data <- function(sensor_data, window_length,
 transformation_window <- function(window_length, overlap) {
   transformation_window <- function(sensor_data, window_length, overlap) {
     window(sensor_data, window_length = window_length, overlap = overlap) %>% 
-      group_by(axis, Window)
+      dplyr::group_by(axis, Window)
   }
   partial_transformation_window <- purrr::partial(
     transformation_window, window_length = window_length, overlap = overlap)
@@ -398,7 +401,7 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
                 tidyr::gather(key="Window", value="value", convert = T)
             }, .id = "IMF") %>% dplyr::mutate(IMF = as.integer(IMF))
         }, .id = "axis") %>% 
-        group_by(axis, IMF, Window)
+        dplyr::group_by(axis, IMF, Window)
       return(windowed_imf)
     },
     window_length = window_length,

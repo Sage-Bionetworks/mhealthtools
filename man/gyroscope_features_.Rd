@@ -4,10 +4,8 @@
 \alias{gyroscope_features_}
 \title{Extract gyroscope features}
 \usage{
-gyroscope_features_(sensor_data, transform = transform_gyroscope_data,
-  extract = c(time_domain_summary, frequency_domain_summary,
-  frequency_domain_energy), extract_on = c("acceleration", "velocity",
-  "displacement"))
+gyroscope_features_(sensor_data, transform = NULL, extract = NULL,
+  extract_on = c("acceleration", "velocity", "displacement"), models = NULL)
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, x, y, z containing 
