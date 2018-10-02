@@ -1,3 +1,5 @@
+[![Travis-CI Build Status](https://travis-ci.org/Sage-Bionetworks/mhealthtools.svg?branch=master)](https://travis-ci.org/Sage-Bionetworks/mhealthtools)
+
 ## mhealthtools
 R package for extracting features from mobile sensor data.
 
