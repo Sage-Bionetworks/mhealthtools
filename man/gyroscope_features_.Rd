@@ -15,12 +15,15 @@ gyroscope measurements.}
 and outputs a dataframe.}
 
 \item{extract}{A list of functions to be applied to each of the columns
-in \code{extract_on} from the output of \code{transform}.}
+in \code{extract_on} from the output of \code{transform}. Each function
+should return a dataframe of features (normally a single-row datafame).}
 
 \item{extract_on}{A list of column names to calculate statistics from.}
 }
 \value{
-gyroscope features.
+A list of gyroscope features. The output from \code{extract} will
+be stored under \code{$extracted_features} and the output from \code{models}
+will be stored under \code{$model_features}.
 }
 \description{
 Extract gyroscope features. This function is not normally called

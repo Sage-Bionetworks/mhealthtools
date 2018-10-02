@@ -14,7 +14,8 @@ sensor_features(sensor_data, transform = NULL, extract = NULL,
 and outputs a dataframe.}
 
 \item{extract}{A list of functions to be applied to each of the columns
-in \code{extract_on} from the output of \code{transform}.}
+in \code{extract_on} from the output of \code{transform}. Each function
+should return a dataframe of features (normally a single-row datafame).}
 
 \item{extract_on}{A list of column names to compute statistics on.}
 
@@ -35,9 +36,9 @@ is not normally called directly.
 \details{
 The feature extraction paradigm is implemented as such:
 
-Input: raw feature data  
-Transform: into a format suitable for calculating statistics upon  
-Extract: features by calculating statistics upon individual, grouped columns --
-         or with a model.  
-Return: statistics/features
+Input: raw feature data
+Transform: into a format suitable for calculating statistics upon
+Extract: features by computing statistics upon individual, grouped columns --
+         or with a model.
+Return: A list of feature dataframes
 }

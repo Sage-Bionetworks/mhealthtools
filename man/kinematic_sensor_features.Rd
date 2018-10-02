@@ -16,7 +16,8 @@ kinematic_sensor_features(sensor_data, acf_col, transform = NULL,
 and outputs a dataframe.}
 
 \item{extract}{A list of functions to be applied to each of the columns
-in \code{extract_on} from the output of \code{transform}.}
+in \code{extract_on} from the output of \code{transform}. Each function
+should return a dataframe of features (normally a single-row datafame).}
 
 \item{extract_on}{A list of column names to calculate statistics from.}
 
@@ -24,7 +25,9 @@ in \code{extract_on} from the output of \code{transform}.}
 \code{transform} as input and output a dataframe.}
 }
 \value{
-A dataframe of features.
+A list of feature dataframes. The output from \code{extract} will
+be stored under \code{$extracted_features} and the output from \code{models}
+will be stored under \code{$model_features}.
 }
 \description{
 Extract kinematic (accelerometer/gyroscope) features. This function is not 

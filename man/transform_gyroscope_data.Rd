@@ -13,11 +13,7 @@ transform_gyroscope_data(sensor_data, transformation = NA,
 
 \item{transformation}{A function which accepts a tidy version of \code{sensor_data},
 with columns t, axis, value, as input and outputs a dataframe suitable for 
-feature extraction. By default, the tidy sensor data is windowed before feature
-extraction. This is a more user-friendly version of the \code{transform} 
-parameter required for more generic functions like \code{sensor_features}. Namely,
-its input will already be "cleaned" by detrending, bandpassing, etc. See 
-\code{preprocess_sensor_data} for all the cleaning steps performed.}
+feature extraction.}
 
 \item{window_length}{Length of sliding windows.}
 
@@ -25,7 +21,7 @@ its input will already be "cleaned" by detrending, bandpassing, etc. See
 
 \item{frequency_range}{Frequency range for the bandpass filter.}
 
-\item{sampling_rate}{Sampling rate of the acceleration vector.}
+\item{sampling_rate}{Sampling rate of the velocity column.}
 }
 \value{
 A dataframe

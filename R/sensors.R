@@ -7,15 +7,16 @@
 #' 
 #' Input: raw feature data
 #' Transform: into a format suitable for calculating statistics upon
-#' Extract: features by calculating statistics upon individual, grouped columns --
+#' Extract: features by computing statistics upon individual, grouped columns --
 #'          or with a model.
-#' Return: statistics/features
+#' Return: A list of feature dataframes
 #' 
 #' @param sensor_data A dataframe.
 #' @param transform A function which accepts \code{sensor_data} as input
 #' and outputs a dataframe.
 #' @param extract A list of functions to be applied to each of the columns
-#' in \code{extract_on} from the output of \code{transform}.
+#' in \code{extract_on} from the output of \code{transform}. Each function
+#' should return a dataframe of features (normally a single-row datafame).
 #' @param extract_on A list of column names to compute statistics on.
 #' @param models A list of functions which accept the output from
 #' \code{transform} as input and output a dataframe.
@@ -32,16 +33,16 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
   }
   transformed_sensor_data <- transform(sensor_data)
   if (has_error(transformed_sensor_data)) {
-    features[["error"]] <- transformed_sensor_data
+    features$error <- transformed_sensor_data
     return(features)
   }
   if (!is.null(extract) && !is.null(extract_on)) {
-    features[["extracted_features"]] <- purrr::map_dfr(
+    features$extracted_features <- purrr::map_dfr(
       extract_on,
       ~ extract_features(transformed_sensor_data, ., extract))
   }
   if (!is.null(models)) {
-    features[["model_features"]] <- purrr::map(models, ~ .(transformed_sensor_data))
+    features$model_features <- purrr::map(models, ~ .(transformed_sensor_data))
   }
   return(features)
 }
@@ -56,7 +57,8 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
 #' @param transform A function which accepts \code{sensor_data} as input
 #' and outputs a dataframe.
 #' @param extract A list of functions to be applied to each of the columns
-#' in \code{extract_on} from the output of \code{transform}.
+#' in \code{extract_on} from the output of \code{transform}. Each function
+#' should return a dataframe of features (normally a single-row datafame).
 #' @param extract_on A list of column names to calculate statistics from.
 #' @param models A list of functions which accept the output from
 #' \code{transform} as input and output a dataframe.
@@ -87,13 +89,13 @@ kinematic_sensor_features <- function(sensor_data, acf_col, transform = NULL,
     sensor_data = transformed_sensor_data,
     transform = NULL,
     models = models)
-  features[["extracted_features"]] <- dplyr::bind_rows(
+  features$extracted_features <- dplyr::bind_rows(
     movement_features[[1]], acf_features[[1]]) %>% 
     dplyr::left_join(incidental_cols_to_preserve) %>%
     dplyr::select(measurementType, dplyr::one_of(names(incidental_cols_to_preserve)),
            dplyr::everything())
   if (tibble::has_name(model_features, "model_features")) {
-    features[["model_features"]] <- model_features[["model_features"]]
+    features$model_features <- model_features$model_features
   }
   return(features)
 }
@@ -108,9 +110,13 @@ kinematic_sensor_features <- function(sensor_data, acf_col, transform = NULL,
 #' @param transform A function which accepts \code{sensor_data} as input
 #' and outputs a dataframe.
 #' @param extract A list of functions to be applied to each of the columns
-#' in \code{extract_on} from the output of \code{transform}.
+#' in \code{extract_on} from the output of \code{transform}. Each function
+#' should return a dataframe of features (normally a single-row datafame).
 #' @param extract_on A list of column names to calculate statistics from.
-#' @return Accelerometer features.
+#' @param extract_on A list of column names to calculate statistics from.
+#' @return A list of accelerometer features. The output from \code{extract} will
+#' be stored under \code{$extracted_features} and the output from \code{models}
+#' will be stored under \code{$model_features}.
 accelerometer_features_ <- function(sensor_data, transform = NULL,
                                     extract = NULL, extract_on = c(
                                       "acceleration", "jerk", "velocity", "displacement"),
@@ -129,9 +135,12 @@ accelerometer_features_ <- function(sensor_data, transform = NULL,
 #' @param transform A function which accepts \code{sensor_data} as input
 #' and outputs a dataframe.
 #' @param extract A list of functions to be applied to each of the columns
-#' in \code{extract_on} from the output of \code{transform}.
+#' in \code{extract_on} from the output of \code{transform}. Each function
+#' should return a dataframe of features (normally a single-row datafame).
 #' @param extract_on A list of column names to calculate statistics from.
-#' @return gyroscope features.
+#' @return A list of gyroscope features. The output from \code{extract} will
+#' be stored under \code{$extracted_features} and the output from \code{models}
+#' will be stored under \code{$model_features}.
 gyroscope_features_ <- function(sensor_data, transform = NULL, extract = NULL,
                                 extract_on = c("acceleration", "velocity",
                                                "displacement"), models = NULL) {
@@ -154,8 +163,7 @@ default_kinematic_features <- function(sampling_rate) {
 
 #' Extract accelerometer features
 #' 
-#' Extract features summarizing time domain, frequency domain, and frequency energy
-#' (by default) from accelerometer measurements.
+#' Extract features from accelerometer measurements.
 #' 
 #' @param sensor_data A data frame with columns t, x, y, z containing 
 #' accelerometer measurements.
@@ -164,22 +172,25 @@ default_kinematic_features <- function(sampling_rate) {
 #' feature extraction. By default, the tidy sensor data is windowed before feature
 #' extraction. This is a more user-friendly version of the \code{transform} 
 #' parameter required for more generic functions like \code{sensor_features}. Namely,
-#' its input will already be "cleaned" by detrending, bandpassing, etc. See 
-#' \code{preprocess_sensor_data} for all the cleaning steps performed.
+#' its input will already be "cleaned" by detrending, bandpassing, etc. And 
+#' its output will have columns for jerk, velocity, and displacement computed 
+#' from the cleaned measurements. See \code{preprocess_sensor_data} for all the
+#' cleaning steps performed.
 #' @param funs A list of feature extraction functions that each accept
-#' a single numeric vector as input.
+#' a single numeric vector as input. Each function should return a 
+#' dataframe of features (normally a single-row datafame).
 #' @param models A function which accepts as input \code{sensor_data} and
 #' outputs features. Useful for models which compute individual statistics
-#' using multiple input variables, or models that otherwise don't fit well
-#' into the feature extraction paradigm as implemented in \code{sensor_features}.
-#' @param window_length Length of sliding windows.
-#' @param overlap Window overlap.
+#' using multiple input variables.
+#' @param window_length Length of sliding windows during bandpass filtering.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
-#' @return Accelerometer features.
+#' @return A list of accelerometer features. The output from \code{funs} will
+#' be stored under \code{$extracted_features} and the output from \code{models}
+#' will be stored under \code{$model_features}.
 #' @export
 accelerometer_features <- function(sensor_data, transformation = NULL, funs = NULL, 
-                                   models = NULL, window_length = 256, overlap = 0.5,
+                                   models = NULL, window_length = 256,
                                    time_range = c(1,9), frequency_range=c(1, 25)) {
   sampling_rate <- get_sampling_rate(sensor_data)
   extracted_features <- accelerometer_features_(
@@ -198,8 +209,7 @@ accelerometer_features <- function(sensor_data, transformation = NULL, funs = NU
 
 #' Extract gyroscope features
 #' 
-#' Extract features summarizing time domain, frequency domain, and frequency energy
-#' (by default) from gyroscope measurements.
+#' Extract features from gyroscope measurements.
 #' 
 #' @param sensor_data A data frame with columns t, x, y, z containing 
 #' gyroscope measurements.
@@ -208,22 +218,25 @@ accelerometer_features <- function(sensor_data, transformation = NULL, funs = NU
 #' feature extraction. By default, the tidy sensor data is windowed before feature
 #' extraction. This is a more user-friendly version of the \code{transform} 
 #' parameter required for more generic functions like \code{sensor_features}. Namely,
-#' its input will already be "cleaned" by detrending, bandpassing, etc. See 
-#' \code{preprocess_sensor_data} for all the cleaning steps performed.
+#' its input will already be "cleaned" by detrending, bandpassing, etc. And 
+#' its output will have columns for jerk, velocity, and displacement computed 
+#' from the cleaned measurements. See \code{preprocess_sensor_data} for all the
+#' cleaning steps performed.
 #' @param funs A list of feature extraction functions that each accept
-#' a single numeric vector as input.
+#' a single numeric vector as input. Each function should return a 
+#' dataframe of features (normally a single-row datafame).
 #' @param models A function which accepts as input \code{sensor_data} and
-#' outputs features. Useful for models which compute individual statistics
-#' using multiple input variables, or models that otherwise don't fit well
-#' into the feature extraction paradigm as implemented in \code{sensor_features}.
-#' @param window_length Length of sliding windows.
-#' @param overlap Window overlap.
+#' outputs features. Useful for models which compute statistics
+#' using multiple input variables.
+#' @param window_length Length of sliding windows during bandpass filtering.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
-#' @return Gyroscope features.
+#' @return A list of gyroscope features. The output from \code{funs} will
+#' be stored under \code{$extracted_features} and the output from \code{models}
+#' will be stored under \code{$model_features}.
 #' @export
 gyroscope_features <- function(sensor_data, transformation = NULL, funs = NULL,
-                               models = NULL, window_length = 256, overlap = 0.5,
+                               models = NULL, window_length = 256,
                                time_range = c(1,9), frequency_range=c(1, 25)) {
   sampling_rate <- get_sampling_rate(sensor_data)
   all_features <- gyroscope_features_(
@@ -329,7 +342,7 @@ tapping_features <- function(tap_data,
 #' parameter required for more generic functions like \code{sensor_features}. Namely,
 #' its input will already be "cleaned" by detrending, bandpassing, etc. See 
 #' \code{preprocess_sensor_data} for all the cleaning steps performed.
-#' @param window_length Length of sliding windows.
+#' @param window_length Length of sliding windows during bandpass filtering.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @param sampling_rate Sampling rate of the acceleration vector.
@@ -369,9 +382,17 @@ preprocess_sensor_data <- function(sensor_data, window_length,
   return(preprocessed_sensor_data)
 }
 
+#' Generate a function for applying a window transformation to sensor data
+#' 
+#' @param window_length Length of the sliding window
+#' @param overlap Window overlap
+#' @return A function that accepts as input a dataframe with columns 
+#' t, axis, value and outputs a windowed transformation of that dataframe
 transformation_window <- function(window_length, overlap) {
   transformation_window <- function(sensor_data, window_length, overlap) {
-    window(sensor_data, window_length = window_length, overlap = overlap) %>% 
+    window(sensor_data = sensor_data,
+           window_length = window_length,
+           overlap = overlap) %>% 
       dplyr::group_by(axis, Window)
   }
   partial_transformation_window <- purrr::partial(
@@ -379,6 +400,16 @@ transformation_window <- function(window_length, overlap) {
   return(partial_transformation_window)
 }
 
+#' Generate a function for windowing sensor data after applying EMD
+#' 
+#' Apply empirical mode decomposition to sensor data, then window the result.
+#' 
+#' @param window_length Length of the sliding window
+#' @param overlap Window overlap
+#' @param max_imf The maximum number of IMF's during EMD
+#' @return A function that accepts as input a dataframe with columns 
+#' t, axis, value and outputs a windowed transformation of that 
+#' dataframe's EMD.
 transformation_imf_window <- function(window_length, overlap, max_imf) {
   purrr::partial(
     function(sensor_data, window_length, overlap, max_imf) {
@@ -414,15 +445,11 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
 #' @param sensor_data A dataframe with columns t, x, y, z.
 #' @param transformation A function which accepts a tidy version of \code{sensor_data},
 #' with columns t, axis, value, as input and outputs a dataframe suitable for 
-#' feature extraction. By default, the tidy sensor data is windowed before feature
-#' extraction. This is a more user-friendly version of the \code{transform} 
-#' parameter required for more generic functions like \code{sensor_features}. Namely,
-#' its input will already be "cleaned" by detrending, bandpassing, etc. See 
-#' \code{preprocess_sensor_data} for all the cleaning steps performed.
-#' @param window_length Length of sliding windows.
+#' feature extraction.
+#' @param window_length Length of sliding windows during bandpass filtering.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
-#' @param sampling_rate Sampling rate of the acceleration vector.
+#' @param sampling_rate Sampling rate of the acceleration column.
 #' @return A dataframe
 transform_accelerometer_data <- function(sensor_data, transformation = NULL,
                                          window_length = 256, time_range = c(1,9),
@@ -451,15 +478,11 @@ transform_accelerometer_data <- function(sensor_data, transformation = NULL,
 #' @param sensor_data A dataframe with columns t, x, y, z.
 #' @param transformation A function which accepts a tidy version of \code{sensor_data},
 #' with columns t, axis, value, as input and outputs a dataframe suitable for 
-#' feature extraction. By default, the tidy sensor data is windowed before feature
-#' extraction. This is a more user-friendly version of the \code{transform} 
-#' parameter required for more generic functions like \code{sensor_features}. Namely,
-#' its input will already be "cleaned" by detrending, bandpassing, etc. See 
-#' \code{preprocess_sensor_data} for all the cleaning steps performed.
+#' feature extraction.
 #' @param window_length Length of sliding windows.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
-#' @param sampling_rate Sampling rate of the acceleration vector.
+#' @param sampling_rate Sampling rate of the velocity column.
 #' @return A dataframe
 transform_gyroscope_data <- function(sensor_data, transformation = NA, window_length = 256,
                                      time_range = c(1,9), frequency_range=c(1, 25),

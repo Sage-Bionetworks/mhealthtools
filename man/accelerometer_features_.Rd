@@ -16,12 +16,17 @@ accelerometer measurements.}
 and outputs a dataframe.}
 
 \item{extract}{A list of functions to be applied to each of the columns
-in \code{extract_on} from the output of \code{transform}.}
+in \code{extract_on} from the output of \code{transform}. Each function
+should return a dataframe of features (normally a single-row datafame).}
+
+\item{extract_on}{A list of column names to calculate statistics from.}
 
 \item{extract_on}{A list of column names to calculate statistics from.}
 }
 \value{
-Accelerometer features.
+A list of accelerometer features. The output from \code{extract} will
+be stored under \code{$extracted_features} and the output from \code{models}
+will be stored under \code{$model_features}.
 }
 \description{
 Extract accelerometer features. This function is not normally called

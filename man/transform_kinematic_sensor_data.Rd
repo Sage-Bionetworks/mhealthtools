@@ -18,7 +18,7 @@ parameter required for more generic functions like \code{sensor_features}. Namel
 its input will already be "cleaned" by detrending, bandpassing, etc. See 
 \code{preprocess_sensor_data} for all the cleaning steps performed.}
 
-\item{window_length}{Length of sliding windows.}
+\item{window_length}{Length of sliding windows during bandpass filtering.}
 
 \item{time_range}{Timestamp range to use.}
 

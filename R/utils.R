@@ -458,7 +458,7 @@ mutate_integral <- function(sensor_data, sampling_rate, col, derived_col) {
 #' 
 #' @param sensor_data A data frame with columns \code{axis}, \code{Window}, and \code{col}.
 #' @param col Name of column to calculate acf of.
-#' @return A tibble with columns axis, window, window_index, acf
+#' @return A tibble with columns axis, Window, window_index, acf
 calculate_acf <- function(sensor_data, col) {
   if (has_error(sensor_data)) return(sensor_data)
   acf_data <- tryCatch({
@@ -473,7 +473,7 @@ calculate_acf <- function(sensor_data, col) {
       tidyr::unnest(data) %>% 
       dplyr::select(-acf, acf) # arrange other columns before acf col
     if (length(groups)) { # restore groups if originally grouped
-      acf_data <- acf_data %>% group_by_at(.vars = groups)
+      acf_data <- acf_data %>% dplyr::group_by_at(.vars = groups)
     }
     return(acf_data)
   }, error = function(e) {
@@ -675,7 +675,6 @@ time_domain_summary <- function(values, sampling_rate=NA) {
 #' @param sampling_rate Sampling_rate of \code{values}.
 #' @param npeaks Number of peaks to be computed in EWT
 #' @return A features data frame of dimension 1 x num_features
-#####
 frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
   if(is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")

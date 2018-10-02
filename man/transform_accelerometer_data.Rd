@@ -13,19 +13,15 @@ transform_accelerometer_data(sensor_data, transformation = NULL,
 
 \item{transformation}{A function which accepts a tidy version of \code{sensor_data},
 with columns t, axis, value, as input and outputs a dataframe suitable for 
-feature extraction. By default, the tidy sensor data is windowed before feature
-extraction. This is a more user-friendly version of the \code{transform} 
-parameter required for more generic functions like \code{sensor_features}. Namely,
-its input will already be "cleaned" by detrending, bandpassing, etc. See 
-\code{preprocess_sensor_data} for all the cleaning steps performed.}
+feature extraction.}
 
-\item{window_length}{Length of sliding windows.}
+\item{window_length}{Length of sliding windows during bandpass filtering.}
 
 \item{time_range}{Timestamp range to use.}
 
 \item{frequency_range}{Frequency range for the bandpass filter.}
 
-\item{sampling_rate}{Sampling rate of the acceleration vector.}
+\item{sampling_rate}{Sampling rate of the acceleration column.}
 }
 \value{
 A dataframe
