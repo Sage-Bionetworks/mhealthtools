@@ -4,14 +4,12 @@
 \alias{mutate_integral}
 \title{Add a column which is the "integral" of an existing column to a time-series dataframe.}
 \usage{
-mutate_integral(sensor_data, sampling_rate, groups, col, derived_col)
+mutate_integral(sensor_data, sampling_rate, col, derived_col)
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, axis, acceleration.}
 
 \item{sampling_rate}{Sampling rate of \code{col}.}
-
-\item{groups}{Column names to group \code{sensor_data} on before integrating.}
 
 \item{col}{Name of column to integrate.}
 

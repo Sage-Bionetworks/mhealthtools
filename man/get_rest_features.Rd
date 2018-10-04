@@ -4,8 +4,8 @@
 \alias{get_rest_features}
 \title{Extract rest features from raw accelerometer and gyroscope data.}
 \usage{
-get_rest_features(accelerometer_data, gyroscope_data, gravity_data = NA,
-  funs = NA, window_length = 256, time_range = c(1, 9),
+get_rest_features(accelerometer_data, gyroscope_data, gravity_data = NULL,
+  funs = NULL, models = NULL, window_length = 256, time_range = c(1, 9),
   frequency_range = c(1, 25), overlap = 0.5)
 }
 \arguments{
@@ -18,20 +18,28 @@ gyroscope measurements.}
 \item{gravity_data}{A data frame with columns t, x, y, z containing 
 gravity sensor measurements.}
 
-\item{funs}{A list of feature extraction functions that accept a single
-numeric vector as input. Passing NA will extract the default features 
-(time_domain_summary, frequency_domain_summary, frequency_domain_energy).}
+\item{funs}{A list of feature extraction functions that each accept
+a single numeric vector as input. Each function should return a 
+dataframe of features (normally a single-row datafame).}
 
-\item{window_length}{Length of sliding windows.}
+\item{models}{A function which accepts as input a dataframe with columns
+axis, Window, jerk, acceleration, velocity, displacement and
+outputs features. Useful for models which compute individual statistics
+using multiple input variables.}
+
+\item{window_length}{Length of sliding windows for bandpass filter
+and windowing transformation.}
 
 \item{time_range}{Timestamp range to use.}
 
 \item{frequency_range}{Frequency range for the bandpass filter.}
 
-\item{overlap}{Window overlap.}
+\item{overlap}{Window overlap for the windowing transformation.}
 }
 \value{
-Rest features indexed by axis and window.
+A list of feature dataframes. The outputs from \code{funs} will
+be stored under \code{$extracted_features} and the outputs from \code{models}
+will be stored under \code{$model_features}.'
 }
 \description{
 Extract rest features from raw accelerometer and gyroscope data.
