@@ -4,10 +4,8 @@
 \alias{gyroscope_features_}
 \title{Extract gyroscope features}
 \usage{
-gyroscope_features_(sensor_data, transform = transform_gyroscope_data,
-  extract = c(time_domain_summary, frequency_domain_summary,
-  frequency_domain_energy), extract_on = c("acceleration", "velocity",
-  "displacement"), groups = c("axis", "Window"))
+gyroscope_features_(sensor_data, transform = NULL, extract = NULL,
+  extract_on = c("acceleration", "velocity", "displacement"), models = NULL)
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, x, y, z containing 
@@ -17,14 +15,15 @@ gyroscope measurements.}
 and outputs a dataframe.}
 
 \item{extract}{A list of functions to be applied to each of the columns
-in \code{extract_on} from the output of \code{transform}.}
+in \code{extract_on} from the output of \code{transform}. Each function
+should return a dataframe of features (normally a single-row datafame).}
 
 \item{extract_on}{A list of column names to calculate statistics from.}
-
-\item{groups}{A list of column names to group upon when calculating statistics.}
 }
 \value{
-gyroscope features.
+A list of gyroscope features. The output from \code{extract} will
+be stored under \code{$extracted_features} and the output from \code{models}
+will be stored under \code{$model_features}.
 }
 \description{
 Extract gyroscope features. This function is not normally called

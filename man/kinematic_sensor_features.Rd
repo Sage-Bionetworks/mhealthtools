@@ -4,26 +4,30 @@
 \alias{kinematic_sensor_features}
 \title{Extract kinematic sensor features}
 \usage{
-kinematic_sensor_features(sensor_data, transform, extract, extract_on, groups,
-  acf_col)
+kinematic_sensor_features(sensor_data, acf_col, transform = NULL,
+  extract = NULL, extract_on = NULL, models = NULL)
 }
 \arguments{
 \item{sensor_data}{A dataframe.}
+
+\item{acf_col}{Column name to calculate acf upon.}
 
 \item{transform}{A function which accepts \code{sensor_data} as input
 and outputs a dataframe.}
 
 \item{extract}{A list of functions to be applied to each of the columns
-in \code{extract_on} from the output of \code{transform}.}
+in \code{extract_on} from the output of \code{transform}. Each function
+should return a dataframe of features (normally a single-row datafame).}
 
 \item{extract_on}{A list of column names to calculate statistics from.}
 
-\item{groups}{A list of column names to group upon when calculating statistics.}
-
-\item{acf_col}{Column name to calculate acf upon.}
+\item{models}{A list of functions which accept the output from
+\code{transform} as input and output a dataframe.}
 }
 \value{
-A dataframe of features.
+A list of feature dataframes. The output from \code{extract} will
+be stored under \code{$extracted_features} and the output from \code{models}
+will be stored under \code{$model_features}.
 }
 \description{
 Extract kinematic (accelerometer/gyroscope) features. This function is not 
