@@ -1,0 +1,83 @@
+---
+title: "Extending mhealthtools"
+author: "Phil Snyder"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Extending mhealthtools}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+If you need functionality that isn't already included with mhealthtools, it will be necessary to incorporate your own code within the existing mhealthtools architecture. Luckily, mhealthtools is written with modularity in mind, and using (or excluding) any part of the mhealthtools pipeline is easy -- at least once you understand the underlying structure of the package. Whether it's including a new statistical measure to be computed, a new assay, or even a completely new mobile sensor, it can be done without ever modifying the underlying codebase of mhealthtools.
+
+## The mhealthtools architecture
+
+There are three distinct levels of abstraction within mhealthtools: _assay_ modules, _sensor_ modules, and _utility_ functions. The functions that actually do all the work -- taking a numerical input and producing a numerical output -- exist as utilities. These utilites are utilized (pun intended) by sensor modules (e.g., accelerometer, gyroscope, ...). Sensor modules are in turn utilized by assay modules. Thus, a clear heirarchy is established where higher level modules will call functions from lower level modules, but lower level modules will never call a function from a module that is more abstracted than itself.
+
+In brief summary: Assay > Sensor > Utility
+
+Examples of Assay functions:  
+- get_tremor_features  
+- get_tapping_features  
+  
+Examples of Sensor function:  
+- accelerometer_features  
+- gyroscope_features  
+  
+Examples of Utility functions:  
+- mutate_detrend  
+- detrend  
+- extract_features  
+
+### Utility functions
+
+Although utilities exist at the bottom of the functional totem pole, they can serve very different purposes from each other. Functions like `map_groups` or `extract_features` are functional and abstract, and could exist in just about any codebase, whereas functions like `integral` just apply a base R function. Some utility functions are hierarchical -- `mutate_integral` makes use of `integral`, but accepts as input and outputs a dataframe with a schema optimized for kinematic sensor measurements, like those from accelerometer or gyroscope sensors. In short, utility functions are just a grab bag of functions that aren't specific to any one assay or sensor module.
+
+### Sensor modules
+
+Sensor modules are where things start to get interesting. The implementation of sensor modules is based on a bare-bones feature extraction paradigm/algorithm. The paradigm goes like this:
+
+- Input: raw sensor data, in a standardized format.
+- Transform: raw sensor data (by, e.g., standardizing, computing rates of change, windowing).
+- Extract: features by computing statistics upon individual columns, usually grouped by an index.
+- Return: statistics/features for each group.
+
+In some ways this paradigm is quite flexible -- any numerical transformation can be applied to the raw sensor data, and any statistic can be computed on each of the resulting transformations. But not all features you could plausibly want to compute fit well into this paradigm. Statistics that rely on complex, non-linear combinations of their input variables, such as some machine learning models which produce dense embeddings, are overly cumbersome to fit into the transform -> extract model. If you'd like to use these types of complex statistics in your feature extraction process, you can circumvent the transform -> extract pipeline by passing your own feature extraction function to the `model` parameter of sensor modules. The `model` parameter accepts a function which just accepts `sensor_data` as input and outputs whatever it wants, so it's not tremendously useful unless used as part of a larger, assay module. For example, you might write your own _swim_ assay that uses included functionality for accelerometer feature extraction, but a complex model for gyroscope feature extraction.
+
+#### Advanced sensor functionality
+
+For those who want to take full advantage of the modularity of the sensor modules, it's worth understanding the heirarchy implemented in `sensors.R`. In practice, the transform step is split into two processes, a _preprocessing_ followed by a _transformation_. Preprocessing is responsible for putting the data in a tidy format and cleaning the measurements (standardizing, detrending, etc.). Transformations take that cleaned data and put it into a completely new vector space by, for example, windowing a time series vector. Many of these preprocessing/transformation steps are shared between sensors (see heirarchy below). Feature extraction happens in a single step, but has a heirarchical aspect to it as well.
+
+To make things more concrete, see the heirarchical organization of the standard accelerometer/gyroscope feature extraction process below. Keep in mind the input -> transform -> extract paradigm, implemented in its purest form in `sensor_features`. Try reading the chart from bottom to top and don't forget to read the `>` symbol as a heirarchial "greater than" sign, rather than an `->` arrow indicating direction of program flow.
+
+- Feature extraction:
+    - `sensor_features` > `kinematic_sensor_features`.
+- Transform:
+    - `transform_kinematic_sensor_data` > (`transform_accelerometer_data` or `transform_gyroscope_data`)
+    - A look inside `transform_accelerometer_data`:
+        - `preprocess_sensor_data` (tidy, clean)
+        - `transformation_window` (window)
+        - Do some other things, like add velocity, jerk, displacement columns for later feature extraction.
+- What actually happens: `accelerometer_features_` or `gyroscope_features_`.
+    - These match the input/output format of our elegant `sensor_features` function.
+- What you call: `accelerometer_features` or `gyroscope_features`.
+
+While some of these functions (like `kinematic_sensor_features`) are more useful as constructs to avoid repeated program logic, others (like the `preprocess_sensor_data` and `transformation_*` functions) could easily be used within a different feature extraction pipeline than the default `accelerometer_features` or `gyroscope_features`.
+
+## Assay modules
+
+At the top level of feature extraction, you are usually interested in assays: data generated by a specific task like walking, tapping, flapping your arms like a bird -- whatever you think might be a useful measurement to your research. The main task of assay modules is to simply coordinate the input and output to and from the sensor modules. For example, `get_tremor_features` accepts sensor data in a "raw" format of timestamp and axis measurements, and outputs features on those measurements. To get to that point, the tremor assay module simply calls the respective feature extraction functions on its input, followed by some error checking, then returns the concatenated features.
+
+## Error handling
+
+So what if something goes wrong in the feature extraction process? Maybe some input data is malformed or some statistic computing function accidentally takes the logarithm of zero? Standard practice within mhealthtools is to do error-checking at a dataframe level -- meaning if something goes wrong, it will be caught by a function that is meant to return a dataframe. Instead of returning a feature dataframe, or some transformation of its input, the function will return a dataframe with an "error" column that normally contains a string giving a description of the error. Additional columns may be included if the result of the function is expected to eventually be concatenated to other, potentially non-errored results. Consistency with this error handling behavior is important because these dataframe-level functions are often piped together, and if anything goes awry upstream, downstream functions know to act as identity functions until the result of the piped statement is returned to its original caller -- where the result will be error-checked and returned in an appropriate fashion.
+
+For example, if we are running the transform step on our data, and something goes wrong while detrending the data, `detrend` will throw an exception, which gets passed to `mutate_detrend`, our dataframe-level function. `mutate_detrend` will catch the exception and return a dataframe with an error column containing the string "Detrend Error", as well as a Window column with the value NA. The dataframe continues down the piping structure initiated within `preprocess_sensor_data`, which then passes the errored result to `transformation`. Whatever function is passed as the `transformation` parameter of `transform_kinematic_sensor_data` should check for the error column and, upon finding one, immediately return its input. `transform_kinematic_sensor_data` then returns the error dataframe to (for example) `transform_accelerometer_features`, which returns the result upon checking for the error column to its caller... and repeat, all the way up to the original caller.

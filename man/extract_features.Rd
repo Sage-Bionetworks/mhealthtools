@@ -4,7 +4,7 @@
 \alias{extract_features}
 \title{Extract features from a column}
 \usage{
-extract_features(x, col, groups, funs)
+extract_features(x, col, funs)
 }
 \arguments{
 \item{x}{A data frame with columns axis, window, and \code{col}.}

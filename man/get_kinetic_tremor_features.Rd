@@ -2,20 +2,51 @@
 % Please edit documentation in R/get_kinetic_tremor_features.R
 \name{get_kinetic_tremor_features}
 \alias{get_kinetic_tremor_features}
-\title{extracts features from tremor task handToNose accelerometer and gyroscope JSON data file}
+\title{Extract kinetic tremor features from raw accelerometer and gyroscope data.}
 \usage{
 get_kinetic_tremor_features(accelerometer_data, gyroscope_data,
-  gravity_data = NA, funs = NA, window_length = 256, time_range = c(1,
-  9), frequency_range = c(1, 25), overlap = 0.5, max_imf = 4)
+  gravity_data = NULL, funs = NULL, models = NULL, window_length = 256,
+  time_range = c(1, 9), frequency_range = c(1, 25), overlap = 0.5,
+  max_imf = 4)
 }
 \arguments{
-\item{tremorJsonFileLoc}{path to tremor accelerometer json file}
+\item{accelerometer_data}{A data frame with columns t, x, y, z containing 
+accelerometer measurements.}
+
+\item{gyroscope_data}{A data frame with columns t, x, y, z containing 
+gyroscope measurements.}
+
+\item{gravity_data}{A data frame with columns t, x, y, z containing 
+gravity sensor measurements.}
+
+\item{funs}{A list of feature extraction functions that each accept
+a single numeric vector as input. Each function should return a 
+dataframe of features (normally a single-row datafame).}
+
+\item{models}{A function which accepts as input a dataframe with columns
+axis, Window, IMF, jerk, acceleration, velocity, displacement and
+outputs features. Useful for models which compute individual statistics
+using multiple input variables.}
+
+\item{window_length}{Length of sliding windows for bandpass filter
+and windowing transformation.}
+
+\item{time_range}{Timestamp range to use.}
+
+\item{frequency_range}{Frequency range for the bandpass filter.}
+
+\item{overlap}{Window overlap for the windowing transformation.}
+
+\item{max_imf}{Number of intrinsic mode functions to use for 
+empirical mode decomposition.}
 }
 \value{
-data frame of tremor features
+A list of feature dataframes. The outputs from \code{funs} will
+be stored under \code{$extracted_features} and the outputs from \code{models}
+will be stored under \code{$model_features}.'
 }
 \description{
-extracts features from tremor task handToNose accelerometer and gyroscope JSON data file
+Extract kinetic tremor features from raw accelerometer and gyroscope data.
 }
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder

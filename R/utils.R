@@ -418,17 +418,14 @@ mutate_displacement <- function(sensor_data, sampling_rate) {
 #' 
 #' @param sensor_data A data frame with columns t, axis, acceleration.
 #' @param sampling_rate Sampling rate of \code{col}.
-#' @param groups Column names to group \code{sensor_data} on before differentiating.
 #' @param col Name of column to differentiate.
 #' @param derived_col Name of new column which is the derivative of \code{col}.
 #' @return A dataframe
-mutate_derivative <- function(sensor_data, sampling_rate, groups, col, derived_col) {
+mutate_derivative <- function(sensor_data, sampling_rate, col, derived_col) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_derivative <- tryCatch({
     sensor_data %>%
-      dplyr::group_by_at(.vars = groups) %>% 
-      dplyr::mutate(!!derived_col := derivative(!!dplyr::sym(col)) * sampling_rate) %>%
-      dplyr::ungroup()
+      dplyr::mutate(!!derived_col := derivative(!!dplyr::sym(col)) * sampling_rate)
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = paste("Error calculating", derived_col))
   })
@@ -441,17 +438,14 @@ mutate_derivative <- function(sensor_data, sampling_rate, groups, col, derived_c
 #' 
 #' @param sensor_data A data frame with columns t, axis, acceleration.
 #' @param sampling_rate Sampling rate of \code{col}.
-#' @param groups Column names to group \code{sensor_data} on before integrating.
 #' @param col Name of column to integrate.
 #' @param derived_col Name of new column which is the integral of \code{col}.
 #' @return A dataframe
-mutate_integral <- function(sensor_data, sampling_rate, groups, col, derived_col) {
+mutate_integral <- function(sensor_data, sampling_rate, col, derived_col) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_integral <- tryCatch({
     sensor_data %>% 
-      dplyr::group_by_at(.vars = groups) %>%
-      dplyr::mutate(!!derived_col := integral(!!dplyr::sym(col)) * sampling_rate) %>% 
-      dplyr::ungroup()
+      dplyr::mutate(!!derived_col := integral(!!dplyr::sym(col)) * sampling_rate)
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = paste("Error calculating", derived_col))
   })
@@ -464,13 +458,12 @@ mutate_integral <- function(sensor_data, sampling_rate, groups, col, derived_col
 #' 
 #' @param sensor_data A data frame with columns \code{axis}, \code{Window}, and \code{col}.
 #' @param col Name of column to calculate acf of.
-#' @param groups Column names to group on when computing acf.
-#' @return A tibble with columns axis, window, window_index, acf
-calculate_acf <- function(sensor_data, col, groups) {
+#' @return A tibble with columns axis, Window, window_index, acf
+calculate_acf <- function(sensor_data, col) {
   if (has_error(sensor_data)) return(sensor_data)
   acf_data <- tryCatch({
-    sensor_data %>%
-      dplyr::group_by_at(.vars = groups) %>%
+    groups <- dplyr::group_vars(sensor_data)
+    acf_data <- sensor_data %>%
       tidyr::nest(col) %>%
       dplyr::mutate(data = purrr::map(data, function(d) {
         acf_col <- acf(d[,col], plot=F)$acf
@@ -478,7 +471,11 @@ calculate_acf <- function(sensor_data, col, groups) {
         dplyr::bind_cols(acf = acf_col, window_index = index_col)
       })) %>%
       tidyr::unnest(data) %>% 
-      dplyr::select_at(.vars = c(groups, "acf"))
+      dplyr::select(-acf, acf) # arrange other columns before acf col
+    if (length(groups)) { # restore groups if originally grouped
+      acf_data <- acf_data %>% dplyr::group_by_at(.vars = groups)
+    }
+    return(acf_data)
   }, error = function(e) {
     dplyr::tibble(Window = NA, error = "Error calculating ACF")
   })
@@ -678,7 +675,6 @@ time_domain_summary <- function(values, sampling_rate=NA) {
 #' @param sampling_rate Sampling_rate of \code{values}.
 #' @param npeaks Number of peaks to be computed in EWT
 #' @return A features data frame of dimension 1 x num_features
-#####
 frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
   if(is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
@@ -871,17 +867,15 @@ frequency_domain_energy <- function(values, sampling_rate=NA) {
 #' A convenience function for mapping a function -- which accepts a vector as input
 #' and outputs an atomic value -- to a single column of each group in a grouped tibble.
 #' 
-#' @param .x A (non-grouped) tibble
-#' @param groups A character vector specifying which columns to group on.
+#' @param .x A tibble
 #' @param col Column to pass as a vector to \code{.f}.
 #' @param .f Function to be mapped to \code{col} for each group.
 #' @param ... Additional arguments to \code{.f}.
 #' @return A tibble indexed by groups with an additional column containing
 #' the output of the mapped function.
-map_groups <- function(x, col, groups, f, ...) {
+map_groups <- function(x, col, f, ...) {
   dots <- rlang::enquos(...) # can also use enexprs()
   x %>%
-    dplyr::group_by_at(.vars = groups) %>% 
     tidyr::nest() %>% 
     dplyr::mutate(data = purrr::map(data, ~ f(.[[col]], !!!dots))) %>%
     tidyr::unnest(data)
@@ -899,14 +893,18 @@ map_groups <- function(x, col, groups, f, ...) {
 #' function in \code{funs}.
 #' @param funs A list of functions that accept a single vector as input.
 #' @return a data frame with columns axis, window, and other feature columns.
-extract_features <- function(x, col, groups, funs) {
-  purrr::map(
+extract_features <- function(x, col, funs) {
+  groups <- dplyr::group_vars(x)
+  funs_output <- purrr::map(
     funs, ~ map_groups(
       x = x,
       col = col,
-      groups = groups,
-      f = .)) %>%
-    purrr::reduce(dplyr::left_join, by = groups) %>%
-    dplyr::mutate(measurementType = col) %>%
-    dplyr::select(measurementType, dplyr::one_of(groups), dplyr::everything())
+      f = .))
+  if (length(groups)) { # concatenate elements of funs_output
+    funs_output <- funs_output %>% 
+      purrr::reduce(dplyr::left_join, by = groups) %>%
+      dplyr::mutate(measurementType = col) %>%
+      dplyr::select(measurementType, dplyr::one_of(groups), dplyr::everything())
+  }
+  return(funs_output)
 }

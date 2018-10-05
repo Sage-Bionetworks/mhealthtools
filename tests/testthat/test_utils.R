@@ -257,33 +257,20 @@ test_that('Identify min, max gravity values for each window of tidy sensor data'
   expect_is(mhealthtools:::tag_outlier_windows_(gravityVec, 256, 0.5), 'data.frame')
   # Check if output is in correct format. 256 Window length and 0.5 overlap
   
-  # gravityVec <- c(rep(NA,255),1) 
+  gravityVec <- c(rep(NA,255),1)
+  testOutput <- mhealthtools:::tag_outlier_windows_(gravityVec, 256, 0.5) %>% as.data.frame()
+  expect_equal(testOutput, data.frame(Window = as.character(1), max = NA, min = NA, stringsAsFactors=FALSE) )
+  # This needs to have max and min as NA, but is not. The actual output is [Window = '1', max = 0.08, min =0.08]
   # All values are NA except for the last value, our window length is 256, same as the length of gravityVec
-  # min(gravityVec) and max(gravityVec) should be NA, so the testOutput needs to be a dataframe with one obs. for all
-  # the three output vars with max and min having NAs
+  # min(gravityVec) and max(gravityVec) should be NA
   
-  # testOutput <- mhealthtools:::tag_outlier_windows_(seq(256), 256, 0.5) # Initialize the data
-  # testOutput$max <- NA
-  # testOutput$min <- NA
-  
-  # expect_equal(mhealthtools:::tag_outlier_windows_(gravityVec, 256, 0.5), testOutput) 
-  # Min and Max should be NA if any window has NAs in it
 })
 
-# test_that('Identify windows in which Phone might have been flipped/rotated given gravity',{
-#   # actual function in utils: tag_outlier_windows 
-#   testTibble <- dplyr::tibble(window = NA, error = "Error tagging outlier windows")  
-#   
-#   gravityVec <- dat$gravity$x
-#   
-#   # Given a gravity vector as the function requires, we should not get the error tibble(testTibble back)
-#   # expect_false(all.equal(mhealthtools:::tag_outlier_windows(gravityVec,256,0.5),testTibble)) 
-#   # I think the error is because the input needs to be formatted before feeding it in, or if fed in a gravity vector, 
-#   # it needs to be handled inside (or especially before L 331 of utils, ie the first line after tryCatch in tag_outlier_windows)
-#   
-#   # expect_equal(mhealthtools:::tag_outlier_windows(dat$gravity,256,0.5), testTibble) # Wrong input data format(not a vector, but a dataframe), expect an error tibble 
-#   
-# })
+test_that('Identify windows in which Phone might have been flipped/rotated given gravity',{
+  # actual function in utils: tag_outlier_windows
+  
+  expect_is(mhealthtools:::tag_outlier_windows(dat$gravity,256,0.5), 'data.frame') 
+})
 
 context('Features')
 test_that('Time domain summary given acceleration',{

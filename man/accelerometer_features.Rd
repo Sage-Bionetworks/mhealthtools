@@ -4,9 +4,9 @@
 \alias{accelerometer_features}
 \title{Extract accelerometer features}
 \usage{
-accelerometer_features(sensor_data, transformation = NA, funs = NA,
-  groups = c("axis", "Window"), window_length = 256, overlap = 0.5,
-  time_range = c(1, 9), frequency_range = c(1, 25))
+accelerometer_features(sensor_data, transformation = NULL, funs = NULL,
+  models = NULL, window_length = 256, time_range = c(1, 9),
+  frequency_range = c(1, 25))
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, x, y, z containing 
@@ -17,24 +17,30 @@ with columns t, axis, value, as input and outputs a dataframe suitable for
 feature extraction. By default, the tidy sensor data is windowed before feature
 extraction. This is a more user-friendly version of the \code{transform} 
 parameter required for more generic functions like \code{sensor_features}. Namely,
-its input will already be "cleaned" by detrending, bandpassing, etc. See 
-\code{preprocess_sensor_data} for all the cleaning steps performed.}
+its input will already be "cleaned" by detrending, bandpassing, etc. And 
+its output will have columns for jerk, velocity, and displacement computed 
+from the cleaned measurements. See \code{preprocess_sensor_data} for all the
+cleaning steps performed.}
 
 \item{funs}{A list of feature extraction functions that each accept
-a single numeric vector as input.}
+a single numeric vector as input. Each function should return a 
+dataframe of features (normally a single-row datafame).}
 
-\item{window_length}{Length of sliding windows.}
+\item{models}{A function which accepts as input \code{sensor_data} and
+outputs features. Useful for models which compute individual statistics
+using multiple input variables.}
 
-\item{overlap}{Window overlap.}
+\item{window_length}{Length of sliding windows during bandpass filtering.}
 
 \item{time_range}{Timestamp range to use.}
 
 \item{frequency_range}{Frequency range for the bandpass filter.}
 }
 \value{
-Accelerometer features.
+A list of accelerometer features. The output from \code{funs} will
+be stored under \code{$extracted_features} and the output from \code{models}
+will be stored under \code{$model_features}.
 }
 \description{
-Extract features summarizing time domain, frequency domain, and frequency energy
-(by default) from accelerometer measurements.
+Extract features from accelerometer measurements.
 }

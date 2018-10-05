@@ -1,0 +1,312 @@
+---
+title: "Modules"
+author: "Meghasyam Tummalacherla"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Modules}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+```{r setup, include = FALSE, echo=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+`mhealthtools` was built to help people study the physiological symptoms that can be tracked through the sensors of the modern day smartphone. This can be the tremor in your hand using the accelerometer and gyroscope sensors while holding the phone in your hand; or Bradykinesia and Dyskinesia through the acceleremeter and gyroscope sensors while having the phone in the front pocket of your pant while you walk; or your heartrate using the camera with your finger against it. Whatever the experiment design (also referred to as module, task or activity), if it uses the smartphone sensors, you can use `mhealthtools` to extract useful and sometimes physiologically meaningful features.
+
+Here we describe the use of `mhealthtools` for certain modules, that are taken from the [mpower study](https://parkinsonmpower.org/) run by Sage Bionetworks to better understand Parkinson's disease, or read more at their [article published in nature](https://www.nature.com/articles/sdata201611).
+
+Let's load the package before we proceed to it's uses for various modules
+
+```{r data, warning=FALSE, error=FALSE, prompt=FALSE}
+library(mhealthtools)
+```
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE, error=FALSE, prompt=FALSE}
+library(dplyr)
+```
+
+#### Walk Module
+
+In this task, the participant is asked to keep the phone in his/her pant's front pocket (if not in the waistband of the pants) and then walk in a straight line for some fixed amount of time (like 30s). For someone with Parkinson's we expect to see symptoms of Dyskinesia and Bradykinesia. 
+
+The features extracted from `get_walk_features` do capture to some extent the effects of those symptoms. In the default processing, the signal is broken down into IMFs (Intrinsic Mode Functions) using the Hilbert Huang Transform before they are analyzed.
+
+`mhealthtools` comes with preloaded walk data from one of the mpower participants. Let's take a look at the data before we proceed to analyze it.
+
+```{r}
+data("walk_data")
+```
+
+Let's look at the accelerometer data (plotting only the first ten seconds)
+
+```{r, echo=FALSE, fig.width=8, fig.height=5, message=FALSE}
+library(ggplot2)
+a <- walk_data$userAcceleration
+a$t <- walk_data$timestamp
+a <- tidyr::gather(a, 'axis' , 'val', -t)
+a <- a %>% dplyr::filter(t<10)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+```
+
+Let's look at the gyroscope data (plotting only the first ten seconds)
+
+```{r, echo=FALSE, fig.width=8, fig.height=4}
+library(ggplot2)
+a <- walk_data$rotationRate
+a$t <- walk_data$timestamp
+a <- tidyr::gather(a, 'axis' , 'val', -t)
+a <- a %>% dplyr::filter(t<10)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+```
+
+As you can see the accelerometer data in `walk_data` is missing the `t` column, and it is referenced as `walk_data$timestamp`, so let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_walk_features`. Similarly for the gyroscope data
+
+```{r}
+# Getting walk acceleromter and gyroscope data into mhealthtools' tidy format
+walk_accelerometer_data <- walk_data$userAcceleration
+walk_accelerometer_data$t <- walk_data$timestamp
+
+walk_gyroscope_data <- walk_data$rotationRate
+walk_gyroscope_data$t <- walk_data$timestamp
+```
+
+Now let's get the walk features using the tidy data
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+walk_features <- get_walk_features(walk_accelerometer_data, walk_gyroscope_data)
+# Using the default settings
+
+dplyr::glimpse(walk_features)
+```
+
+As with most of the functions in `mhealthtools`, `get_walk_features` also comes with many options for input parameters for versatile data analysis
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+walk_features <- get_walk_features(accelerometer_data, gyroscope_data, max_imf = 3)
+# Changing the Max no. of possible IMFs to 3 (default is 4)
+```
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+walk_features <- get_walk_features(accelerometer_data, gyroscope_data, frequency_range = c(3,15), gravity_data = gravity_data)
+# Changing the frequency range to (3-15)Hz (default is (1-25)Hz) and also giving in a gravity data to tag outlier windows (i,e windows which might be outliers based on the change in gravity value)
+```
+
+Please read the function documentation `?get_walk_features` for more info.
+
+#### Tremor Module
+
+##### Resting tremor
+
+In this task, the participant is asked to keep hold the phone in his/her hand in their lap so that their resting tremor can be measured. For someone with Parkinson's we expect to see some effects of the characteristic pill rolling tremor. 
+
+The features extracted from `get_rest_features` do capture to some extent the effects of those symptoms. 
+
+`mhealthtools` comes with preloaded rest tremor data from one of the mpower participants. Let's take a look at the data before we proceed to analyze it.
+
+```{r}
+data("rest_tremor_data")
+```
+
+Let's look at the accelerometer data (plotting only the first ten seconds)
+
+```{r, echo=FALSE, fig.width=8, fig.height=5, message=FALSE}
+library(ggplot2)
+a <- rest_tremor_data$userAcceleration
+a$t <- rest_tremor_data$timestamp
+a <- tidyr::gather(a, 'axis' , 'val', -t)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+```
+
+Let's look at the gyroscope data (plotting only the first ten seconds)
+
+```{r, echo=FALSE, fig.width=8, fig.height=4}
+library(ggplot2)
+a <- rest_tremor_data$rotationRate
+a$t <- rest_tremor_data$timestamp
+a <- tidyr::gather(a, 'axis' , 'val', -t)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+```
+
+As you can see the accelerometer data in `rest_tremor_data` is missing the `t` column, and it is referenced as `rest_tremor_data$timestamp`, so let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_rest_features`. Similarly for the gyroscope data
+
+```{r}
+# Getting walk acceleromter and gyroscope data into mhealthtools' tidy format
+rest_tremor_accelerometer_data <- rest_tremor_data$userAcceleration
+rest_tremor_accelerometer_data$t <- rest_tremor_data$timestamp
+
+rest_tremor_gyroscope_data <- rest_tremor_data$rotationRate
+rest_tremor_gyroscope_data$t <- rest_tremor_data$timestamp
+```
+
+Now let's get the rest tremor features using the tidy data
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+rest_tremor_features <- get_rest_features(rest_tremor_accelerometer_data, rest_tremor_gyroscope_data)
+# Using the default settings
+
+dplyr::glimpse(rest_tremor_features)
+```
+
+As with most of the functions in `mhealthtools`, `get_rest_features` also comes with many options for input parameters for versatile data analysis
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+rest_tremor_features <- get_rest_features(rest_tremor_accelerometer_data, rest_tremor_gyroscope_data, frequency_range = c(3,15))
+# Changing the frequency range to (3-15)Hz (default is (1-25)Hz) 
+```
+
+Please read the function documentation `?get_rest_features` for more info.
+
+##### Kinetic tremor (Action tremor)
+
+In this task, the participant is asked to hold the phone in their hand, and extend their hands at shoulder length and then touch their nose with their finger, and keep this motion in a loop.
+
+The features extracted from `get_kinetic_tremor_features` do capture to some extent the effects of those symptoms. In the default processing, the signal is broken down into IMFs (Intrinsic Mode Functions) using the Hilbert Huang Transform before they are analyzed.
+
+`mhealthtools` comes with preloaded walk data from one of the mpower participants. Let's take a look at the data before we proceed to analyze it.
+
+```{r}
+data("kinetic_tremor_data")
+```
+
+Let's look at the accelerometer data (plotting only the first ten seconds)
+
+```{r, echo=FALSE, fig.width=8, fig.height=5, message=FALSE}
+library(ggplot2)
+a <- kinetic_tremor_data$userAcceleration
+a$t <- kinetic_tremor_data$timestamp
+a <- tidyr::gather(a, 'axis' , 'val', -t)
+a <- a %>% dplyr::filter(t<10)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+```
+
+Let's look at the gyroscope data (plotting only the first ten seconds)
+
+```{r, echo=FALSE, fig.width=8, fig.height=4}
+library(ggplot2)
+a <- kinetic_tremor_data$rotationRate
+a$t <- kinetic_tremor_data$timestamp
+a <- tidyr::gather(a, 'axis' , 'val', -t)
+a <- a %>% dplyr::filter(t<10)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+```
+
+As you can see the accelerometer data in `kinetic_tremor_data` is missing the `t` column, and it is referenced as `kinetic_tremor_data$timestamp`, so let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_kinetic_tremor_features`. Similarly for the gyroscope data
+
+```{r}
+# Getting walk acceleromter and gyroscope data into mhealthtools' tidy format
+kinetic_tremor_accelerometer_data <- kinetic_tremor_data$userAcceleration
+kinetic_tremor_accelerometer_data$t <- kinetic_tremor_data$timestamp
+
+kinetic_tremor_gyroscope_data <- kinetic_tremor_data$rotationRate
+kinetic_tremor_gyroscope_data$t <- kinetic_tremor_data$timestamp
+```
+
+Now let's get the kinetic tremor features using the tidy data
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+kinetic_tremor_features <- get_kinetic_tremor_features(kinetic_tremor_accelerometer_data, kinetic_tremor_gyroscope_data)
+# Using the default settings
+
+dplyr::glimpse(kinetic_tremor_features)
+```
+
+As with most of the functions in `mhealthtools`, `get_kinetic_tremor_features` also comes with many options for input parameters for versatile data analysis
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+kinetic_tremor_features <- get_kinetic_tremor_features(accelerometer_data, gyroscope_data, max_imf = 3)
+# Changing the Max no. of possible IMFs to 3 (default is 4)
+```
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+kinetic_tremor_features <- get_kinetic_tremor_features(accelerometer_data, gyroscope_data, frequency_range = c(3,15), gravity_data = gravity_data)
+# Changing the frequency range to (3-15)Hz (default is (1-25)Hz) and also giving in a gravity data to tag outlier windows (i,e windows which might be outliers based on the change in gravity value)
+```
+
+Please read the function documentation `?get_kinetic_tremor_features` for more info.
+
+#### Tapping Module (Touchscreen)
+
+In this task, the participant is asked to tap the screen with their middle and pointing finger alternatingly as fast as they can for 30s (with one hand first, and if possible the other hand too). For people having Parkinson's they might not be able to tap as fast as a normal person, and also they might show higher fatigue (slower tap rate) at the end of the task than a normal person.
+
+Features extracted from `get_tapping_features` of `mhealthtools` try to address these symptoms.
+
+```{r}
+data("tap_data")
+head(tap_data)
+```
+
+Let's look at a plot of the `x` and `y` co-ordinates of the tap data against `t`
+
+```{r, echo=FALSE, fig.width=8, fig.height=4}
+library(ggplot2)
+a <- tap_data
+a <- tidyr::gather(a %>% dplyr::select(-buttonid), 'axis' , 'val', -t)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+```
+
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+tap_features <- get_tapping_features(tap_data)
+# Using the default settings
+
+dplyr::glimpse(tap_features)
+```
+
+As with most of the functions in `mhealthtools`, `get_tapping_features` also comes with options input parameters for versatile data analysis. 
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+tap_features <- get_tapping_features(tap_data, depressThr = 10)
+# Changing the threshold for intertap distance in x-axis, depressThr to 10 (default is 20)
+```
+
+Please read the function documentation `?get_tapping_features` for more info.
+
+####  Heartrate Module (Camera)
+
+In this task, the participant is asked to place their finger over their smartphone camera and from the average pixel intensity across frames, we estimate the heartrate of the participant. 
+
+To use the fucntion `get_heartrate` of `mhealthtools` the data needs to be in a certain format, fortunately the package comes with sampledata `heartrate_data`
+
+```{r, echo=FALSE, warning=FALSE, error=FALSE, prompt=FALSE}
+data("heartrate_data")
+head(heartrate_data)
+```
+
+Let's look at the `red`,`blue` and `green` columns of the heartrate data against `t` (plotting only the time between 2 and 10 seconds)
+```{r, echo=FALSE, fig.width=8, fig.height=4}
+library(ggplot2)
+a <- heartrate_data %>% dplyr::select(timestamp, red,blue,green)
+a <- tidyr::gather(a, 'axis' , 'val', -timestamp)
+a <- a %>% dplyr::filter(timestamp<10, timestamp>2)
+ggplot(a, aes(x = timestamp, y= val)) + geom_line()+facet_wrap(~axis)
+```
+
+
+Now to extract the heartrate, we just pass the formatted data into `get_heartrate` which outputs a list containing estimated heartrates for the three channels: red, blue and green, the sampling rate and an error status.
+
+```{r,  warning=FALSE, error=FALSE, prompt=FALSE}
+hr_values <- get_heartrate(heartrate_data)
+# Using the default settings
+```
+
+```{r}
+dplyr::glimpse(hr_values)
+```
+
+As with most of the functions in `mhealthtools`, `get_heartrate` also comes with many options for input parameters for versatile data analysis. 
+
+
+```{r,  warning=FALSE, error=FALSE, prompt=FALSE}
+hr_values <- get_heartrate(heartrate_data, windowLen = 8, freqRange = c(2,20), bpforder = 64)
+# Using 8s windows, frequencies from 2-20Hz and a bandpass filter of order 64
+# Defaults are 10s windows, 1-25Hz frequency range and a bandpass filter of order 128
+```
+
+Please read the function documentation `?get_heartrate` for more info.
+
+Please refer to advanced feature extraction pipeline to use your own functions/models in the extending mhealhtools vignette
