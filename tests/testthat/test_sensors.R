@@ -55,12 +55,18 @@ datAccel <- flatten_data(dat,'userAcceleration')
 datGyro  <- flatten_data(dat,'rotationRate')
 datGravity <- flatten_data(dat, 'gravity')
 
+## get tidy data as we will use that a lot to test the rest of the functions
+datAccelTidy <- mhealthtools:::tidy_sensor_data(datAccel)
+datGyroTidy <- mhealthtools:::tidy_sensor_data(datGyro)
+datGravityTidy <- mhealthtools:::tidy_sensor_data(datGravity)
+
+
 ### Individual test functions
 context('Accelerometer features')
 test_that('Wrapper to extract accelerometer features',{
   # actual function in sensors.R: accelerometer_features
   
-  expect_is(mhealthtools:::accelerometer_features(sensor_data = datAccel), 'data.frame') # Check if output is in correct format
+  expect_is(mhealthtools:::accelerometer_features(sensor_data = datAccelTidy), 'data.frame') # Check if output is in correct format
   
 })
 
