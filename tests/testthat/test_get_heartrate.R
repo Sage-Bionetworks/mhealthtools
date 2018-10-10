@@ -4,6 +4,11 @@
 # email: meghasyam@sagebase.org
 ####################################################
 
+######################## *** NOTE *** ########################
+## Still have to write tests for 
+# (throws error) get_heartrate
+######################## *** NOTE *** ########################
+
 ### Require mHealthTools
 require(mhealthtools)
 
@@ -23,7 +28,7 @@ library(purrr)
 
 ### Load data file
 data("heartrate_data")
-datHR <- heartrate_data
+datHR <- mhealthtools::heartrate_data
 
 ### Individual test functions
 context('Extract Heart rate')

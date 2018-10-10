@@ -4,6 +4,20 @@
 # email: meghasyam@sagebase.org
 ####################################################
 
+######################## *** NOTE *** ########################
+## Still have to write tests for 
+# (throws error) sensor_features
+# (throws error) default_kinematic_features
+# (throws error) kinematic_sensor_features
+# (throws error) accelerometer_features_
+# (throws error) gyroscope_features_
+# (throws error) acceleromter_features
+# (throws error) gyroscope_features
+# (throws error) transform_kinematic_sensor_data
+# (throws error) transform_gyroscope_data
+# (suspect chek) transform_accelerometer_data
+######################## *** NOTE *** ########################
+
 ### Require mHealthTools
 require(mhealthtools)
 
@@ -24,7 +38,7 @@ library(purrr)
 ### Load data file
 data("sensor_data")
 data('tap_data')
-dat <- sensor_data
+dat <- mhealthtools::sensor_data
 
 ### flatten data to the format needed for mHealthTools
 flatten_data <- function(dat, metric) {
@@ -36,7 +50,7 @@ flatten_data <- function(dat, metric) {
 }
 
 ### Get the formatted tapping, accelerometer and gyroscope data to use in testing below
-datTap <- tap_data
+datTap <- mhealthtools::tap_data
 datAccel <- flatten_data(dat,'userAcceleration')
 datGyro  <- flatten_data(dat,'rotationRate')
 datGravity <- flatten_data(dat, 'gravity')

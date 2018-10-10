@@ -4,6 +4,11 @@
 # email: meghasyam@sagebase.org
 ####################################################
 
+######################## *** NOTE *** ########################
+## Still have to write tests for 
+# (throws error) get_tremor_features
+######################## *** NOTE *** ########################
+
 # When I input gravity sensor data into the function get_tremor_features, the whole error column is like
 # 'Phone rotated within window' for all the windows. Is this normal, or is this happening because of the test data (I don't think so)
 # This needs to be checked.
@@ -28,7 +33,7 @@ library(purrr)
 
 ### Load data file
 data("sensor_data")
-dat <- sensor_data
+dat <- mhealthtools::sensor_data
 
 ### flatten data to the format needed for mHealthTools
 flatten_data <- function(dat, metric) {

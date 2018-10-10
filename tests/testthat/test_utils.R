@@ -5,7 +5,16 @@
 ####################################################
 
 ######################## *** NOTE *** ########################
-## Still have to write tests for map_groups
+## Still have to write tests for 
+# map_groups
+# extract_features
+# derivative
+# integral
+# mutate_derivative
+# mutate_integral
+# window_start_end_times
+# (throws error) window
+# (throws error) tag_outlier_windows_
 ######################## *** NOTE *** ########################
 
 ### Require mHealthTools
@@ -26,9 +35,9 @@ library(stringr)
 
 ### Load data file
 data("sensor_data")
-dat <- sensor_data
+dat <- mhealthtools::sensor_data
 data("tap_data")
-datTap <- tap_data
+datTap <- mhealthtools::tap_data
 
 ### flatten data to the format needed for mHealthTools
 flatten_data <- function(dat, metric) {
@@ -120,7 +129,6 @@ datAccelTidy <- mhealthtools:::tidy_sensor_data(datAccel)
 datGyroTidy <- mhealthtools:::tidy_sensor_data(datGyro)
 
 context('Detrending of the data')
-
 test_that("Detrend the data given a time series",{
   # actual function in utils: detrend
   expect_is(mhealthtools:::detrend(datAccel$t, datAccel$y), 'numeric') # Expected format
@@ -138,7 +146,6 @@ test_that("Detrend the given sensor data",{
 })
 
 context('Bandpass and filtering by time ')
-
 test_that('Bandpass a timeseries data',{
   # actual function in utils: bandpass
   testTimeSeries <- datAccel$x
@@ -175,7 +182,6 @@ test_that('Filtering the time series data by selecting a time range',{
 })
 
 context('Windowing')
-
 test_that('Windowing a time series',{
   # actual function in utils: windowSignal
   
