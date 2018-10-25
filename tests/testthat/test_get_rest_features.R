@@ -60,6 +60,24 @@ test_that('Get accelerometer, gyroscope features',{
   expect_is(mhealthtools::get_rest_features(accelerometer_data = datAccel, gyroscope_data = datGyro, gravity_data = datGravity), 'data.frame') 
   # Similar test to previous one except also included gravity data
   
+  expect_is(mhealthtools::get_rest_features(accelerometer_data = datAccel, gyroscope_data = datGyro, funs = list(mean)), 'data.frame')
+  # Custum functions should also work (using base mean as the list of functions, this works even if mean does not give a
+  # dataframe of features as output??)
+  
+  custom_model <- function(dat){
+    avec <- dat['jerk']*dat['velocity'] 
+    
+    avec <- avec %>% 
+      unlist() %>% 
+      as.numeric() 
+    
+    return(data.frame(f1 = mean(avec, na.rm = T)))
+  }
+  expect_is(mhealthtools::get_rest_features(accelerometer_data = datAccel, gyroscope_data = datGyro, models = custom_model, 'data.frame'))
+  # Custum models should also work, the output format of custom models is not defined specifically like the output of
+  # each function in the list of funs
+  
+  
   testTibble$error <- 'Malformed accelerometer data'
   expect_equal(mhealthtools:::get_rest_features(accelerometer_data = NA, gyroscope_data = datGyro), testTibble)
   # Give error tibble if accelerometer data has any NAs

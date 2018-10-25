@@ -6,10 +6,9 @@
 
 ######################## *** NOTE *** ########################
 ## Still have to write tests for 
-# guanlab_nn_architechture
-# load_guanlab_model
-# guanlab_model
+# (throws error) guanlab_model
 ######################## *** NOTE *** ########################
+
 
 ### Require mHealthTools
 require(mhealthtools)
@@ -46,4 +45,28 @@ datAccel <- flatten_data(dat,'userAcceleration')
 datGyro  <- flatten_data(dat,'rotationRate')
 datGravity <- flatten_data(dat, 'gravity')
 
+### Individual test functions
+context('Setting up GuanLab Model')
+test_that('Generate GuanLab architechture',{
+  # actual function in models.R: guanlab_nn_architecture
+  
+  expect_is(mhealthtools:::guanlab_nn_architecture(),'keras.engine.sequential.Sequential')
+  # Keras sequential model
+  
+})
 
+test_that('Load weights into GuanLab architechture',{
+  # actual function in models.R: load_guanlab_model
+  
+  expect_is(mhealthtools:::load_guanlab_model(),'list')
+  # output is a list of Keras sequential models
+  
+})
+
+context('Extract features using GuanLab Model',{
+  # actual function in models.R: guanlab_model
+  
+  expect_is(mhealthtools::guanlab_model(sensor_data = datAccel), 'data.frame')
+  # expose guanlab_model to main functions (:: vs :::)
+  # Also predict_proba in guanlab_model predicts 1 or 0, but we need a probability
+})
