@@ -399,7 +399,7 @@ transformation_window <- function(window_length, overlap) {
     window(sensor_data = sensor_data,
            window_length = window_length,
            overlap = overlap) %>% 
-      dplyr::group_by(axis, Window)
+      dplyr::group_by(axis, window)
   }
   partial_transformation_window <- purrr::partial(
     transformation_window, window_length = window_length, overlap = overlap)
@@ -435,10 +435,10 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
               windowSignal(col, window_length = window_length,
                            overlap = overlap) %>% 
                 dplyr::as_tibble() %>% 
-                tidyr::gather(key="Window", value="value", convert = T)
+                tidyr::gather(key="window", value="value", convert = T)
             }, .id = "IMF") %>% dplyr::mutate(IMF = as.integer(IMF))
         }, .id = "axis") %>% 
-        dplyr::group_by(axis, IMF, Window)
+        dplyr::group_by(axis, IMF, window)
       return(windowed_imf)
     },
     window_length = window_length,
