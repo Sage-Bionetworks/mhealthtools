@@ -76,8 +76,8 @@ dplyr::glimpse(accel_features)
 There are many other possible use cases to calculate the accelerometer features. The `time_range` parameter decides the time window to be operated on in the accelerometer signal. The `overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_range` parameter specifies the frequency range to keep for the analysis.
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
-accel_features <- accelerometer_features(accelerometer_data, overlap = 0.4, time_range = c(2,5))
-# Consider windows with 40% overlap, and consider the time ranges between 2 and 5s only
+accel_features <- accelerometer_features(accelerometer_data, time_range = c(2,5))
+# Consider the time ranges between 2 and 5s only
 ```
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
@@ -136,8 +136,7 @@ dplyr::glimpse(gyro_features)
 There are many other possible use cases to calculate the gyroscope features. The `time_range` parameter decides the time window to be operated on in the accelerometer signal. The `overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_range` parameter specifies the frequency range to keep for the analysis.
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
-gyro_features <- gyroscope_features(gyroscope_data, overlap = 0.6)
-# Consider windows with 60% overlap
+gyro_features <- gyroscope_features(gyroscope_data)
 ```
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}

@@ -6,7 +6,7 @@
 
 ######################## *** NOTE *** ########################
 ## Still have to write tests for 
-# (throws error) get_kinetic_tremor_features
+# (throws error for custom models) get_kinetic_tremor_features
 ######################## *** NOTE *** ########################
 
 # When I input gravity sensor data into the function get_kinetic_tremor_features, the whole error column is like
@@ -55,12 +55,12 @@ test_that('Get accelerometer, gyroscope features',{
   # actual function in get_kinetic_tremor_features.R: get_kinetic_tremor_features
   testTibble <- dplyr::tibble(Window = NA, error = NA)
   
-  expect_is(mhealthtools::get_kinetic_tremor_features(accelerometer_data = datAccel, gyroscope_data = datGyro), 'data.frame') 
+  expect_is(mhealthtools::get_kinetic_tremor_features(accelerometer_data = datAccel, gyroscope_data = datGyro), 'list') 
   # Give both Accelerometer and Gyroscope data and expect a dataframe, with rest of the inputs being default
-  expect_is(mhealthtools::get_kinetic_tremor_features(accelerometer_data = datAccel, gyroscope_data = datGyro, gravity_data = datGravity), 'data.frame') 
+  expect_is(mhealthtools::get_kinetic_tremor_features(accelerometer_data = datAccel, gyroscope_data = datGyro, gravity_data = datGravity), 'list') 
   # Similar test to previous one except also included gravity data
   
-  expect_is(mhealthtools::get_kinetic_tremor_features(accelerometer_data = datAccel, gyroscope_data = datGyro, funs = list(mean)), 'data.frame')
+  expect_is(mhealthtools::get_kinetic_tremor_features(accelerometer_data = datAccel, gyroscope_data = datGyro, funs = list(mean)), 'list')
   # Custum functions should also work (using base mean as the list of functions, this works even if mean does not give a
   # dataframe of features as output??)
   
@@ -73,7 +73,7 @@ test_that('Get accelerometer, gyroscope features',{
     
     return(data.frame(f1 = mean(avec, na.rm = T)))
     }
-  expect_is(mhealthtools::get_kinetic_tremor_features(accelerometer_data = datAccel, gyroscope_data = datGyro, models = custom_model, 'data.frame'))
+  expect_is(mhealthtools::get_kinetic_tremor_features(accelerometer_data = datAccel, gyroscope_data = datGyro, models = custom_model), 'list')
   # Custum models should also work, the output format of custom models is not defined specifically like the output of
   # each function in the list of funs
   

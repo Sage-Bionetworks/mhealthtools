@@ -6,13 +6,6 @@
 
 ######################## *** NOTE *** ########################
 ## Still have to write tests for 
-# (throws error) sensor_features
-# (throws error) default_kinematic_features
-# (throws error) kinematic_sensor_features
-# (throws error) accelerometer_features_
-# (throws error) gyroscope_features_
-# (throws error) acceleromter_features
-# (throws error) gyroscope_features
 # (throws error) transform_kinematic_sensor_data
 # (throws error) transform_gyroscope_data
 # (suspect chek) transform_accelerometer_data
@@ -66,7 +59,7 @@ context('Accelerometer features')
 test_that('Wrapper to extract accelerometer features',{
   # actual function in sensors.R: accelerometer_features
   
-  expect_is(mhealthtools:::accelerometer_features(sensor_data = datAccelTidy), 'data.frame') # Check if output is in correct format
+  expect_is(mhealthtools:::accelerometer_features(sensor_data = datAccelTidy), 'list') # Check if output is in correct format
   
 })
 
@@ -82,12 +75,11 @@ test_that('Function to extract accelerometer features',{
                                                      mhealthtools:::transform_accelerometer_data,
                                                      transformation = transformation,
                                                      window_length = 256,
-                                                     overlap = 0.5,
                                                      time_range = c(1,9),
                                                      frequency_range = c(1,25),
                                                      sampling_rate = 100),
-                                                   extract = funs,
-                                                   groups = c('axis','Window')), 'data.frame') # Check if output is in correct format
+                                                   extract = funs),
+            'list') # Check if output is in correct format
   
 })
 
@@ -95,7 +87,7 @@ context('Gyroscope features')
 test_that('Wrapper to extract gyroscope features',{
   # actual function in sensors.R: gyroscope_features
   
-  expect_is(mhealthtools:::gyroscope_features(sensor_data = datGyro), 'data.frame') # Check if output is in correct format
+  expect_is(mhealthtools:::gyroscope_features(sensor_data = datGyro), 'list') # Check if output is in correct format
   
 })
 
@@ -111,12 +103,11 @@ test_that('Function to extract gyroscope features',{
                                                  mhealthtools:::transform_accelerometer_data,
                                                  transformation = transformation,
                                                  window_length = 256,
-                                                 overlap = 0.5,
                                                  time_range = c(1,9),
                                                  frequency_range = c(1,25),
                                                  sampling_rate = 100),
-                                               extract = funs,
-                                               groups = c('axis','Window')), 'data.frame') # Check if output is in correct format
+                                               extract = funs),
+            'list') # Check if output is in correct format
   
 })
 
@@ -146,7 +137,6 @@ test_that('Function to transform kinematic sensor with given input parameters',{
   expect_is(mhealthtools:::transform_kinematic_sensor_data(sensor_data = datAccel,
                                                            transformation = NA,
                                                            window_length = 256,
-                                                           overlap = 0.5,
                                                            time_range = c(1,9),
                                                            frequency_range = c(1,25),
                                                            sampling_rate = 100),
@@ -173,8 +163,7 @@ test_that('Function to initialize IMF windowing transformation function with inp
 test_that('Function to initialize list of default kinematic feature extraction functions',{
   # actual function in sensors.R: default_kinematic_features
   
-  expect_is(mhealthtools:::default_kinematic_features(sampling_rate = 100,
-                                                      npeaks = 4),
+  expect_is(mhealthtools:::default_kinematic_features(sampling_rate = 100),
             'list') # Check if output is in correct format  
 })
 
@@ -203,17 +192,14 @@ test_that('Extract kinematic sensor features',{
                                                        mhealthtools:::transform_accelerometer_data,
                                                        transformation = transformation,
                                                        window_length = 256,
-                                                       overlap = 0.5,
                                                        time_range = c(1,9),
                                                        frequency_range = c(1,25),
                                                        sampling_rate = 100),
                                                      extract = funs,
                                                      extract_on = c("acceleration", "jerk", 
                                                                     "velocity", "displacement"),
-                                                     
-                                                     groups = c('axis','Window'),
                                                      acf_col = "acceleration"),
-            'data.frame') # Check if output is in correct format
+            'list') # Check if output is in correct format
 })
 
 
@@ -227,7 +213,6 @@ test_that('Extract sensor features',{
   transform = purrr::partial(mhealthtools:::transform_accelerometer_data,
                              transformation = transformation,
                              window_length = 256,
-                             overlap = 0.5,
                              time_range = c(1,9),
                              frequency_range = c(1,25),
                              sampling_rate = 100)
@@ -238,8 +223,6 @@ test_that('Extract sensor features',{
                                            transform = function(x) x,
                                            extract = funs,
                                            extract_on = c("acceleration", "jerk", 
-                                                          "velocity", "displacement"),
-                                           
-                                           groups = c('axis','Window')),
-            'data.frame') # Check if output is in correct format
+                                                          "velocity", "displacement")),
+            'list') # Check if output is in correct format
 })

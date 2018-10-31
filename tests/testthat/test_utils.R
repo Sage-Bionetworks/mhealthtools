@@ -10,6 +10,7 @@
 # extract_features [~PHIL]
 # (throws error) tag_outlier_windows_ [The error is valid, reaffirming my suspicion that NA's
 # are handled differently in the underlying signal package]
+# (throws error for NA window length) window_start_end_times 
 ######################## *** NOTE *** ########################
 
 ### Require mHealthTools
