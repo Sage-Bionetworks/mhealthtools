@@ -111,13 +111,6 @@ test_that('Function to extract gyroscope features',{
   
 })
 
-context('Tapping features')
-test_that('Function to extract tapping features',{
-  # actual function in sensors.R: tapping_features
-  
-  expect_is(mhealthtools:::tapping_features(tap_data = datTap), 'data.frame') # Check if output is in correct format
-})
-
 context('Transformation functions')
 test_that('Function to transform accelometer data with given input parameters',{
   # actual function in sensors.R: transform_accelerometer_data
