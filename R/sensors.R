@@ -44,6 +44,10 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
   if (!is.null(models)) {
     features$model_features <- purrr::map(models, ~ .(transformed_sensor_data))
   }
+  if (is.null(extract) && is.null(models)) {
+    warning(paste("No feature extraction function list or model list passed.",
+                  "Returning an empty feature list."))
+  }
   return(features)
 }
 
@@ -65,35 +69,37 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
 #' @return A list of feature dataframes. The output from \code{extract} will
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}.
-kinematic_sensor_features <- function(sensor_data, acf_col, transform = NULL,
+kinematic_sensor_features <- function(sensor_data, acf_col = NULL, transform = NULL,
                                       extract = NULL, extract_on = NULL, models = NULL) {
   features <- list()
   if (is.null(transform)) {
     transform <- function(x) x
   }
   transformed_sensor_data <- transform(sensor_data)
-  incidental_cols_to_preserve <- transformed_sensor_data %>%
-    dplyr::select(-dplyr::one_of(extract_on)) %>%
-    dplyr::distinct() # distinct of group (table index) cols and incidental cols
-  movement_features <- sensor_features(
-    sensor_data = transformed_sensor_data,
-    transform = NULL,
-    extract = extract,
-    extract_on = extract_on)
-  acf_features <- sensor_features(
-    sensor_data = transformed_sensor_data,
-    transform = purrr::partial(calculate_acf, col = acf_col),
-    extract = extract,
-    extract_on = "acf")
+  if (!is.null(extract) && !is.null(extract_on)) {
+    incidental_cols_to_preserve <- transformed_sensor_data %>%
+      dplyr::select(-dplyr::one_of(extract_on)) %>%
+      dplyr::distinct() # distinct of group (table index) cols and incidental cols
+    movement_features <- sensor_features(
+      sensor_data = transformed_sensor_data,
+      transform = NULL,
+      extract = extract,
+      extract_on = extract_on)
+    acf_features <- sensor_features(
+      sensor_data = transformed_sensor_data,
+      transform = purrr::partial(calculate_acf, col = acf_col),
+      extract = extract,
+      extract_on = "acf")
+    features$extracted_features <- dplyr::bind_rows(
+      movement_features[[1]], acf_features[[1]]) %>% 
+      dplyr::left_join(incidental_cols_to_preserve) %>%
+      dplyr::select(measurementType, dplyr::one_of(names(incidental_cols_to_preserve)),
+             dplyr::everything())
+  }
   model_features <- sensor_features(
     sensor_data = transformed_sensor_data,
     transform = NULL,
     models = models)
-  features$extracted_features <- dplyr::bind_rows(
-    movement_features[[1]], acf_features[[1]]) %>% 
-    dplyr::left_join(incidental_cols_to_preserve) %>%
-    dplyr::select(measurementType, dplyr::one_of(names(incidental_cols_to_preserve)),
-           dplyr::everything())
   if (tibble::has_name(model_features, "model_features")) {
     features$model_features <- model_features$model_features
   }
