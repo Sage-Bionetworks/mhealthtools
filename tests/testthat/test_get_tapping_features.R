@@ -19,7 +19,7 @@ library(purrr)
 
 ### Load data file
 data("tap_data")
-dat <- tap_data
+dat <- mhealthtools::tap_data
 
 ### Individual test functions
 context('Extract tapping features')

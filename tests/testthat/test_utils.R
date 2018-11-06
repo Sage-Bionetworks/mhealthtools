@@ -5,7 +5,12 @@
 ####################################################
 
 ######################## *** NOTE *** ########################
-## Still have to write tests for map_groups
+## Still have to write tests for 
+# map_groups [~PHIL]
+# extract_features [~PHIL]
+# (throws error) tag_outlier_windows_ [The error is valid, reaffirming my suspicion that NA's
+# are handled differently in the underlying signal package]
+# (throws error for NA window length) window_start_end_times 
 ######################## *** NOTE *** ########################
 
 ### Require mHealthTools
@@ -26,9 +31,9 @@ library(stringr)
 
 ### Load data file
 data("sensor_data")
-dat <- sensor_data
+dat <- mhealthtools::sensor_data
 data("tap_data")
-datTap <- tap_data
+datTap <- mhealthtools::tap_data
 
 ### flatten data to the format needed for mHealthTools
 flatten_data <- function(dat, metric) {
@@ -120,7 +125,6 @@ datAccelTidy <- mhealthtools:::tidy_sensor_data(datAccel)
 datGyroTidy <- mhealthtools:::tidy_sensor_data(datGyro)
 
 context('Detrending of the data')
-
 test_that("Detrend the data given a time series",{
   # actual function in utils: detrend
   expect_is(mhealthtools:::detrend(datAccel$t, datAccel$y), 'numeric') # Expected format
@@ -138,7 +142,6 @@ test_that("Detrend the given sensor data",{
 })
 
 context('Bandpass and filtering by time ')
-
 test_that('Bandpass a timeseries data',{
   # actual function in utils: bandpass
   testTimeSeries <- datAccel$x
@@ -175,7 +178,6 @@ test_that('Filtering the time series data by selecting a time range',{
 })
 
 context('Windowing')
-
 test_that('Windowing a time series',{
   # actual function in utils: windowSignal
   
@@ -184,10 +186,24 @@ test_that('Windowing a time series',{
 
 test_that('Windowing the sensor data by axis',{
   # actual function in utils: window
-  testTibble <- dplyr::tibble(window = NA, error = "Windowing error")  
+  testTibble <- dplyr::tibble(Window = NA, error = "Windowing error")  
   
   expect_is(mhealthtools:::window(datAccelTidy, 256, 0.5),'data.frame') # 256 window length, 0.5 overlap, checking output format
-  expect_error(mhealthtools:::window(datAccel,256, 0.5)) # throw an error if Input is not in correct format
+  expect_equal(mhealthtools:::window(datAccel,256, 0.5), testTibble) # throw an error if Input is not in correct format
+  
+})
+
+test_that('Compute start and stop timestamp for each window',{
+  # actual function in utils: window_start_end_times
+  testTibble <- dplyr::tibble(Window = NA, error = "data error")  
+  
+  expect_is(mhealthtools:::window_start_end_times(t = datAccel$t,
+                                                  window_length = 10,
+                                                  overlap = 0.5), 'data.frame') # Check output format
+  
+  expect_equal(mhealthtools:::window_start_end_times(t = datAccel$t,
+                                                  window_length = NA,
+                                                  overlap = 0.5), testTibble) # Throw a data error if any parameter doesn't confirm to norms
   
 })
 
@@ -204,6 +220,58 @@ test_that('Calculate and add Jerk column for the tidy sensor data',{
   
   expect_is(mhealthtools:::mutate_jerk(datAccelTidy,100),'data.frame') # Check if output is in correct format
   expect_equal(mhealthtools:::mutate_jerk(datAccel,100),testTibble) # Throw an error if input is not in correct format
+  
+})
+
+context('Derivative Calculation')
+test_that('Calculate Derivative given acceleration and sampling rate',{
+  # actual function in utils: derivative
+  
+  expect_is(mhealthtools:::derivative(datAccel$x), 'numeric') # Check if output is in correct format
+  
+})
+
+test_that('Calculate and add a derivative column for the sensor data',{
+  # actual function in utils: mutate_derivative  
+  testTibble <- dplyr::tibble(Window = NA, error = "Error calculating dx") # Actual output looks like error calculating derived_col
+  
+  # mutate_derivative and mutate_integral functions are a stand in 
+  # for mutate_*(jerk, velocity, displacement) 
+  expect_is(mhealthtools:::mutate_derivative(sensor_data = datAccel,
+                                             sampling_rate = 100,
+                                             col = 'x',
+                                             derived_col = 'dx'),'data.frame') # Check output format
+  
+  expect_equal(mhealthtools:::mutate_derivative(sensor_data = datAccelTidy,
+                                                sampling_rate = 100,
+                                                col = 'x',
+                                                derived_col = 'dx'),testTibble) # Throw an error if input is not in correct format
+  
+})
+
+context('Integral Calculation')
+test_that('Calculate Integral given acceleration and sampling rate',{
+  # actual function in utils: integral
+  
+  expect_is(mhealthtools:::integral(datAccel$x), 'numeric') # Check if output is in correct format
+  
+})
+
+test_that('Calculate and add a integral column for the sensor data',{
+  # actual function in utils: mutate_integral
+  testTibble <- dplyr::tibble(Window = NA, error = "Error calculating dx") # Actual output looks like error calculating derived_col
+  
+  # mutate_derivative and mutate_integral functions are a stand in 
+  # for mutate_*(jerk, velocity, displacement) 
+  expect_is(mhealthtools:::mutate_integral(sensor_data = datAccel,
+                                             sampling_rate = 100,
+                                             col = 'x',
+                                             derived_col = 'dx'),'data.frame') # Check output format
+  
+  expect_equal(mhealthtools:::mutate_integral(sensor_data = datAccelTidy,
+                                                sampling_rate = 100,
+                                                col = 'x',
+                                                derived_col = 'dx'),testTibble) # Throw an error if input is not in correct format
   
 })
 
@@ -346,4 +414,6 @@ test_that('Co-efficient of Variation (coef_var)',{
   
   expect_is(mhealthtools:::coef_var(tapInter), 'numeric')
 })
+
+
 

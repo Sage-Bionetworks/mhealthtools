@@ -4,6 +4,11 @@
 # email: meghasyam@sagebase.org
 ####################################################
 
+######################## *** NOTE *** ########################
+## Still have to write tests for 
+# (throws error, handle funs = NA, models = NA case) get_heartrate
+######################## *** NOTE *** ########################
+
 ### Require mHealthTools
 require(mhealthtools)
 
@@ -23,7 +28,7 @@ library(purrr)
 
 ### Load data file
 data("heartrate_data")
-datHR <- heartrate_data
+datHR <- mhealthtools::heartrate_data
 
 ### Individual test functions
 context('Extract Heart rate')
@@ -37,11 +42,7 @@ test_that('Function to extract heart rate per channel(R,G,B)',{
   expect_is(mhealthtools:::get_heartrate(dat = datHR), 'list') # Check if output is in correct format
   
   tempDat <- copy(datHR)
-  tempDat <- tempDat %>% dplyr::rename('t' = 'timestamp') # Changed the column name of timestamp to t
-  expect_equal(mhealthtools:::get_heartrate(dat = tempDat), testTibble) # Error if timestamp column is missing
-  
-  tempDat <- copy(datHR)
-  tempDat$timestamp <- rep(1, length(datHR$timestamp))
+  tempDat$t <- rep(1, length(datHR$t))
   expect_equal(mhealthtools:::get_heartrate(dat = tempDat), testTibble) # Error if sampling rate cannot be calculated from timestamp
   
   tempDat <- copy(datHR)
