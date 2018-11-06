@@ -14,7 +14,7 @@ window_start_end_times(t, window_length, overlap)
 \item{overlap}{Window overlap}
 }
 \value{
-A dataframe with columns Window, window_start_time,
+A dataframe with columns window, window_start_time,
 window_end_time, window_start_index, window_end_index
 }
 \description{
