@@ -30,7 +30,6 @@ test_that('Wrapper to extract tapping features',{
   expect_is(mhealthtools::get_tapping_features(tap_data = dat), 'data.frame') # Is output in the correct format
   
   tempDat <- 'not a dataframe' # The input is not a data frame, we should expect the relevant error
-    as.data.frame()
   expect_equal(is_error_dataframe(
     mhealthtools::get_tapping_features(tap_data = tempDat), T))
   

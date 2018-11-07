@@ -192,22 +192,25 @@ test_that('Windowing a time series',{
 test_that('Windowing the sensor data by axis',{
   # actual function in utils: window
   expect_is(mhealthtools:::window(datAccelTidy, 256, 0.5),'data.frame') # 256 window length, 0.5 overlap, checking output format
-  expect_equal(mhealthtools:::window(datAccel,256, 0.5), testTibble) # throw an error if Input is not in correct format
-  
+  expect_equal(is_error_dataframe(
+    mhealthtools:::window(
+      sensor_data = datAccel,
+      window_length = 256,
+      overlap = 0.5)), T)
+  # throw an error if Input is not in correct format
 })
 
 test_that('Compute start and stop timestamp for each window',{
   # actual function in utils: window_start_end_times
-  testTibble <- dplyr::tibble(Window = NA, error = "data error")  
-  
   expect_is(mhealthtools:::window_start_end_times(t = datAccel$t,
                                                   window_length = 10,
                                                   overlap = 0.5), 'data.frame') # Check output format
   
-  expect_equal(mhealthtools:::window_start_end_times(t = datAccel$t,
-                                                  window_length = NA,
-                                                  overlap = 0.5), testTibble) # Throw a data error if any parameter doesn't confirm to norms
-  
+  expect_error(mhealthtools:::window_start_end_times(
+    t = datAccel$t, 
+    window_length = NA,
+    overlap = 0.5))
+  # Throw a data error if any parameter doesn't confirm to norms
 })
 
 context('Jerk Calculation')
@@ -224,7 +227,7 @@ test_that('Calculate and add Jerk column for the tidy sensor data',{
   expect_equal(is_error_dataframe(
     mhealthtools:::mutate_jerk(
       sensor_data = datAccel,
-      sampling_rate = 100), T)) # Throw an error if input is not in correct format
+      sampling_rate = 100)), T) # Throw an error if input is not in correct format
   
 })
 
@@ -238,7 +241,6 @@ test_that('Calculate Derivative given acceleration and sampling rate',{
 
 test_that('Calculate and add a derivative column for the sensor data',{
   # actual function in utils: mutate_derivative  
-  testTibble <- dplyr::tibble(Window = NA, error = "Error calculating dx") # Actual output looks like error calculating derived_col
   
   # mutate_derivative and mutate_integral functions are a stand in 
   # for mutate_*(jerk, velocity, displacement) 
@@ -247,10 +249,12 @@ test_that('Calculate and add a derivative column for the sensor data',{
                                              col = 'x',
                                              derived_col = 'dx'),'data.frame') # Check output format
   
-  expect_equal(mhealthtools:::mutate_derivative(sensor_data = datAccelTidy,
-                                                sampling_rate = 100,
-                                                col = 'x',
-                                                derived_col = 'dx'),testTibble) # Throw an error if input is not in correct format
+  expect_equal(is_error_dataframe(
+    mhealthtools:::mutate_derivative(
+      sensor_data = datAccelTidy,
+      sampling_rate = 100,
+      col = 'x',
+      derived_col = 'dx')), T) # Throw an error if input is not in correct format
   
 })
 
@@ -264,7 +268,6 @@ test_that('Calculate Integral given acceleration and sampling rate',{
 
 test_that('Calculate and add a integral column for the sensor data',{
   # actual function in utils: mutate_integral
-  testTibble <- dplyr::tibble(Window = NA, error = "Error calculating dx") # Actual output looks like error calculating derived_col
   
   # mutate_derivative and mutate_integral functions are a stand in 
   # for mutate_*(jerk, velocity, displacement) 
@@ -273,11 +276,12 @@ test_that('Calculate and add a integral column for the sensor data',{
                                              col = 'x',
                                              derived_col = 'dx'),'data.frame') # Check output format
   
-  expect_equal(mhealthtools:::mutate_integral(sensor_data = datAccelTidy,
-                                                sampling_rate = 100,
-                                                col = 'x',
-                                                derived_col = 'dx'),testTibble) # Throw an error if input is not in correct format
-  
+  expect_equal(is_error_dataframe( # Throw an error if input is not in correct format
+    mhealthtools:::mutate_integral(
+      sensor_data = datAccelTidy,
+      sampling_rate = 100,
+      col = 'x',
+      derived_col = 'dx')), T) 
 })
 
 context('Velocity Calculation')
@@ -290,11 +294,10 @@ test_that('Calculate velocity given acceleration and sampling rate',{
 test_that('Calculate and add Velocity column for the tidy sensor data',{
   # actual function in utils: mutate_velocity 
   expect_is(mhealthtools:::mutate_velocity(datAccelTidy,100),'data.frame') # Check if output is in correct format
-  expect_equal(is_error_dataframe(
+  expect_equal(is_error_dataframe( # Throw an error if input is not in correct format
     mhealthtools:::mutate_velocity(
       sensor_data = datAccel,
-      sampling_rate = 100), T)) # Throw an error if input is not in correct format
-  
+      sampling_rate = 100)), T) 
 })
 
 context('Displacement Calculation')
@@ -307,21 +310,19 @@ test_that('Calculate Displacement given acceleration and sampling rate',{
 test_that('Calculate and add Displacement column for the tidy sensor data',{
   # actual function in utils: mutate_displacement  
   expect_is(mhealthtools:::mutate_displacement(datAccelTidy,100),'data.frame') # Check if output is in correct format
-  expect_equal(is_error_dataframe(
+  expect_equal(is_error_dataframe( # Throw an error if input is not in correct format
     mhealthtools:::mutate_displacement(
       sensor_data = datAccel,
-      sampling_rate = 100), T)) # Throw an error if input is not in correct format
-  
+      sampling_rate = 100)), T) 
 })
 
 context('ACF calculation')
 test_that('Construct a dataframe with ACF values given tidy sensor data',{
   # actual function in utils: calculate_acf  
   expect_is(mhealthtools:::calculate_acf(datAccelTidy),'data.frame') # Check if output is in correct format
-  expect_equal(is_error_dataframe(
+  expect_equal(is_error_dataframe( # Throw an error if input is not in correct format
     mhealthtools:::calculate_acf(
-      sensor_data = datAccel), T)) # Throw an error if input is not in correct format
-  
+      sensor_data = datAccel)), T) 
 })
 
 context('Tag and Identify outlier windows based on device rotation(using gravity)')
