@@ -53,7 +53,6 @@ datGravity <- flatten_data(dat, 'gravity')
 context('Get Rest Features')
 test_that('Get accelerometer, gyroscope features',{
   # actual function in get_rest_features.R: get_rest_features
-  testTibble <- dplyr::tibble(Window = NA, error = NA)
   
   expect_is(mhealthtools::get_rest_features(accelerometer_data = datAccel, gyroscope_data = datGyro), 'list') 
   # Give both Accelerometer and Gyroscope data and expect a dataframe, with rest of the inputs being default
@@ -78,12 +77,16 @@ test_that('Get accelerometer, gyroscope features',{
   # each function in the list of funs
   
   
-  testTibble$error <- 'Malformed accelerometer data'
-  expect_equal(mhealthtools:::get_rest_features(accelerometer_data = NA, gyroscope_data = datGyro), testTibble)
+  expect_equal(is_error_dataframe(
+    mhealthtools:::get_rest_features(
+      accelerometer_data = NA,
+      gyroscope_data = datGyro), T))
   # Give error tibble if accelerometer data has any NAs
   
-  testTibble$error <- 'Malformed gyroscope data'
-  expect_equal(mhealthtools:::get_rest_features(accelerometer_data = datAccel, gyroscope_data = NA), testTibble)
+  expect_equal(is_error_dataframe(
+    mhealthtools:::get_rest_features(
+      accelerometer_data = datAccel,
+      gyroscope_data = NA), T))
   # Give error tibble if gyroscope data has any NAs  
   
   # The processing errors for acceleromter_features and gyroscope_features have been handled in test_sensors.R

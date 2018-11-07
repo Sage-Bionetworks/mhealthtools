@@ -130,4 +130,3 @@ tapping_features <- function(tap_data,
     as.data.frame()
   return(tapFeatures)
 }
-

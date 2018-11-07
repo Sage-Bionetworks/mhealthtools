@@ -30,28 +30,24 @@ test_that('Wrapper to extract tapping features',{
   expect_is(mhealthtools::get_tapping_features(tap_data = dat), 'data.frame') # Is output in the correct format
   
   tempDat <- 'not a dataframe' # The input is not a data frame, we should expect the relevant error
-  testTibble <- dplyr::tibble(error = "expected data frame object") %>% 
-    as.data.frame()
-  expect_equal(mhealthtools::get_tapping_features(tap_data = tempDat), 
-               testTibble)
+  expect_equal(is_error_dataframe(
+    mhealthtools::get_tapping_features(tap_data = tempDat), T))
   
   tempDat <- dat[1:2,] # tempDat now has just 2 rows of observations, we should expect the relevant error as this is less that the required 5
-  testTibble <- dplyr::tibble(error = "raw tapping data has less than 5 rows") %>% 
-    as.data.frame()
-  expect_equal(mhealthtools::get_tapping_features(tap_data = tempDat), 
-               testTibble)
+  expect_equal(is_error_dataframe(
+    mhealthtools::get_tapping_features(tap_data = tempDat), T))
   
   tempDat <- dat[1:2,]
   tempDat$buttonid[1:2] <- 'TappedButtonNone'
   tempDat <- rbind(tempDat, tempDat, tempDat, tempDat, tempDat)
-  testTibble <- dplyr::tibble(error = "post duplication removal tapping data has less than 5 rows") %>% 
-    as.data.frame()
   # tempDat now has 10 rows, but they are all duplicates of the first two (of the buttonid 'TappedButtonNone'),
   # so ideally speaking it just has two rows of non-duplicated unique data
   # so if we remove duplicates (we can only remove duplicates of buttonid 'TappedButtonNone'),
   # we should get an errow saying that the number of rows is less than 5
-  expect_equal(mhealthtools::get_tapping_features(tap_data = tempDat, removeDups = TRUE), 
-               testTibble)
+  expect_equal(is_error_dataframe(
+    mhealthtools::get_tapping_features(
+      tap_data = tempDat,
+      removeDups = TRUE), T))
   
 })
 
