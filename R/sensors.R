@@ -415,9 +415,9 @@ transform_accelerometer_data <- function(sensor_data, transformation = NULL,
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @param sampling_rate Sampling rate of the velocity column.
 #' @return A dataframe
-transform_gyroscope_data <- function(sensor_data, transformation = NA, window_length = 256,
-                                     time_range = c(1,9), frequency_range=c(1, 25),
-                                     sampling_rate = 100) {
+transform_gyroscope_data <- function(sensor_data, transformation = NULL,
+                                     window_length = 256, time_range = c(1,9),
+                                     frequency_range=c(1, 25), sampling_rate = 100) {
   transformed_sensor_data <- transform_kinematic_sensor_data(
     sensor_data, transformation = transformation, 
     window_length = window_length,
