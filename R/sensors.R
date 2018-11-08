@@ -37,9 +37,11 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
     return(features)
   }
   if (!is.null(extract) && !is.null(extract_on)) {
+    transformed_sensor_data_groups <- dplyr::groups(transformed_sensor_data)
     features$extracted_features <- purrr::map_dfr(
       extract_on,
-      ~ extract_features(transformed_sensor_data, ., extract))
+      ~ extract_features(transformed_sensor_data, ., extract)) %>% 
+      dplyr::distinct(!!!transformed_sensor_data_groups, measurementType, .keep_all = T)
   }
   if (!is.null(models)) {
     features$model_features <- purrr::map(models, ~ .(transformed_sensor_data))
@@ -77,9 +79,10 @@ kinematic_sensor_features <- function(sensor_data, acf_col = NULL, transform = N
   }
   transformed_sensor_data <- transform(sensor_data)
   if (!is.null(extract) && !is.null(extract_on)) {
+    transformed_sensor_data_groups <- dplyr::groups(transformed_sensor_data)
     incidental_cols_to_preserve <- transformed_sensor_data %>%
       dplyr::select(-dplyr::one_of(extract_on)) %>%
-      dplyr::distinct() # distinct of group (table index) cols and incidental cols
+      dplyr::distinct(!!!transformed_sensor_data_groups, .keep_all = T)
     movement_features <- sensor_features(
       sensor_data = transformed_sensor_data,
       transform = NULL,
