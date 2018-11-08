@@ -217,8 +217,6 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @param sensor_data A data frame with columns t, axis, value.
 #' @param window_length Length of the filter
 #' @param overlap window overlap
-#' @param include_timestamp Whether to include columns for starting and ending
-#' timestamps for each row.
 #' @return Windowed sensor data
 window <- function(sensor_data, window_length, overlap) {
   if (has_error(sensor_data)) return(sensor_data)
@@ -232,11 +230,9 @@ window <- function(sensor_data, window_length, overlap) {
     tidy_windowed_sensor_data <- lapply(
       windowed_sensor_data,
       function(windowed_matrix) {
-        windowed_matrix <- cbind(window_index = 1:dim(windowed_matrix)[1],
-                                 windowed_matrix)
         tidy_tibble <- windowed_matrix %>% 
           dplyr::as_tibble() %>%
-          tidyr::gather(window, value, -window_index, convert=T)
+          tidyr::gather(window, value, convert=T)
         return(tidy_tibble)
       }) %>% 
       dplyr::bind_rows(.id = "axis")
@@ -245,7 +241,7 @@ window <- function(sensor_data, window_length, overlap) {
                                               overlap = overlap)
     tidy_windowed_sensor_data <- tidy_windowed_sensor_data %>% 
       dplyr::left_join(start_end_times, by="window") %>%
-      dplyr::select(axis, window, window_index, window_start_time,
+      dplyr::select(axis, window, window_start_time,
                     window_end_time, value)
     return(tidy_windowed_sensor_data)
   }, error = function(e) {
@@ -457,7 +453,7 @@ mutate_integral <- function(sensor_data, sampling_rate, col, derived_col) {
 #' 
 #' @param sensor_data A data frame with columns \code{axis}, \code{window}, and \code{col}.
 #' @param col Name of column to calculate acf of.
-#' @return A tibble with columns axis, window, window_index, acf
+#' @return A tibble with columns axis, window, acf
 calculate_acf <- function(sensor_data, col) {
   if (has_error(sensor_data)) return(sensor_data)
   acf_data <- tryCatch({
@@ -465,12 +461,10 @@ calculate_acf <- function(sensor_data, col) {
     acf_data <- sensor_data %>%
       tidyr::nest(col) %>%
       dplyr::mutate(data = purrr::map(data, function(d) {
-        acf_col <- acf(d[,col], plot=F)$acf
-        index_col <- 1:length(acf_col)
-        dplyr::bind_cols(acf = acf_col, window_index = index_col)
+        acf(d[,col], plot=F)$acf
       })) %>%
       tidyr::unnest(data) %>% 
-      dplyr::select(-acf, acf) # arrange other columns before acf col
+      dplyr::rename(acf = data)
     if (length(groups)) { # restore groups if originally grouped
       acf_data <- acf_data %>% dplyr::group_by_at(.vars = groups)
     }
