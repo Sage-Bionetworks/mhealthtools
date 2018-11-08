@@ -31,11 +31,11 @@ test_that('Wrapper to extract tapping features',{
   
   tempDat <- 'not a dataframe' # The input is not a data frame, we should expect the relevant error
   expect_equal(is_error_dataframe(
-    mhealthtools::get_tapping_features(tap_data = tempDat), T))
+    mhealthtools::get_tapping_features(tap_data = tempDat)), T)
   
   tempDat <- dat[1:2,] # tempDat now has just 2 rows of observations, we should expect the relevant error as this is less that the required 5
   expect_equal(is_error_dataframe(
-    mhealthtools::get_tapping_features(tap_data = tempDat), T))
+    mhealthtools::get_tapping_features(tap_data = tempDat)), T)
   
   tempDat <- dat[1:2,]
   tempDat$buttonid[1:2] <- 'TappedButtonNone'
@@ -47,7 +47,7 @@ test_that('Wrapper to extract tapping features',{
   expect_equal(is_error_dataframe(
     mhealthtools::get_tapping_features(
       tap_data = tempDat,
-      removeDups = TRUE), T))
+      removeDups = TRUE)), T)
   
 })
 
