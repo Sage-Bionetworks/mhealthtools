@@ -6,7 +6,7 @@
 
 ######################## *** NOTE *** ########################
 ## Still have to write tests for 
-# (throws error, handle funs = NA, models = NA case) get_heartrate
+# (throws error, handle funs = NULL, models = NULL case) get_heartrate
 ######################## *** NOTE *** ########################
 
 ### Require mHealthTools
