@@ -128,7 +128,7 @@ test_that('Function to transform kinematic sensor with given input parameters',{
   # actual function in sensors.R: transform_kinematic_sensor_data
   
   expect_is(mhealthtools:::transform_kinematic_sensor_data(sensor_data = datAccel,
-                                                           transformation = NA,
+                                                           transformation = NULL,
                                                            window_length = 256,
                                                            time_range = c(1,9),
                                                            frequency_range = c(1,25),
