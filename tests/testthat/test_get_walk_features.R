@@ -15,33 +15,33 @@
 # Go to Line 55 to see code to emulate this situation
 
 ### Require mHealthTools
-require(mhealthtools)
+# require(mhealthtools)
 
 ### Data file from a test user in Synapse
 # Sample accelerometer data was taken from a control, test user with the recordId 5cf10e77-793f-49ab-ae96-38028aeefc28, from the table
 # syn5734657, for his hand to nose left test - 'data/phone_data_test.json'
 
 ### Required Libraries
-library(testthat)
-library(jsonlite)
-library(dplyr)
-library(data.table)
-library(signal)
-library(seewave)
-library(stringr)
-library(purrr)
+# library(testthat)
+# library(jsonlite)
+# library(dplyr)
+# library(data.table)
+# library(signal)
+# library(seewave)
+# library(stringr)
+# library(purrr)
 
 ### Load data file
-data("sensor_data")
+testthat::context('Load Required Data Files')
 dat <- mhealthtools::sensor_data
 
 ### flatten data to the format needed for mHealthTools
 flatten_data <- function(dat, metric) {
   dat <- dat %>% 
-    select(timestamp, metric) %>% 
+    dplyr::select(timestamp, metric) %>% 
     jsonlite::flatten()
   names(dat) <- c("t", "x", "y", "z")
-  return(as_tibble(dat))
+  return(tibble::as_tibble(dat))
 }
 
 ### Get the formatted accelerometer and gyroscope data to use in testing below
@@ -50,16 +50,16 @@ datGyro  <- flatten_data(dat,'rotationRate')
 datGravity <- flatten_data(dat, 'gravity')
 
 ### Individual test functions
-context('Get Walk Features')
-test_that('Get accelerometer, gyroscope features',{
+testthat::context('Get Walk Features')
+testthat::test_that('Get accelerometer, gyroscope features',{
   # actual function in get_walk_features.R: get_walk_features
   
-  expect_is(mhealthtools::get_walk_features(accelerometer_data = datAccel, gyroscope_data = datGyro), 'list') 
+  testthat::expect_is(mhealthtools::get_walk_features(accelerometer_data = datAccel, gyroscope_data = datGyro), 'list') 
   # Give both Accelerometer and Gyroscope data and expect a dataframe, with rest of the inputs being default
-  expect_is(mhealthtools::get_walk_features(accelerometer_data = datAccel, gyroscope_data = datGyro, gravity_data = datGravity), 'list') 
+  testthat::expect_is(mhealthtools::get_walk_features(accelerometer_data = datAccel, gyroscope_data = datGyro, gravity_data = datGravity), 'list') 
   # Similar test to previous one except also included gravity data
   
-  expect_is(mhealthtools::get_walk_features(accelerometer_data = datAccel, gyroscope_data = datGyro, funs = list(mean)), 'list')
+  testthat::expect_is(mhealthtools::get_walk_features(accelerometer_data = datAccel, gyroscope_data = datGyro, funs = list(mean)), 'list')
   # Custum functions should also work (using base mean as the list of functions, this works even if mean does not give a
   # dataframe of features as output??)
   
@@ -73,20 +73,20 @@ test_that('Get accelerometer, gyroscope features',{
     return(data.frame(f1 = mean(avec, na.rm = T)))
   }
   
-  expect_is(mhealthtools::get_walk_features(
+  testthat::expect_is(mhealthtools::get_walk_features(
     accelerometer_data = datAccel,
     gyroscope_data = datGyro,
     models = list(custom_model = custom_model)), 'list')
   # Custom models should also work, the output format of custom models is not defined specifically like the output of
   # each function in the list of funs
   
-  expect_equal(is_error_dataframe(
+  testthat::expect_equal(is_error_dataframe(
     mhealthtools:::get_walk_features(
       accelerometer_data = NA,
       gyroscope_data = datGyro)), T)
   # Give error tibble if accelerometer data has any NAs
   
-  expect_equal(is_error_dataframe(
+  testthat::expect_equal(is_error_dataframe(
     mhealthtools:::get_walk_features(
       accelerometer_data = datAccel,
       gyroscope_data = NA)), T)
