@@ -9,7 +9,7 @@
 #' @param funs Feature extraction functions that accept a single
 #' time-series vector as input. 
 #' @param models A function which accepts as input a dataframe with columns
-#' axis, Window, IMF, jerk, acceleration, velocity, displacement and
+#' axis, window, IMF, jerk, acceleration, velocity, displacement and
 #' outputs features. Useful for models which compute individual statistics
 #' using multiple input variables.
 #' @param window_length Length of sliding windows for bandpass filter
@@ -72,11 +72,12 @@ get_walk_features <- function(
       gyroscope = features_gyro$extracted_features,
       .id = "sensor")
     # tag outlier windows if there are no other errors
-    if (!has_error(features$extracted_features) && !is.null(gravity_data)) {
+    if (!has_error(features$extracted_features) && !is.null(gravity_data) &&
+        rlang::has_name(features$extracted_features, "window")) {
       gr_error <- tag_outlier_windows(gravity_data, window_length, overlap)
       features$extracted_features <- features$extracted_features %>%
         {if(rlang::has_name(., "error")) dplyr::select(-error) else .} %>% 
-        dplyr::left_join(gr_error, by = 'Window')
+        dplyr::left_join(gr_error, by = 'window')
     }
   }
   if (!is.null(models)) {

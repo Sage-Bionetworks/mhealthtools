@@ -324,7 +324,7 @@ transformation_window <- function(window_length, overlap) {
     window(sensor_data = sensor_data,
            window_length = window_length,
            overlap = overlap) %>% 
-      dplyr::group_by(axis, Window)
+      dplyr::group_by(axis, window)
   }
   partial_transformation_window <- purrr::partial(
     transformation_window, window_length = window_length, overlap = overlap)
@@ -360,10 +360,10 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
               windowSignal(col, window_length = window_length,
                            overlap = overlap) %>% 
                 dplyr::as_tibble() %>% 
-                tidyr::gather(key="Window", value="value", convert = T)
+                tidyr::gather(key="window", value="value", convert = T)
             }, .id = "IMF") %>% dplyr::mutate(IMF = as.integer(IMF))
         }, .id = "axis") %>% 
-        dplyr::group_by(axis, IMF, Window)
+        dplyr::group_by(axis, IMF, window)
       return(windowed_imf)
     },
     window_length = window_length,
@@ -415,9 +415,9 @@ transform_accelerometer_data <- function(sensor_data, transformation = NULL,
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @param sampling_rate Sampling rate of the velocity column.
 #' @return A dataframe
-transform_gyroscope_data <- function(sensor_data, transformation = NA, window_length = 256,
-                                     time_range = c(1,9), frequency_range=c(1, 25),
-                                     sampling_rate = 100) {
+transform_gyroscope_data <- function(sensor_data, transformation = NULL,
+                                     window_length = 256, time_range = c(1,9),
+                                     frequency_range=c(1, 25), sampling_rate = 100) {
   transformed_sensor_data <- transform_kinematic_sensor_data(
     sensor_data, transformation = transformation, 
     window_length = window_length,

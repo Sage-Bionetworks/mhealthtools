@@ -23,7 +23,7 @@ a single numeric vector as input. Each function should return a
 dataframe of features (normally a single-row datafame).}
 
 \item{models}{A function which accepts as input a dataframe with columns
-axis, Window, jerk, acceleration, velocity, displacement and
+axis, window, jerk, acceleration, velocity, displacement and
 outputs features. Useful for models which compute individual statistics
 using multiple input variables.}
 

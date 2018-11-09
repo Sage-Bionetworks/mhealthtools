@@ -6,7 +6,7 @@
 
 ######################## *** NOTE *** ########################
 ## Still have to write tests for 
-# (throws error, handle funs = NA, models = NA case) get_heartrate
+# (throws error, handle funs = NULL, models = NULL case) get_heartrate
 ######################## *** NOTE *** ########################
 
 ### Require mHealthTools
@@ -34,21 +34,18 @@ datHR <- mhealthtools::heartrate_data
 context('Extract Heart rate')
 test_that('Function to extract heart rate per channel(R,G,B)',{
   # actual function in get_heartrate: get_heartrate
-  testTibble <- data.frame(red = NA, green = NA, blue = NA, 
-                           error = NA,
-                           samplingRate = NA)
-  testTibble$error = 'Sampling Rate calculated from timestamp is Inf or NaN / timestamp not found in json'
-  
-  expect_is(mhealthtools:::get_heartrate(dat = datHR), 'list') # Check if output is in correct format
+  expect_equal(is_error_dataframe( # Check if output is in correct format
+    mhealthtools:::get_heartrate(dat = datHR)), T)
   
   tempDat <- copy(datHR)
   tempDat$t <- rep(1, length(datHR$t))
-  expect_equal(mhealthtools:::get_heartrate(dat = tempDat), testTibble) # Error if sampling rate cannot be calculated from timestamp
+  expect_equal(is_error_dataframe( # Error if sampling rate cannot be calculated from timestamp
+    mhealthtools:::get_heartrate(dat = tempDat)), T) 
   
   tempDat <- copy(datHR)
   tempDat <- tempDat %>% dplyr::rename('rex' = 'red') # Changed the column name of red to rex
-  testTibble$error = 'red, green, blue cannot be read from JSON'
-  expect_equal(mhealthtools:::get_heartrate(dat = tempDat), testTibble) # Error if any channel red, green or blue is missing
+  expect_equal(is_error_dataframe( # Error if any channel red, green or blue is missing
+    mhealthtools:::get_heartrate(dat = tempDat)), T)
   
   tempDat <- copy(datHR)
   tempDat$red <- rep(NA, length(datHR$red))

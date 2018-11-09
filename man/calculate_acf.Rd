@@ -7,12 +7,12 @@
 calculate_acf(sensor_data, col)
 }
 \arguments{
-\item{sensor_data}{A data frame with columns \code{axis}, \code{Window}, and \code{col}.}
+\item{sensor_data}{A data frame with columns \code{axis}, \code{window}, and \code{col}.}
 
 \item{col}{Name of column to calculate acf of.}
 }
 \value{
-A tibble with columns axis, Window, window_index, acf
+A tibble with columns axis, window, window_index, acf
 }
 \description{
 Estimate the ACF for windowed sensor data.
