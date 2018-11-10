@@ -13,7 +13,8 @@
 # require(mhealthtools)
 
 ### Data file from a test user in Synapse
-# Sample camera data was taken from a control, test user with the recordId ec82434e-0ca7-4425-b7bb-d87c37f063db,
+# Sample camera data was taken from a control, test user with the 
+# recordId ec82434e-0ca7-4425-b7bb-d87c37f063db,
 # from the table syn11665074, from the column heartRate_before_recorder.json
 
 ### Required Libraries
@@ -34,18 +35,23 @@ datHR <- mhealthtools::heartrate_data
 testthat::context('Extract Heart rate')
 testthat::test_that('Function to extract heart rate per channel(R,G,B)',{
   # actual function in get_heartrate: get_heartrate
-  testthat::expect_equal(is_error_dataframe( # Check if output is in correct format
+  testthat::expect_equal(is_error_dataframe( 
+    # Check output is in correct format
     mhealthtools:::get_heartrate(dat = datHR)), T)
   
   tempDat <- data.table::copy(datHR)
   tempDat$t <- rep(1, length(datHR$t))
-  testthat::expect_equal(is_error_dataframe( # Error if sampling rate cannot be calculated from timestamp
+  
+  # Error if sampling rate cannot be calculated from timestamp
+  testthat::expect_equal(is_error_dataframe( 
     mhealthtools:::get_heartrate(dat = tempDat)), T) 
   
   tempDat <- data.table::copy(datHR)
   tempDat <- tempDat %>%
     dplyr::rename('rex' = 'red') # Changed the column name of red to rex
-  testthat::expect_equal(is_error_dataframe( # Error if any channel red, green or blue is missing
+  
+  # Error if any channel red, green or blue is missing
+  testthat::expect_equal(is_error_dataframe(
     mhealthtools:::get_heartrate(dat = tempDat)), T)
   
   tempDat <- data.table::copy(datHR)
@@ -56,15 +62,21 @@ testthat::test_that('Extract heart rate given a timeseries',{
   # actual function in get_heartRate: getHrFromTimeSeries
   timeSeries <- datHR$red
   
-  testthat::expect_is(mhealthtools:::getHrFromTimeSeries(x = timeSeries,samplingRate = 100), 'numeric') # Check if output is in correct format
+  testthat::expect_is(mhealthtools:::getHrFromTimeSeries(
+    x = timeSeries,samplingRate = 100), 'numeric') 
+  # Check output is in correct format
   
-  # NA's are handled as 0s, so even if the input has NA's (not all of them we should get a numeric output)
+  # NA's are handled as 0s, so even if the input has NA's (
+  # not all of them we should get a numeric output)
   timeSeries[1:10] <- NA
-  testthat::expect_is(mhealthtools:::getHrFromTimeSeries(x = timeSeries,samplingRate = 100), 'numeric') # Check if output is in correct format
-
-  # If all the input is NA's then the output will be c(NA,NA)
-  testthat::expect_equal(mhealthtools:::getHrFromTimeSeries(x = rep(NA,1000),samplingRate = 100), c(NA,NA)) # Check if output is in correct format
+  testthat::expect_is(mhealthtools:::getHrFromTimeSeries(
+    x = timeSeries,samplingRate = 100), 'numeric') 
+  # Check output is in correct format
   
+  # If all the input is NA's then the output will be c(NA,NA)
+  testthat::expect_equal(mhealthtools:::getHrFromTimeSeries(
+    x = rep(NA,1000),samplingRate = 100), c(NA,NA)) 
+  # Check output is in correct format
 })
 
 testthat::context('Filtering the raw avg pixel waveform')
@@ -72,6 +84,7 @@ testthat::test_that('Bandpass filter the input signal',{
   # actual function in get_heartRate: getfilteredsignal
   timeSeries <- datHR$red
   
-  testthat::expect_is(mhealthtools:::getfilteredsignal(x = timeSeries,samplingRate = 60), 'numeric') # Check if output is in correct format
-  
+  testthat::expect_is(mhealthtools:::getfilteredsignal(
+    x = timeSeries,samplingRate = 60), 'numeric') 
+  # Check output is in correct format
 })

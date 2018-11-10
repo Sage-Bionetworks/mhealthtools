@@ -27,22 +27,28 @@ testthat::test_that('Wrapper to extract tapping features',{
   # actual function in get_tapping_features.R: get_tapping_features
   
   
-  testthat::expect_is(mhealthtools::get_tapping_features(tap_data = dat), 'data.frame') # Is output in the correct format
+  testthat::expect_is(mhealthtools::get_tapping_features(tap_data = dat),
+                      'data.frame') # Is output in the correct format
   
-  tempDat <- 'not a dataframe' # The input is not a data frame, we should expect the relevant error
+  tempDat <- 'not a dataframe' 
+  # The input is not a data frame, we should expect the relevant error
   testthat::expect_equal(is_error_dataframe(
     mhealthtools::get_tapping_features(tap_data = tempDat)), T)
   
-  tempDat <- dat[1:2,] # tempDat now has just 2 rows of observations, we should expect the relevant error as this is less that the required 5
+  tempDat <- dat[1:2,] 
+  # tempDat now has just 2 rows of observations, we should expect the
+  # relevant error as this is less that the required 5
   testthat::expect_equal(is_error_dataframe(
     mhealthtools::get_tapping_features(tap_data = tempDat)), T)
   
   tempDat <- dat[1:2,]
   tempDat$buttonid[1:2] <- 'TappedButtonNone'
   tempDat <- rbind(tempDat, tempDat, tempDat, tempDat, tempDat)
-  # tempDat now has 10 rows, but they are all duplicates of the first two (of the buttonid 'TappedButtonNone'),
+  # tempDat now has 10 rows, but they are all duplicates of the first two 
+  # (of the buttonid 'TappedButtonNone'),
   # so ideally speaking it just has two rows of non-duplicated unique data
-  # so if we remove duplicates (we can only remove duplicates of buttonid 'TappedButtonNone'),
+  # so if we remove duplicates
+  # (we can only remove duplicates of buttonid 'TappedButtonNone'),
   # we should get an errow saying that the number of rows is less than 5
   testthat::expect_equal(is_error_dataframe(
     mhealthtools::get_tapping_features(
@@ -57,10 +63,14 @@ testthat::test_that('Remove TappedButtonNone duplicates',{
 
   tempDat <- dat[1:2,] # 2 Rows
   
-  testthat::expect_is(mhealthtools:::clean_tapped_button_none(tap_data = tempDat),'data.frame') # Check if output is in correct format
+  testthat::expect_is(mhealthtools:::clean_tapped_button_none(
+    tap_data = tempDat),'data.frame') # Check if output is in correct format
   
-  tempDat$buttonid[1:2] <- 'TappedButtonNone' # Make the buttonid 'TappedButtonNone'
-  tempDatDuplicated <- rbind(tempDat, tempDat, tempDat, tempDat, tempDat) # Duplicated dataframe with only 2 rows of actual data
-  testthat::expect_equal(mhealthtools:::clean_tapped_button_none(tap_data = tempDatDuplicated),tempDat) # Check if duplicates are removed
+  tempDat$buttonid[1:2] <- 'TappedButtonNone' 
+  # Make the buttonid 'TappedButtonNone'
+  tempDatDuplicated <- rbind(tempDat, tempDat, tempDat, tempDat, tempDat)
+  # Duplicated dataframe with only 2 rows of actual data
+  testthat::expect_equal(mhealthtools:::clean_tapped_button_none(
+    tap_data = tempDatDuplicated),tempDat) # Check if duplicates are removed
   
 })
