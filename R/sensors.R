@@ -360,7 +360,7 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
         imf, function(df) {
           windowed_imf <- purrr::map_dfr(
             df, function(col) {
-              windowSignal(col, window_length = window_length,
+              window_signal(col, window_length = window_length,
                            overlap = overlap) %>% 
                 dplyr::as_tibble() %>% 
                 tidyr::gather(key="window", value="value", convert = T)

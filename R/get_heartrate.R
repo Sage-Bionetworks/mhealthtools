@@ -36,7 +36,7 @@ get_heartrate <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 1
   
   # Split each color into segments based on windowLen
   dat = tryCatch({ dat %>% dplyr::select(red, green, blue) %>% na.omit() %>% 
-      lapply(mhealthtools:::windowSignal, windowLen, 0.5) }, 
+      lapply(mhealthtools:::window_signal, windowLen, 0.5) }, 
       error = function(e){ NA })
   if(all(is.na(dat))){dat1$error = 'red, green, blue cannot be read from JSON'; return(dat1) }
   
