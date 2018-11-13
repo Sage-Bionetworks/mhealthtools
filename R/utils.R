@@ -79,7 +79,7 @@ get_left_right_events_and_tap_intervals <- function(tap_data,
 
 #' Calculate the sampling rate.
 #' 
-#' @param sensor_data A data frame with columns t, x, y, z.
+#' @param sensor_data A data frame with column t
 #' @return The sampling rate (number of samples taken per second on average).
 get_sampling_rate <- function(sensor_data) {
   tryCatch({
