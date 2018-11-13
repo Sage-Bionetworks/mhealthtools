@@ -4,18 +4,21 @@
 \alias{get_tapping_features}
 \title{Extract tapping features from raw tapping data.}
 \usage{
-get_tapping_features(tap_data, depressThr = 20, removeDups = TRUE)
+get_tapping_features(tap_data, depress_threshold = 20,
+  remove_duplicates = TRUE)
 }
 \arguments{
 \item{tap_data}{A data frame with columns t, x, y, buttonid containing 
-tapping measurements. buttonid can be from c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
-indicating a tap that has been classified as to the left, right or neither of those places on the screen}
+tapping measurements. buttonid can be from 
+c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
+indicating a tap that has been classified as to the left, right 
+or neither of those places on the screen}
 
-\item{depressThr}{A numeric value indicating the threshold between 
-taps (better description needed)}
+\item{depress_threshold}{A numeric value indicating the threshold between 
+taps}
 
-\item{removeDups}{A logical value indicating if duplicates in taps considered as None 
-(i.e buttonid is neither left nor right) need to be removed or not}
+\item{remove_duplicates}{A logical value indicating whether duplicates in taps
+considered as None (i.e buttonid is neither left nor right) need to be removed.}
 }
 \value{
 Tapping features
@@ -24,5 +27,5 @@ Tapping features
 Extract tapping features from raw tapping data.
 }
 \author{
-Elias Chaibub Neto, Meghasyam Tummalacherla
+Elias Chaibub Neto, Meghasyam Tummalacherla, Phil Snyder
 }

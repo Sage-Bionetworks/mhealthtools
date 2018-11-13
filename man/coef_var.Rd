@@ -7,7 +7,7 @@
 coef_var(x)
 }
 \arguments{
-\item{x}{A numeric vector x whose Coefficient of Variation needs to be calculated}
+\item{x}{A numeric vector}
 }
 \value{
 A numeric value that is representative of the Coefficient of Variation
