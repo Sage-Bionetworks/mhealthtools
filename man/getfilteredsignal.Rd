@@ -4,8 +4,8 @@
 \alias{getfilteredsignal}
 \title{Bandpass and sorted mean filter the given signal}
 \usage{
-getfilteredsignal(x, mforder = 33, bpforder = 128, freqRange = c(2, 25),
-  samplingRate)
+getfilteredsignal(x, mforder = 33, bpforder = 128, freqRange = c(2,
+  25), samplingRate)
 }
 \arguments{
 \item{x}{A time series numeric data}

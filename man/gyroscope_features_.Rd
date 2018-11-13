@@ -5,7 +5,8 @@
 \title{Extract gyroscope features}
 \usage{
 gyroscope_features_(sensor_data, transform = NULL, extract = NULL,
-  extract_on = c("acceleration", "velocity", "displacement"), models = NULL)
+  extract_on = c("acceleration", "velocity", "displacement"),
+  models = NULL)
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, x, y, z containing 

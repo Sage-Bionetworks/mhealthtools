@@ -7,22 +7,31 @@
 get_tapping_features(tap_data, depressThr = 20, removeDups = TRUE)
 }
 \arguments{
-\item{tap_data}{A data frame with columns t, x, y, buttonid containing 
-tapping measurements. buttonid can be from c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
-indicating a tap that has been classified as to the left, right or neither of those places on the screen}
+\item{tap_data}{A n x 4 data frame with column names as t, x, y, buttonid containing 
+tapping measurements. HEre n is the total number of tapping measurements, t is the time 
+of measurement when the screen press was recorded, x and y are the coordinates of the screen 
+touch in the smartphone, and buttonid can be one of the following values c('TappedButtonLeft',
+'TappedButtonRight','TappedButtonNone') indicating a tap that has been classified as to the left,
+right or neither of those places on the screen}
 
-\item{depressThr}{A numeric value indicating the threshold between 
-taps (better description needed)}
+\item{depressThr}{A numeric value indicating the threshold between two succesive taps}
 
 \item{removeDups}{A logical value indicating if duplicates in taps considered as None 
 (i.e buttonid is neither left nor right) need to be removed or not}
 }
 \value{
-Tapping features
+A 1 x 43 data frame consisting of tapping features and an error message, if any
+See https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md for
+feature definitions
 }
 \description{
 Extract tapping features from raw tapping data.
 }
+\examples{
+library(mhealthtools)
+data("tap_data")
+tap_features <- get_tapping_features(tap_data)
+}
 \author{
-Elias Chaibub Neto, Meghasyam Tummalacherla
+Elias Chaibub Neto, Meghasyam Tummalacherla, Phil Snyder, Thanneer M Perumal
 }

@@ -4,7 +4,8 @@
 \alias{get_heartrate}
 \title{Extract heart rate for each color band from avg pixel value per frame of video (processed hr)}
 \usage{
-get_heartrate(dat, windowLen = 10, freqRange = c(1, 25), bpforder = 128)
+get_heartrate(dat, windowLen = 10, freqRange = c(1, 25),
+  bpforder = 128)
 }
 \arguments{
 \item{dat}{A data frame with columns t, red, green and blue}

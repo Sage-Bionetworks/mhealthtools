@@ -5,9 +5,9 @@
 \title{Extract kinetic tremor features from raw accelerometer and gyroscope data.}
 \usage{
 get_kinetic_tremor_features(accelerometer_data, gyroscope_data,
-  gravity_data = NULL, funs = NULL, models = NULL, window_length = 256,
-  time_range = c(1, 9), frequency_range = c(1, 25), overlap = 0.5,
-  max_imf = 4)
+  gravity_data = NULL, funs = NULL, models = NULL,
+  window_length = 256, time_range = c(1, 9), frequency_range = c(1,
+  25), overlap = 0.5, max_imf = 4)
 }
 \arguments{
 \item{accelerometer_data}{A data frame with columns t, x, y, z containing 

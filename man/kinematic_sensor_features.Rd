@@ -4,8 +4,9 @@
 \alias{kinematic_sensor_features}
 \title{Extract kinematic sensor features}
 \usage{
-kinematic_sensor_features(sensor_data, acf_col = NULL, transform = NULL,
-  extract = NULL, extract_on = NULL, models = NULL)
+kinematic_sensor_features(sensor_data, acf_col = NULL,
+  transform = NULL, extract = NULL, extract_on = NULL,
+  models = NULL)
 }
 \arguments{
 \item{sensor_data}{A dataframe.}
