@@ -40,8 +40,9 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
     transformed_sensor_data_groups <- dplyr::groups(transformed_sensor_data)
     features$extracted_features <- purrr::map_dfr(
       extract_on,
-      ~ extract_features(transformed_sensor_data, ., extract)) %>% 
-      dplyr::distinct(!!!transformed_sensor_data_groups, measurementType, .keep_all = T)
+      ~ extract_features(transformed_sensor_data, ., extract)) %>%
+      dplyr::distinct(
+        !!!transformed_sensor_data_groups, measurementType, .keep_all = T)
   }
   if (!is.null(models)) {
     features$model_features <- purrr::map(models, ~ .(transformed_sensor_data))
@@ -56,7 +57,8 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
 #' Extract kinematic sensor features
 #' 
 #' Extract kinematic (accelerometer/gyroscope) features. This function is not 
-#' normally called directly. See \code{accelerometer_features} and \code{gyroscope_features}.
+#' normally called directly. See \code{accelerometer_features}
+#' and \code{gyroscope_features}.
 #' 
 #' @param sensor_data A dataframe.
 #' @param acf_col Column name to calculate acf upon.
@@ -71,8 +73,9 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
 #' @return A list of feature dataframes. The output from \code{extract} will
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}.
-kinematic_sensor_features <- function(sensor_data, acf_col = NULL, transform = NULL,
-                                      extract = NULL, extract_on = NULL, models = NULL) {
+kinematic_sensor_features <- function(sensor_data, acf_col = NULL,
+                                      transform = NULL, extract = NULL,
+                                      extract_on = NULL, models = NULL) {
   features <- list()
   if (is.null(transform)) {
     transform <- function(x) x
@@ -94,10 +97,11 @@ kinematic_sensor_features <- function(sensor_data, acf_col = NULL, transform = N
       extract = extract,
       extract_on = "acf")
     features$extracted_features <- dplyr::bind_rows(
-      movement_features[[1]], acf_features[[1]]) %>% 
+      movement_features[[1]], acf_features[[1]]) %>%
       dplyr::left_join(incidental_cols_to_preserve) %>%
-      dplyr::select(measurementType, dplyr::one_of(names(incidental_cols_to_preserve)),
-             dplyr::everything())
+      dplyr::select(measurementType,
+                    dplyr::one_of(names(incidental_cols_to_preserve)),
+                    dplyr::everything())
   }
   model_features <- sensor_features(
     sensor_data = transformed_sensor_data,
@@ -128,10 +132,12 @@ kinematic_sensor_features <- function(sensor_data, acf_col = NULL, transform = N
 #' will be stored under \code{$model_features}.
 accelerometer_features_ <- function(sensor_data, transform = NULL,
                                     extract = NULL, extract_on = c(
-                                      "acceleration", "jerk", "velocity", "displacement"),
+                                      "acceleration", "jerk",
+                                      "velocity", "displacement"),
                                     models = NULL) {
-  kinematic_sensor_features(sensor_data, transform = transform, extract = extract,
-                            extract_on = extract_on, models = models, acf_col = "acceleration")
+  kinematic_sensor_features(sensor_data, transform = transform,
+                            extract = extract, extract_on = extract_on,
+                            models = models, acf_col = "acceleration")
 }
 
 #' Extract gyroscope features
@@ -198,9 +204,13 @@ default_kinematic_features <- function(sampling_rate) {
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}.
 #' @export
-accelerometer_features <- function(sensor_data, transformation = NULL, funs = NULL, 
-                                   models = NULL, window_length = 256,
-                                   time_range = c(1,9), frequency_range=c(1, 25)) {
+accelerometer_features <- function(sensor_data,
+                                   transformation = NULL,
+                                   funs = NULL,
+                                   models = NULL,
+                                   window_length = 256,
+                                   time_range = c(1, 9),
+                                   frequency_range=c(1, 25)) {
   sampling_rate <- get_sampling_rate(sensor_data)
   extracted_features <- accelerometer_features_(
     sensor_data = sensor_data,
@@ -244,9 +254,13 @@ accelerometer_features <- function(sensor_data, transformation = NULL, funs = NU
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}.
 #' @export
-gyroscope_features <- function(sensor_data, transformation = NULL, funs = NULL,
-                               models = NULL, window_length = 256,
-                               time_range = c(1,9), frequency_range=c(1, 25)) {
+gyroscope_features <- function(sensor_data,
+                               transformation = NULL,
+                               funs = NULL,
+                               models = NULL,
+                               window_length = 256,
+                               time_range = c(1, 9),
+                               frequency_range=c(1, 25)) {
   sampling_rate <- get_sampling_rate(sensor_data)
   all_features <- gyroscope_features_(
     sensor_data = sensor_data,
@@ -281,14 +295,15 @@ gyroscope_features <- function(sensor_data, transformation = NULL, funs = NULL,
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @param sampling_rate Sampling rate of the acceleration vector.
 #' @return A dataframe.
-transform_kinematic_sensor_data <- function(sensor_data, transformation, 
+transform_kinematic_sensor_data <- function(sensor_data, transformation,
                                             window_length, time_range,
                                             frequency_range, sampling_rate) {
-  preprocessed_sensor_data <- preprocess_sensor_data(sensor_data = sensor_data,
-                                                     window_length = window_length,
-                                                     sampling_rate = sampling_rate,
-                                                     frequency_range = frequency_range, 
-                                                     time_range = time_range)
+  preprocessed_sensor_data <- preprocess_sensor_data(
+    sensor_data = sensor_data,
+    window_length = window_length,
+    sampling_rate = sampling_rate,
+    frequency_range = frequency_range,
+    time_range = time_range)
   if (has_error(preprocessed_sensor_data)) return(preprocessed_sensor_data)
   if (is.null(transformation)) transformation <- function(x) x
   transformed_sensor_data <- transformation(preprocessed_sensor_data)
@@ -309,7 +324,7 @@ transform_kinematic_sensor_data <- function(sensor_data, transformation,
 preprocess_sensor_data <- function(sensor_data, window_length,
                                    sampling_rate, frequency_range, time_range) {
   preprocessed_sensor_data <- sensor_data %>%
-    tidy_sensor_data() %>% 
+    tidy_sensor_data() %>%
     mutate_detrend() %>%
     mutate_bandpass(window_length, sampling_rate, frequency_range) %>%
     filter_time(time_range[1], time_range[2])
@@ -326,7 +341,7 @@ transformation_window <- function(window_length, overlap) {
   transformation_window <- function(sensor_data, window_length, overlap) {
     window(sensor_data = sensor_data,
            window_length = window_length,
-           overlap = overlap) %>% 
+           overlap = overlap) %>%
       dplyr::group_by(axis, window)
   }
   partial_transformation_window <- purrr::partial(
@@ -347,12 +362,12 @@ transformation_window <- function(window_length, overlap) {
 transformation_imf_window <- function(window_length, overlap, max_imf) {
   purrr::partial(
     function(sensor_data, window_length, overlap, max_imf) {
-      values <- sensor_data %>% 
+      values <- sensor_data %>%
         tidyr::spread(key = "axis", value = "value")
       imf <- purrr::map2(values %>% dplyr::select(t), values %>% dplyr::select(-t),
                          function(t, v) {
                            dplyr::as_tibble(
-                             EMD::emd(v, t, max.imf = max_imf)$imf) %>% 
+                             EMD::emd(v, t, max.imf = max_imf)$imf) %>%
                              setNames(1:max_imf)
                          })
       names(imf) <- names(values %>% dplyr::select(-t))
@@ -361,11 +376,11 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
           windowed_imf <- purrr::map_dfr(
             df, function(col) {
               window_signal(col, window_length = window_length,
-                           overlap = overlap) %>% 
-                dplyr::as_tibble() %>% 
-                tidyr::gather(key="window", value="value", convert = T)
+                           overlap = overlap) %>%
+                dplyr::as_tibble() %>%
+                tidyr::gather(key = "window", value = "value", convert = T)
             }, .id = "IMF") %>% dplyr::mutate(IMF = as.integer(IMF))
-        }, .id = "axis") %>% 
+        }, .id = "axis") %>%
         dplyr::group_by(axis, IMF, window)
       return(windowed_imf)
     },
@@ -385,9 +400,12 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @param sampling_rate Sampling rate of the acceleration column.
 #' @return A dataframe
-transform_accelerometer_data <- function(sensor_data, transformation = NULL,
-                                         window_length = 256, time_range = c(1,9),
-                                         frequency_range=c(1, 25), sampling_rate = 100) {
+transform_accelerometer_data <- function(sensor_data,
+                                         transformation = NULL,
+                                         window_length = 256,
+                                         time_range = c(1, 9),
+                                         frequency_range = c(1, 25),
+                                         sampling_rate = 100) {
   transformed_sensor_data <- transform_kinematic_sensor_data(
     sensor_data = sensor_data,
     transformation = transformation,
@@ -396,12 +414,12 @@ transform_accelerometer_data <- function(sensor_data, transformation = NULL,
     frequency_range = frequency_range,
     sampling_rate = sampling_rate)
   if (has_error(transformed_sensor_data)) return(transformed_sensor_data)
-  transformed_sensor_data <- transformed_sensor_data %>% 
-    dplyr::rename(acceleration = value) %>% 
+  transformed_sensor_data <- transformed_sensor_data %>%
+    dplyr::rename(acceleration = value) %>%
     mutate_derivative(sampling_rate = sampling_rate,
-                      col = "acceleration", derived_col = "jerk") %>% 
+                      col = "acceleration", derived_col = "jerk") %>%
     mutate_integral(sampling_rate = sampling_rate,
-                    col = "acceleration", derived_col = "velocity") %>% 
+                    col = "acceleration", derived_col = "velocity") %>%
     mutate_integral(sampling_rate = sampling_rate,
                     col = "velocity", derived_col = "displacement")
   return(transformed_sensor_data)
@@ -418,20 +436,23 @@ transform_accelerometer_data <- function(sensor_data, transformation = NULL,
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @param sampling_rate Sampling rate of the velocity column.
 #' @return A dataframe
-transform_gyroscope_data <- function(sensor_data, transformation = NULL,
-                                     window_length = 256, time_range = c(1,9),
-                                     frequency_range=c(1, 25), sampling_rate = 100) {
+transform_gyroscope_data <- function(sensor_data,
+                                     transformation = NULL,
+                                     window_length = 256,
+                                     time_range = c(1, 9),
+                                     frequency_range=c(1, 25),
+                                     sampling_rate = 100) {
   transformed_sensor_data <- transform_kinematic_sensor_data(
-    sensor_data, transformation = transformation, 
+    sensor_data, transformation = transformation,
     window_length = window_length,
-    time_range = time_range, 
+    time_range = time_range,
     frequency_range = frequency_range,
     sampling_rate = sampling_rate)
   if (has_error(transformed_sensor_data)) return(transformed_sensor_data)
-  transformed_sensor_data <- transformed_sensor_data %>% 
-    dplyr::rename(velocity = value) %>% 
+  transformed_sensor_data <- transformed_sensor_data %>%
+    dplyr::rename(velocity = value) %>%
     mutate_derivative(sampling_rate = sampling_rate,
-                      col = "velocity", derived_col = "acceleration") %>% 
+                      col = "velocity", derived_col = "acceleration") %>%
     mutate_integral(sampling_rate = sampling_rate,
                     col = "velocity", derived_col = "displacement")
   return(transformed_sensor_data)
