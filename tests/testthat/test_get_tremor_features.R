@@ -4,39 +4,45 @@
 # email: meghasyam@sagebase.org
 ####################################################
 
-# When I input gravity sensor data into the function get_tremor_features, the whole error column is like
-# 'Phone rotated within window' for all the windows. Is this normal, or is this happening because of the test data (I don't think so)
-# This needs to be checked.
-# Go to Line 55 to see code to emulate this situation
+######################## *** NOTE *** ########################
+## Still have to write tests for 
+# (throws error for custom models) get_tremor_features
+######################## *** NOTE *** ########################
+
+# When I input gravity sensor data into the function get_tremor_features,
+# the whole error column is like 'Phone rotated within window' for all the windows.
+# Is this normal, or is this happening because of the test data (I don't think so)
+# This needs to be checked
 
 ### Require mHealthTools
-require(mhealthtools)
+# require(mhealthtools)
 
 ### Data file from a test user in Synapse
-# Sample accelerometer data was taken from a control, test user with the recordId 5cf10e77-793f-49ab-ae96-38028aeefc28, from the table
+# Sample accelerometer data was taken from a control, test user with
+# the recordId 5cf10e77-793f-49ab-ae96-38028aeefc28, from the table
 # syn5734657, for his hand to nose left test - 'data/phone_data_test.json'
 
 ### Required Libraries
-library(testthat)
-library(jsonlite)
-library(dplyr)
-library(data.table)
-library(signal)
-library(seewave)
-library(stringr)
-library(purrr)
+# library(testthat)
+# library(jsonlite)
+# library(dplyr)
+# library(data.table)
+# library(signal)
+# library(seewave)
+# library(stringr)
+# library(purrr)
 
 ### Load data file
-data("sensor_data")
-dat <- sensor_data
+testthat::context('Load Required Data Files')
+dat <- mhealthtools::sensor_data
 
 ### flatten data to the format needed for mHealthTools
 flatten_data <- function(dat, metric) {
   dat <- dat %>% 
-    select(timestamp, metric) %>% 
+    dplyr::select(timestamp, metric) %>% 
     jsonlite::flatten()
   names(dat) <- c("t", "x", "y", "z")
-  return(as_tibble(dat))
+  return(tibble::as_tibble(dat))
 }
 
 ### Get the formatted accelerometer and gyroscope data to use in testing below
@@ -45,25 +51,55 @@ datGyro  <- flatten_data(dat,'rotationRate')
 datGravity <- flatten_data(dat, 'gravity')
 
 ### Individual test functions
-context('Get Tremor Features')
-test_that('Get accelerometer, gyroscope features',{
+testthat::context('Get Tremor Features')
+testthat::test_that('Get accelerometer, gyroscope features',{
   # actual function in get_tremor_features.R: get_tremor_features
-  testTibble <- dplyr::tibble(Window = NA, error = NA)
   
-  expect_is(mhealthtools::get_tremor_features(accelerometer_data = datAccel, gyroscope_data = datGyro), 'data.frame') 
-  # Give both Accelerometer and Gyroscope data and expect a dataframe, with rest of the inputs being default
-  expect_is(mhealthtools::get_tremor_features(accelerometer_data = datAccel, gyroscope_data = datGyro, gravity_data = datGravity), 'data.frame') 
+  testthat::expect_is(mhealthtools::get_tremor_features(
+    accelerometer_data = datAccel, gyroscope_data = datGyro), 'list') 
+  # Give both Accelerometer and Gyroscope data and expect a dataframe,
+  # with rest of the inputs being default
+  testthat::expect_is(mhealthtools::get_tremor_features(
+    accelerometer_data = datAccel, gyroscope_data = datGyro, 
+    gravity_data = datGravity), 'list') 
   # Similar test to previous one except also included gravity data
   
-  testTibble$error <- 'Malformed accelerometer data'
-  expect_equal(mhealthtools:::get_tremor_features(accelerometer_data = NA, gyroscope_data = datGyro), testTibble)
+  testthat::expect_is(mhealthtools::get_tremor_features(
+    accelerometer_data = datAccel, gyroscope_data = datGyro,
+    funs = list(mean)), 'list')
+  # Custom functions should also work (using base mean as the list of functions,
+  # this works even if mean does not give a dataframe of features as output??)
+  
+  custom_model <- function(dat){
+    avec <- dat['acceleration']*dat['velocity'] 
+    
+    avec <- avec %>% 
+      unlist() %>% 
+      as.numeric() 
+    
+    return(data.frame(f1 = mean(avec, na.rm = T)))
+  }
+  
+  testthat::expect_is(mhealthtools::get_tremor_features(
+    accelerometer_data = datAccel,
+    gyroscope_data = datGyro,
+    models = list(custom_model = custom_model)), 'list')
+  # Custom models should also work, the output format of custom models is not
+  # defined specifically like the output of each function in the list of funs
+  
+  testthat::expect_equal(is_error_dataframe(
+    mhealthtools:::get_tremor_features(
+      accelerometer_data = NA,
+      gyroscope_data = datGyro)), T)
   # Give error tibble if accelerometer data has any NAs
   
-  testTibble$error <- 'Malformed gyroscope data'
-  expect_equal(mhealthtools:::get_tremor_features(accelerometer_data = datAccel, gyroscope_data = NA), testTibble)
+  testthat::expect_equal(is_error_dataframe(
+    mhealthtools:::get_tremor_features(
+      accelerometer_data = datAccel,
+      gyroscope_data = NA)), T)
   # Give error tibble if gyroscope data has any NAs  
   
-  # The processing errors for acceleromter_features and gyroscope_features have been handled in test_sensors.R
+  # The processing errors for acceleromter_features and gyroscope_features
+  # have been handled in test_sensors.R
   # tag_outlier_windows was also handled in test_utils.R
-  
 })

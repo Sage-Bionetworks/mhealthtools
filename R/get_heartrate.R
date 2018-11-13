@@ -1,6 +1,6 @@
 #' Extract heart rate for each color band from avg pixel value per frame of video (processed hr)
 #'
-#' @param dat A data frame with columns timestamp, red, green and blue
+#' @param dat A data frame with columns t, red, green and blue
 #' @param windowLen Length of the time window in seconds, to be considered
 #' while calculating the heart rate for each channel
 #' @param freqRange Frequency range in Hz for the bandpass filter parameters
@@ -22,9 +22,9 @@ get_heartrate <- function(dat, windowLen = 10, freqRange = c(1,25), bpforder = 1
   dat1 = data.frame(red = NA, green = NA, blue = NA, error = NA, samplingRate = NA)
   
   # Get sampling rate
-  samplingRate = tryCatch({ length(dat$timestamp)/(dat$timestamp[length(dat$timestamp)] - dat$timestamp[1]) }, 
+  samplingRate = tryCatch({ length(dat$t)/(dat$t[length(dat$t)] - dat$t[1]) }, 
                           error = function(e){ NA })
-  if(!is.finite(samplingRate)){dat1$error = 'Sampling Rate calculated from timestamp is Inf or NaN / timestamp not found in json'; return(dat1) }
+  if((is.infinite(samplingRate) | is.na(samplingRate))){dat1$error = 'Sampling Rate calculated from timestamp is Inf or NaN / timestamp not found in json'; return(dat1) }
   
   if(samplingRate < 55){if(samplingRate > 22){bpforder = 64}else{bpforder = 32}}
   

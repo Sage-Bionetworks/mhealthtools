@@ -22,7 +22,7 @@ gravity sensor measurements.}
 time-series vector as input.}
 
 \item{models}{A function which accepts as input a dataframe with columns
-axis, Window, IMF, jerk, acceleration, velocity, displacement and
+axis, window, IMF, jerk, acceleration, velocity, displacement and
 outputs features. Useful for models which compute individual statistics
 using multiple input variables.}
 

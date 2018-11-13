@@ -110,7 +110,6 @@ tidy_sensor_data <- function(sensor_data) {
       tidyr::gather(axis, value, -t)
   }, error = function(e) {
     dplyr::tibble(
-      Window = NA,
       error = "Could not put sensor data in tidy format by gathering the axes.")
   })
   return(tidy_sensor_data)
@@ -139,7 +138,7 @@ mutate_detrend <- function(sensor_data) {
         value = detrend(t, value)) %>% 
       dplyr::ungroup()
   }, error = function(e) {
-    dplyr::tibble(Window = NA, error = "Detrend error")
+    dplyr::tibble(error = "Detrend error")
   })
   return(detrended_sensor_data)
 }
@@ -189,7 +188,7 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
                          frequency_range)) %>% 
       dplyr::ungroup()
   }, error = function(e) {
-    dplyr::tibble(Window = NA, error = "Bandpass filter error")
+    dplyr::tibble(error = "Bandpass filter error")
   })
   return(bandpass_filtered_sensor_data)
 }
@@ -209,7 +208,7 @@ filter_time <- function(sensor_data, t1, t2) {
     filtered_time_sensor_data <- sensor_data %>% dplyr::filter(t >= t1, t <= t2)
     return(filtered_time_sensor_data)
   }, error = function(e) {
-    dplyr::tibble(Window = NA, error = "'Not enough time samples")
+    dplyr::tibble(error = "'Not enough time samples")
   })
 }
 
@@ -218,8 +217,6 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @param sensor_data A data frame with columns t, axis, value.
 #' @param window_length Length of the filter
 #' @param overlap window overlap
-#' @param include_timestamp Whether to include columns for starting and ending
-#' timestamps for each row.
 #' @return Windowed sensor data
 window <- function(sensor_data, window_length, overlap) {
   if (has_error(sensor_data)) return(sensor_data)
@@ -233,11 +230,9 @@ window <- function(sensor_data, window_length, overlap) {
     tidy_windowed_sensor_data <- lapply(
       windowed_sensor_data,
       function(windowed_matrix) {
-        windowed_matrix <- cbind(window_index = 1:dim(windowed_matrix)[1],
-                                 windowed_matrix)
         tidy_tibble <- windowed_matrix %>% 
           dplyr::as_tibble() %>%
-          tidyr::gather(Window, value, -window_index, convert=T)
+          tidyr::gather(window, value, convert=T)
         return(tidy_tibble)
       }) %>% 
       dplyr::bind_rows(.id = "axis")
@@ -245,12 +240,12 @@ window <- function(sensor_data, window_length, overlap) {
                                               window_length = window_length,
                                               overlap = overlap)
     tidy_windowed_sensor_data <- tidy_windowed_sensor_data %>% 
-      dplyr::left_join(start_end_times, by="Window") %>%
-      dplyr::select(axis, Window, window_index, window_start_time,
+      dplyr::left_join(start_end_times, by="window") %>%
+      dplyr::select(axis, window, window_start_time,
                     window_end_time, value)
     return(tidy_windowed_sensor_data)
   }, error = function(e) {
-    dplyr::tibble(Window = NA, error = "Windowing error")
+    dplyr::tibble(error = "Windowing error")
   })
 }
 
@@ -259,7 +254,7 @@ window <- function(sensor_data, window_length, overlap) {
 #' @param t A numeric time vector
 #' @param window_length Length of the filter
 #' @param overlap Window overlap
-#' @return A dataframe with columns Window, window_start_time,
+#' @return A dataframe with columns window, window_start_time,
 #' window_end_time, window_start_index, window_end_index
 window_start_end_times <- function(t, window_length, overlap) {
   seq_length <- length(t)
@@ -273,7 +268,7 @@ window_start_end_times <- function(t, window_length, overlap) {
   start_times <- t[start_indices]
   end_times <- t[end_indices]
   window_start_end_times <- dplyr::tibble(
-    Window = seq(1, length(start_indices)),
+    window = seq(1, length(start_indices)),
     window_start_time = start_times,
     window_end_time = end_times,
     window_start_index = start_indices,
@@ -346,11 +341,11 @@ mutate_jerk <- function(sensor_data, sampling_rate) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_jerk <- tryCatch({
     sensor_data %>%
-      dplyr::group_by(axis, Window) %>% 
+      dplyr::group_by(axis, window) %>% 
       dplyr::mutate(jerk = jerk(acceleration, sampling_rate)) %>%
       dplyr::ungroup()
   }, error = function(e) {
-    dplyr::tibble(Window = NA, error = "Error calculating jerk")
+    dplyr::tibble(error = "Error calculating jerk")
   })
   return(sensor_data_with_jerk)
 }
@@ -374,11 +369,11 @@ mutate_velocity <- function(sensor_data, sampling_rate) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_velocity <- tryCatch({
     sensor_data %>% 
-      dplyr::group_by(axis, Window) %>%
+      dplyr::group_by(axis, window) %>%
       dplyr::mutate(velocity = velocity(acceleration, sampling_rate)) %>% 
       dplyr::ungroup()
   }, error = function(e) {
-    dplyr::tibble(Window = NA, error = "Error calculating velocity")
+    dplyr::tibble(error = "Error calculating velocity")
   })
   return(sensor_data_with_velocity)
 }
@@ -403,11 +398,11 @@ mutate_displacement <- function(sensor_data, sampling_rate) {
   if (has_error(sensor_data)) return(sensor_data)
   sensor_data_with_displacement <- tryCatch({
     sensor_data %>%
-      dplyr::group_by(axis, Window) %>%
+      dplyr::group_by(axis, window) %>%
       dplyr::mutate(displacement = displacement(acceleration, sampling_rate)) %>% 
       dplyr::ungroup()
   }, error = function(e) {
-    dplyr::tibble(Window = NA, error = "Error calculating displacement")
+    dplyr::tibble(error = "Error calculating displacement")
   })
   return(sensor_data_with_displacement)
 }
@@ -427,7 +422,7 @@ mutate_derivative <- function(sensor_data, sampling_rate, col, derived_col) {
     sensor_data %>%
       dplyr::mutate(!!derived_col := derivative(!!dplyr::sym(col)) * sampling_rate)
   }, error = function(e) {
-    dplyr::tibble(Window = NA, error = paste("Error calculating", derived_col))
+    dplyr::tibble(error = paste("Error calculating", derived_col))
   })
   return(sensor_data_with_derivative)
 }
@@ -447,7 +442,7 @@ mutate_integral <- function(sensor_data, sampling_rate, col, derived_col) {
     sensor_data %>% 
       dplyr::mutate(!!derived_col := integral(!!dplyr::sym(col)) * sampling_rate)
   }, error = function(e) {
-    dplyr::tibble(Window = NA, error = paste("Error calculating", derived_col))
+    dplyr::tibble(error = paste("Error calculating", derived_col))
   })
   return(sensor_data_with_integral)
 }
@@ -456,9 +451,9 @@ mutate_integral <- function(sensor_data, sampling_rate, col, derived_col) {
 #' 
 #' Estimate the ACF for windowed sensor data.
 #' 
-#' @param sensor_data A data frame with columns \code{axis}, \code{Window}, and \code{col}.
+#' @param sensor_data A data frame with columns \code{axis}, \code{window}, and \code{col}.
 #' @param col Name of column to calculate acf of.
-#' @return A tibble with columns axis, Window, window_index, acf
+#' @return A tibble with columns axis, window, acf
 calculate_acf <- function(sensor_data, col) {
   if (has_error(sensor_data)) return(sensor_data)
   acf_data <- tryCatch({
@@ -466,18 +461,16 @@ calculate_acf <- function(sensor_data, col) {
     acf_data <- sensor_data %>%
       tidyr::nest(col) %>%
       dplyr::mutate(data = purrr::map(data, function(d) {
-        acf_col <- acf(d[,col], plot=F)$acf
-        index_col <- 1:length(acf_col)
-        dplyr::bind_cols(acf = acf_col, window_index = index_col)
+        acf(d[,col], plot=F)$acf
       })) %>%
       tidyr::unnest(data) %>% 
-      dplyr::select(-acf, acf) # arrange other columns before acf col
+      dplyr::rename(acf = data)
     if (length(groups)) { # restore groups if originally grouped
       acf_data <- acf_data %>% dplyr::group_by_at(.vars = groups)
     }
     return(acf_data)
   }, error = function(e) {
-    dplyr::tibble(Window = NA, error = "Error calculating ACF")
+    dplyr::tibble(error = "Error calculating ACF")
   })
   return(acf_data)
 }
@@ -493,8 +486,8 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
   gravity_summary <- gravity_vector %>% 
     windowSignal(window_length = window_length, overlap = overlap) %>%
     dplyr::as_tibble() %>%
-    tidyr::gather(Window, value) %>%
-    dplyr::group_by(Window) %>%
+    tidyr::gather(window, value) %>%
+    dplyr::group_by(window) %>%
     dplyr::summarise(max = max(value, na.rm = T),
                      min = min(value, na.rm = T))
   return(gravity_summary)
@@ -515,14 +508,14 @@ tag_outlier_windows <- function(gravity, window_length, overlap) {
       purrr::map(tag_outlier_windows_, window_length, overlap) %>%
       dplyr::bind_rows(.id = 'axis') %>%
       dplyr::mutate(error = sign(max) != sign(min)) %>% 
-      dplyr::group_by(Window) %>% 
+      dplyr::group_by(window) %>% 
       dplyr::summarise(error = any(error, na.rm = T)) %>% 
-      dplyr::mutate(Window = as.integer(Window))
+      dplyr::mutate(window = as.integer(window))
     gr_error$error[gr_error$error == TRUE] = 'Phone rotated within window'
     gr_error$error[gr_error$error == FALSE] = 'None'
     return(gr_error)
   }, error = function(e) {
-    dplyr::tibble(Window = "NA", error = "Error tagging outlier windows")
+    dplyr::tibble(error = "Error tagging outlier windows")
   })
   return(gr_error)
 }

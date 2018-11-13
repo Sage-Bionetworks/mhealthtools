@@ -7,7 +7,7 @@
 get_heartrate(dat, windowLen = 10, freqRange = c(1, 25), bpforder = 128)
 }
 \arguments{
-\item{dat}{A data frame with columns timestamp, red, green and blue}
+\item{dat}{A data frame with columns t, red, green and blue}
 
 \item{windowLen}{Length of the time window in seconds, to be considered
 while calculating the heart rate for each channel}

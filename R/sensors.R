@@ -37,9 +37,11 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
     return(features)
   }
   if (!is.null(extract) && !is.null(extract_on)) {
+    transformed_sensor_data_groups <- dplyr::groups(transformed_sensor_data)
     features$extracted_features <- purrr::map_dfr(
       extract_on,
-      ~ extract_features(transformed_sensor_data, ., extract))
+      ~ extract_features(transformed_sensor_data, ., extract)) %>% 
+      dplyr::distinct(!!!transformed_sensor_data_groups, measurementType, .keep_all = T)
   }
   if (!is.null(models)) {
     features$model_features <- purrr::map(models, ~ .(transformed_sensor_data))
@@ -77,9 +79,10 @@ kinematic_sensor_features <- function(sensor_data, acf_col = NULL, transform = N
   }
   transformed_sensor_data <- transform(sensor_data)
   if (!is.null(extract) && !is.null(extract_on)) {
+    transformed_sensor_data_groups <- dplyr::groups(transformed_sensor_data)
     incidental_cols_to_preserve <- transformed_sensor_data %>%
       dplyr::select(-dplyr::one_of(extract_on)) %>%
-      dplyr::distinct() # distinct of group (table index) cols and incidental cols
+      dplyr::distinct(!!!transformed_sensor_data_groups, .keep_all = T)
     movement_features <- sensor_features(
       sensor_data = transformed_sensor_data,
       transform = NULL,
@@ -259,81 +262,6 @@ gyroscope_features <- function(sensor_data, transformation = NULL, funs = NULL,
   return(all_features)
 }
 
-#' Extract tapping (screen sensor) features
-#' 
-#' @param tap_data A data frame with columns t, x, y, buttonid containing 
-#' tapping measurements. buttonid can be from c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
-#' indicating a tap that has been classified as to the left, right or neither of those places on the screen
-#' @param depressThr A numerical threshold for intertap distance in x axis
-#' @return A dataframe of features.
-#' @export
-tapping_features <- function(tap_data,
-                             depressThr = 20) {
-  
-  results <- get_left_right_events_and_tap_intervals(tapData = tap_data,
-                                                     depressThr = depressThr)
-  tapInter <- results$tapInter
-  tapData <- results$tapData
-  error <- results$error
-  
-  # check error - if after cleaning tapping data less than 5 data points remain
-  if (error) {
-    tapFeatures <- dplyr::tibble(error = "post cleaning less than 5 tap points remain")
-    return(tapFeatures)
-  }
-  
-  meanX <- mean(tapData$x)
-  iL <- tapData$x < meanX
-  iR <- tapData$x >= meanX
-  driftLeft <- calculate_drift(x = tapData[iL,"x"], y = tapData[iL, "y"])
-  driftRight <- calculate_drift(x = tapData[iR,"x"], y = tapData[iR, "y"])
-  
-  intertap_features <- intertap_summary_features(tapInter = tapInter)
-  if(intertap_features$error == 'None'){
-    intertap_features <- intertap_features %>% dplyr::select(-error)
-    colnames(intertap_features) <- paste0(colnames(intertap_features),'TapInter')
-  }else{
-    colnames(intertap_features) <- paste0(colnames(intertap_features),'TapInter')
-  }
-  
-  tapdrift_left_features <- tapdrift_summary_features(tapDrift = driftLeft)
-  if(tapdrift_left_features$error == 'None'){
-    tapdrift_left_features <- tapdrift_left_features %>% dplyr::select(-error)
-    colnames(tapdrift_left_features) <- paste0(colnames(tapdrift_left_features),'DriftLeft')
-  }else{
-    colnames(tapdrift_left_features) <- paste0(colnames(tapdrift_left_features),'DriftLeft')
-  }
-  
-  tapdrift_right_features <- tapdrift_summary_features(tapDrift = driftRight)
-  if(tapdrift_right_features$error == 'None'){
-    tapdrift_right_features <- tapdrift_right_features %>% dplyr::select(-error)
-    colnames(tapdrift_right_features) <- paste0(colnames(tapdrift_right_features),'DriftRight')
-  }else{
-    colnames(tapdrift_right_features) <- paste0(colnames(tapdrift_right_features),'DriftRight')
-  }
-  
-  tapdata_features <- tap_data_summary_features(tapData = tap_data)
-  if(tapdata_features$error == 'None'){
-    tapdata_features <- tapdata_features %>% dplyr::select(-error)
-  }
-  
-  tapFeatures <- dplyr::bind_cols(intertap_features,
-                                  tapdrift_left_features,
-                                  tapdrift_right_features,
-                                  tapdata_features)
-  
-  ftrs_error <- grep('error', colnames(tapFeatures))
-  ftrs_error <- paste(tapFeatures[ftrs_error], collapse = ' ; ')
-  if(ftrs_error == ''){
-    ftrs_error = 'None'
-  }
-  
-  tapFeatures$error <- ftrs_error
-  tapFeatures <- tapFeatures %>% 
-    as.data.frame()
-  return(tapFeatures)
-}
-
 #' Apply standard transformations to kinematic sensor data
 #' 
 #' Apply standard transformations to kinematic (accelerometer/gyroscope)
@@ -399,7 +327,7 @@ transformation_window <- function(window_length, overlap) {
     window(sensor_data = sensor_data,
            window_length = window_length,
            overlap = overlap) %>% 
-      dplyr::group_by(axis, Window)
+      dplyr::group_by(axis, window)
   }
   partial_transformation_window <- purrr::partial(
     transformation_window, window_length = window_length, overlap = overlap)
@@ -435,10 +363,10 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
               windowSignal(col, window_length = window_length,
                            overlap = overlap) %>% 
                 dplyr::as_tibble() %>% 
-                tidyr::gather(key="Window", value="value", convert = T)
+                tidyr::gather(key="window", value="value", convert = T)
             }, .id = "IMF") %>% dplyr::mutate(IMF = as.integer(IMF))
         }, .id = "axis") %>% 
-        dplyr::group_by(axis, IMF, Window)
+        dplyr::group_by(axis, IMF, window)
       return(windowed_imf)
     },
     window_length = window_length,
@@ -490,9 +418,9 @@ transform_accelerometer_data <- function(sensor_data, transformation = NULL,
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @param sampling_rate Sampling rate of the velocity column.
 #' @return A dataframe
-transform_gyroscope_data <- function(sensor_data, transformation = NA, window_length = 256,
-                                     time_range = c(1,9), frequency_range=c(1, 25),
-                                     sampling_rate = 100) {
+transform_gyroscope_data <- function(sensor_data, transformation = NULL,
+                                     window_length = 256, time_range = c(1,9),
+                                     frequency_range=c(1, 25), sampling_rate = 100) {
   transformed_sensor_data <- transform_kinematic_sensor_data(
     sensor_data, transformation = transformation, 
     window_length = window_length,
