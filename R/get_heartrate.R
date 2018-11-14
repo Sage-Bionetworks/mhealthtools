@@ -1,7 +1,7 @@
 #' Extract heart rate for each color band from avg pixel value per
 #' frame of video (processed hr)
 #'
-#' @param sensor_data A data frame with columns t, red, green and blue
+#' @param heartrate_data A data frame with columns t, red, green and blue
 #' @param window_length Length of the time window in seconds, to be considered
 #' while calculating the heart rate for each channel
 #' @param frequency_range Frequency range in Hz for the bandpass filter parameters
@@ -10,15 +10,15 @@
 #' each color (red, green, blue)
 #' @export
 #' @author Meghasyam Tummalacherla, Phil Snyder 
-get_heartrate <- function(sensor_data, window_length = 10,
+get_heartrate <- function(heartrate_data, window_length = 10,
                           frequency_range = c(1, 25), bandpass_order = 128) {
-  sensor_data1 <- data.frame(red = NA, green = NA, blue = NA,
+  heartrate_data1 <- data.frame(red = NA, green = NA, blue = NA,
                             error = NA, sampling_rate = NA)
-  sampling_rate <- get_sampling_rate(sensor_data)
+  sampling_rate <- get_sampling_rate(heartrate_data)
   if (is.infinite(sampling_rate) || is.na(sampling_rate)) {
-    sensor_data1$error <- paste("Sampling Rate calculated from timestamp is Inf",
+    heartrate_data1$error <- paste("Sampling Rate calculated from timestamp is Inf",
                                "or NaN / timestamp not found in json")
-    return(sensor_data1)
+    return(heartrate_data1)
   }
   if (sampling_rate < 55) {
     if (sampling_rate > 22) {
@@ -36,19 +36,19 @@ get_heartrate <- function(sensor_data, window_length = 10,
   mforder <- 2 * round(60 * sampling_rate / 220) + 1
   
   # Split each color into segments based on window_length
-  sensor_data <- tryCatch({
-    sensor_data %>%
+  heartrate_data <- tryCatch({
+    heartrate_data %>%
       dplyr::select(red, green, blue) %>%
       na.omit() %>%
       lapply(window_signal, window_length, 0.5)
     }, error = function(e) { NA })
-  if (all(is.na(sensor_data))) {
-    sensor_data1$error <- "red, green, blue cannot be read from JSON"
-    return(sensor_data1)
+  if (all(is.na(heartrate_data))) {
+    heartrate_data1$error <- "red, green, blue cannot be read from JSON"
+    return(heartrate_data1)
   }
   
   # Apply filter to each segment of each color
-  sensor_data <- sensor_data %>%
+  heartrate_data <- heartrate_data %>%
     lapply(function(dfl) {
       dfl[is.na(dfl)] <- 0
       dfl <- tryCatch({
@@ -56,13 +56,13 @@ get_heartrate <- function(sensor_data, window_length = 10,
               bandpass_order, frequency_range, sampling_rate)
         }, error = function(e) { NA })
     })
-  if (all(is.na(sensor_data))) {
-    sensor_data1$error <- "filtering error"
-    return(sensor_data1)
+  if (all(is.na(heartrate_data))) {
+    heartrate_data1$error <- "filtering error"
+    return(heartrate_data1)
   }
   
   # Get HR for each filtered segment of each color
-  sensor_data <- sensor_data %>%
+  heartrate_data <- heartrate_data %>%
     lapply(function(dfl) {
       dfl <- tryCatch({
         apply(dfl, 2, get_hr_from_time_series, sampling_rate)
@@ -71,16 +71,16 @@ get_heartrate <- function(sensor_data, window_length = 10,
       colnames(dfl) <- c("hr", "confidence")
       return(dfl)
   })
-  if (all(is.na(sensor_data))) {
-    sensor_data1$error <- "HR calculation error"
-    return(sensor_data1)
+  if (all(is.na(heartrate_data))) {
+    heartrate_data1$error <- "HR calculation error"
+    return(heartrate_data1)
   }
-  sensor_data$error <- "none"
+  heartrate_data$error <- "none"
   if (sampling_rate < 55) {
-    sensor_data$error <- "Low sampling rate, at least 55FPS needed"
+    heartrate_data$error <- "Low sampling rate, at least 55FPS needed"
   }
-  sensor_data$sampling_rate <- sampling_rate
-  return(sensor_data)
+  heartrate_data$sampling_rate <- sampling_rate
+  return(heartrate_data)
 }
 
 #' Bandpass and sorted mean filter the given signal

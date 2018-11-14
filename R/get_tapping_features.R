@@ -19,7 +19,7 @@ get_tapping_features <- function(tap_data, depress_threshold = 20,
   } else if (nrow(tap_data) < 5) {
     tap_features <- dplyr::tibble(error = "sensor data has less than 5 rows")
   } else {
-    #remove duplicate data points // if selected
+    # remove duplicate data points // if selected
     if (remove_duplicates) {
       tap_data <- clean_tapped_button_none(tap_data = tap_data)
     }

@@ -37,14 +37,14 @@ testthat::test_that('Function to extract heart rate per channel(R,G,B)',{
   # actual function in get_heartrate: get_heartrate
   testthat::expect_equal(is_error_dataframe( 
     # Check output is in correct format
-    mhealthtools:::get_heartrate(sensor_data = datHR)), T)
+    mhealthtools:::get_heartrate(heartrate_data = datHR)), T)
   
   tempDat <- data.table::copy(datHR)
   tempDat$t <- rep(1, length(datHR$t))
   
   # Error if sampling rate cannot be calculated from timestamp
   testthat::expect_equal(is_error_dataframe( 
-    mhealthtools:::get_heartrate(sensor_data = tempDat)), T) 
+    mhealthtools:::get_heartrate(heartrate_data = tempDat)), T) 
   
   tempDat <- data.table::copy(datHR)
   tempDat <- tempDat %>%
@@ -52,7 +52,7 @@ testthat::test_that('Function to extract heart rate per channel(R,G,B)',{
   
   # Error if any channel red, green or blue is missing
   testthat::expect_equal(is_error_dataframe(
-    mhealthtools:::get_heartrate(sensor_data = tempDat)), T)
+    mhealthtools:::get_heartrate(heartrate_data = tempDat)), T)
   
   tempDat <- data.table::copy(datHR)
   tempDat$red <- rep(NA, length(datHR$red))
