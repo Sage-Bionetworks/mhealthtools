@@ -32,6 +32,10 @@ Wrapper functionality to preprocess and extract interpretable features from scre
 library(mhealthtools)
 data("tap_data")
 tap_features <- get_tapping_features(tap_data)
+
+tap_features <- get_tapping_features(tap_data, depress_threshold = 120)
+
+tap_features <- get_tapping_features(tap_data, depress_threshold = 120, remove_duplicates = F)
 }
 \author{
 Elias Chaibub Neto, Meghasyam Tummalacherla, Phil Snyder, Thanneer M Perumal

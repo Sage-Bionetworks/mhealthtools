@@ -16,6 +16,10 @@
 #' library(mhealthtools)
 #' data("tap_data")
 #' tap_features <- get_tapping_features(tap_data)
+#' 
+#' tap_features <- get_tapping_features(tap_data, depress_threshold = 120)
+#' 
+#' tap_features <- get_tapping_features(tap_data, depress_threshold = 120, remove_duplicates = F)
 #' @export
 #' @author Elias Chaibub Neto, Meghasyam Tummalacherla, Phil Snyder, Thanneer M Perumal
 get_tapping_features <- function(tap_data, 
@@ -48,7 +52,7 @@ get_tapping_features <- function(tap_data,
 #' Remove duplicates in the given dataframe tap_data which have the buttonid parameter as 'TappedButtonNone'
 #' 
 #' @param tap_data A n x 4 data frame with column names as t, x, y, buttonid containing 
-#' tapping measurements. HEre n is the total number of tapping measurements, t is the time 
+#' tapping measurements. Here n is the total number of tapping measurements, t is the time 
 #' of measurement when the screen press was recorded, x and y are the coordinates of the screen 
 #' touch in the smartphone, and buttonid can be one of the following values c('TappedButtonLeft',
 #' 'TappedButtonRight','TappedButtonNone') indicating a tap that has been classified as to the left,
@@ -74,7 +78,7 @@ clean_tapped_button_none <- function(tap_data) {
 #' Extract tapping (screen sensor) features
 #' 
 #' @param tap_data A n x 4 data frame with column names as t, x, y, buttonid containing 
-#' tapping measurements. HEre n is the total number of tapping measurements, t is the time 
+#' tapping measurements. Here n is the total number of tapping measurements, t is the time 
 #' of measurement when the screen press was recorded, x and y are the coordinates of the screen 
 #' touch in the smartphone, and buttonid can be one of the following values c('TappedButtonLeft',
 #' 'TappedButtonRight','TappedButtonNone') indicating a tap that has been classified as to the left,
@@ -94,8 +98,7 @@ tapping_features <- function(tap_data,
   
   # check error - if after cleaning tapping data less than 5 data points remain
   if (error) {
-    tap_features <- dplyr::tibble(
-      error = "post cleaning less than 5 tap points remain")
+    tap_features <- dplyr::tibble(error = "post cleaning less than 5 tap points remain")
     return(tap_features)
   }
   
