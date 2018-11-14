@@ -6,7 +6,8 @@
 walk assay measured using smartphone raw accelerometer and gyroscpe sensors.}
 \usage{
 get_walk_features(accelerometer_data, gyroscope_data,
-  gravity_data = NULL, funs = NULL, models = NULL,
+  gravity_data = NULL, funs = list(frequency_domain_summary,
+  time_domain_summary, frequency_domain_energy), models = NULL,
   window_length = 256, time_range = c(1, 9), frequency_range = c(1,
   25), overlap = 0.5, max_imf = 4)
 }
@@ -15,48 +16,67 @@ get_walk_features(accelerometer_data, gyroscope_data,
 containing accelerometer measurements. Here n is the total number of measurements, 
 t is the time of measurement, x, y and z are the linear acceleration excluding 
 gravity in their respective coordinates of the smartphone tri-axial accelerometers. 
-Here x, y, and z are wrt phones axis as reference}
+x, y, and z co-ordinates are wrt phones axis as reference}
 
 \item{gyroscope_data}{A n x 4 data frame with column names as t, x, y, z containing 
 gyroscope measurements. Here n is the total number of measurements, t is the time 
 of measurement, x, y and z are the angular velocity excluding gravity in their 
-respective coordinates of the smartphone gyroscopes. Here x, y, and z are wrt phones 
-axis as reference}
+respective coordinates of the smartphone gyroscopes. x, y, and z co-ordinates are wrt 
+phones axis as reference}
 
 \item{gravity_data}{A n x 4 data frame with column names as t, x, y, z containing 
 gravity estimations. Here n is the total number of measurements, t is the time of 
 measurement, x, y and z are the linear acceleration measuring gravity components in
-their respective coordinates of the smartphone gyroscopes. Here x, y, and z are wrt 
+their respective coordinates of the smartphone gyroscopes. x, y, and z are wrt 
 phones axis as reference}
 
-\item{funs}{Feature extraction functions that accept a single time-series vector as input. 
-Check extending vignette}
+\item{funs}{Multiple feature extraction functions as lists. By default we provide three 
+functionalities including \code{time_domain_summary}, \code{frequency_domain_summary},
+and \code{frequency_domain_energy}. Check extending Extending vignette for how to desing 
+your own feature extraction functions.}
 
-\item{models}{A function which accepts as input a dataframe with columns
-axis, window, IMF, jerk, acceleration, velocity, displacement and
-outputs features. Useful for models which compute individual statistics
-using multiple input variables.}
+\item{models}{A function which accepts as input a dataframe with columns axis, window, 
+IMF, jerk, acceleration, velocity, displacement and outputs features. Useful for models
+which compute individual statistics using multiple input variables.}
 
-\item{window_length}{Length of sliding windows for bandpass filter
-and windowing transformation.}
+\item{window_length}{Length of Hamming sliding windows for bandpass filter and windowing 
+transformation. The default should only be changed by expert users.}
 
-\item{time_range}{Timestamp range to use.}
+\item{time_range}{Time range of the assay to use in s. We suggest using c(1, 9) for 
+Sage Bionetworks specific assays. The default should only be changed by expert users.}
 
-\item{frequency_range}{Frequency range for the bandpass filter.}
+\item{frequency_range}{Frequency range for the bandpass filter in Hz. We suggest to use 
+c(1, 25) for sage Bionetworks specific assays. The default should only be changed by expert 
+users.}
 
-\item{overlap}{Window overlap for the windowing transformation.}
+\item{overlap}{Window overlap for the Hamming windowing transformation.}
 
-\item{max_imf}{Number of intrinsic mode functions to use for 
-empirical mode decomposition.}
+\item{max_imf}{Number of intrinsic mode functions to use for empirical mode decomposition. 
+Specifying 1 gives no emprical mode decomposition.}
 }
 \value{
-A list of feature dataframes. The outputs from \code{funs} will
-be stored under \code{$extracted_features} and the outputs from \code{models}
-will be stored under \code{$model_features}.'
+A list of feature dataframes for each \code{funs} feature extraction function will 
+be stored under \code{$extracted_features} and the outputs from \code{models} will be stored under 
+\code{$model_features}. See https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md 
+for feature definitions from the defualt functions
 }
 \description{
 Wrapper functionality to preprocess and extract interprettable features from 
 walk assay measured using smartphone raw accelerometer and gyroscpe sensors.
+}
+\examples{
+library(mhealthtools)
+data("accelerometer_data")
+data(gyroscope_data)
+walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data)
+
+walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, time_range = c(2,8))
+
+walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, time_range = c(2,8), frequency_range = c(1,25))
+
+walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, overlap = 0.3)
+
+walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, max_imf = 1)
 }
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
