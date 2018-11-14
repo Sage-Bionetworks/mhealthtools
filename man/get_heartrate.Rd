@@ -5,11 +5,11 @@
 \title{Extract heart rate for each color band from avg pixel value per
 frame of video (processed hr)}
 \usage{
-get_heartrate(sensor_data, window_length = 10, frequency_range = c(1,
-  25), bandpass_order = 128)
+get_heartrate(heartrate_data, window_length = 10,
+  frequency_range = c(1, 25), bandpass_order = 128)
 }
 \arguments{
-\item{sensor_data}{A data frame with columns t, red, green and blue}
+\item{heartrate_data}{A data frame with columns t, red, green and blue}
 
 \item{window_length}{Length of the time window in seconds, to be considered
 while calculating the heart rate for each channel}
