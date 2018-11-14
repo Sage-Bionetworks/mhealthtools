@@ -280,32 +280,6 @@ testthat::test_that('Compute start and stop timestamp for each window',{
   # Throw a data error if any parameter doesn't confirm to norms
 })
 
-testthat::context('Jerk Calculation')
-testthat::test_that(
-  'Calculate Jerk given acceleration and sampling rate',{
-    # actual function in utils: jerk  
-    testthat::expect_is(mhealthtools:::jerk(acceleration = datAccel$x,
-                                            sampling_rate = 100), 'numeric') 
-    # Check if output is in correct format
-    
-  })
-
-testthat::test_that(
-  'Calculate and add Jerk column for the tidy sensor data',{
-    # actual function in utils: mutate_jerk  
-    
-    testthat::expect_is(
-      mhealthtools:::mutate_jerk(sensor_data = datAccelTidy,
-                                 sampling_rate = 100),'data.frame') 
-    # Check if output is in correct format
-    testthat::expect_equal(is_error_dataframe(
-      mhealthtools:::mutate_jerk(
-        sensor_data = datAccel,
-        sampling_rate = 100)), T) 
-    # Throw an error if input is not in correct format
-    
-  })
-
 testthat::context('Derivative Calculation')
 testthat::test_that(
   'Calculate Derivative given acceleration and sampling rate',{
@@ -369,57 +343,6 @@ testthat::test_that(
         sampling_rate = 100,
         col = 'x',
         derived_col = 'dx')), T) 
-  })
-
-testthat::context('Velocity Calculation')
-testthat::test_that(
-  'Calculate velocity given acceleration and sampling rate',{
-    # actual function in utils: velocity  
-    testthat::expect_is(
-      mhealthtools:::velocity(acceleration = datAccel$x,
-                              sampling_rate = 100), 'numeric') 
-    # Check if output is in correct format
-    
-  })
-
-testthat::test_that(
-  'Calculate and add Velocity column for the tidy sensor data',{
-    # actual function in utils: mutate_velocity 
-    testthat::expect_is(
-      mhealthtools:::mutate_velocity(sensor_data = datAccelTidy,
-                                     sampling_rate = 100),
-      'data.frame') 
-    # Check if output is in correct format
-    testthat::expect_equal(is_error_dataframe( 
-      # Throw an error if input is not in correct format
-      mhealthtools:::mutate_velocity(
-        sensor_data = datAccel,
-        sampling_rate = 100)), T) 
-  })
-
-testthat::context('Displacement Calculation')
-testthat::test_that(
-  'Calculate Displacement given acceleration and sampling rate',{
-    # actual function in utils: displacement  
-    testthat::expect_is(
-      mhealthtools:::displacement(acceleration = datAccel$x,
-                                  sampling_rate = 100), 'numeric') 
-    # Check if output is in correct format
-    
-  })
-
-testthat::test_that(
-  'Calculate and add Displacement column for the tidy sensor data',{
-    # actual function in utils: mutate_displacement  
-    testthat::expect_is(
-      mhealthtools:::mutate_displacement(sensor_data = datAccelTidy,
-                                         sampling_rate = 100),'data.frame')
-    # Check if output is in correct format
-    testthat::expect_equal(is_error_dataframe( 
-      # Throw an error if input is not in correct format
-      mhealthtools:::mutate_displacement(
-        sensor_data = datAccel,
-        sampling_rate = 100)), T) 
   })
 
 testthat::context('ACF calculation')
