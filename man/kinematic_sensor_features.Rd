@@ -32,5 +32,6 @@ will be stored under \code{$model_features}.
 }
 \description{
 Extract kinematic (accelerometer/gyroscope) features. This function is not 
-normally called directly. See \code{accelerometer_features} and \code{gyroscope_features}.
+normally called directly. See \code{accelerometer_features}
+and \code{gyroscope_features}.
 }

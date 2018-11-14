@@ -4,7 +4,8 @@
 \alias{get_tapping_features}
 \title{Wrapper functionality to preprocess and extract interpretable features from screen tapping data.}
 \usage{
-get_tapping_features(tap_data, depressThr = 20, removeDups = TRUE)
+get_tapping_features(tap_data, depress_threshold = 20,
+  remove_duplicates = TRUE)
 }
 \arguments{
 \item{tap_data}{A n x 4 data frame with column names as t, x, y, buttonid containing 
@@ -14,9 +15,9 @@ touch in the smartphone, and buttonid can be one of the following values c('Tapp
 'TappedButtonRight','TappedButtonNone') indicating a tap that has been classified as to the left,
 right or neither of those places on the screen}
 
-\item{depressThr}{A numeric value indicating the threshold between two successive taps}
+\item{depress_threshold}{A numeric value indicating the threshold between two successive taps}
 
-\item{removeDups}{A logical value indicating if duplicates in taps considered as None 
+\item{remove_duplicates}{A logical value indicating if duplicates in taps considered as None 
 (i.e buttonid is neither left nor right) need to be removed or not}
 }
 \value{

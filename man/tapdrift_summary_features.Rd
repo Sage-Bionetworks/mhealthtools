@@ -4,10 +4,10 @@
 \alias{tapdrift_summary_features}
 \title{Get default tapping features for tap drift}
 \usage{
-tapdrift_summary_features(tapDrift)
+tapdrift_summary_features(tap_drift)
 }
 \arguments{
-\item{tapDrift}{A numeric vector}
+\item{tap_drift}{A numeric vector}
 }
 \value{
 A features data frame of dimension 1 x n_features

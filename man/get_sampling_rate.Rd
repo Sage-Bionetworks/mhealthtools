@@ -7,7 +7,7 @@
 get_sampling_rate(sensor_data)
 }
 \arguments{
-\item{sensor_data}{A data frame with columns t, x, y, z.}
+\item{sensor_data}{A data frame with column t}
 }
 \value{
 The sampling rate (number of samples taken per second on average).
