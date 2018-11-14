@@ -24,23 +24,23 @@
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 get_tremor_features <- function(
   accelerometer_data, gyroscope_data, gravity_data = NULL,
-  funs = NULL, models = NULL, window_length = 256, time_range = c(1,9),
+  funs = NULL, models = NULL, window_length = 256, time_range = c(1, 9),
   frequency_range = c(1, 25), overlap = 0.5) {
   
   features <- list()
   
   # check input integrity
   if (any(is.na(accelerometer_data))) {
-    features$error <- dplyr::tibble(error = 'Malformed accelerometer data')
+    features$error <- dplyr::tibble(error = "Malformed accelerometer data")
     return(features)
   } else if (any(is.na(gyroscope_data))) {
-    features$error <- dplyr::tibble(error = 'Malformed gyroscope data')
+    features$error <- dplyr::tibble(error = "Malformed gyroscope data")
     return(features)
   }
   
   # Get accelerometer features
   features_accel <- accelerometer_features(
-    sensor_data = accelerometer_data, 
+    sensor_data = accelerometer_data,
     transformation = transformation_window(window_length = window_length,
                                            overlap = overlap),
     funs = funs,
@@ -71,13 +71,14 @@ get_tremor_features <- function(
         rlang::has_name(features$extracted_features, "window")) {
       gr_error <- tag_outlier_windows(gravity_data, window_length, overlap)
       features$extracted_features <- features$extracted_features %>%
-        {if(rlang::has_name(., "error")) dplyr::select(-error) else .} %>% 
-        dplyr::left_join(gr_error, by = 'window')
+        {if (rlang::has_name(., "error")) dplyr::select(-error) else .} %>%
+        dplyr::left_join(gr_error, by = "window")
     }
   }
   if (!is.null(models)) {
-    features$model_features <- list(accelerometer = features_accel$model_features,
-                                    gyroscope = features_gyro$model_features)
+    features$model_features <- list(
+      accelerometer = features_accel$model_features,
+      gyroscope = features_gyro$model_features)
   }
   
   return(features)

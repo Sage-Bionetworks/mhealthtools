@@ -20,6 +20,7 @@ A tibble indexed by groups with an additional column containing
 the output of the mapped function.
 }
 \description{
-A convenience function for mapping a function -- which accepts a vector as input
-and outputs an atomic value -- to a single column of each group in a grouped tibble.
+A convenience function for mapping a function -- which accepts a 
+vector as input and outputs an atomic value -- to a single column
+of each group in a grouped tibble.
 }

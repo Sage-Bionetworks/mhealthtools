@@ -4,10 +4,10 @@
 \alias{intertap_summary_features}
 \title{Get default tapping features for intertap distance}
 \usage{
-intertap_summary_features(tapInter)
+intertap_summary_features(tap_intervals)
 }
 \arguments{
-\item{tapInter}{A numeric vector containing intertap intervals}
+\item{tap_intervals}{A numeric vector containing intertap intervals}
 }
 \value{
 A features data frame of dimension 1 x n_features

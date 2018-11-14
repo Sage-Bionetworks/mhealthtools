@@ -70,24 +70,25 @@ testthat::test_that(
     # actual function in sensors.R: get_left_right_events_and_tap_intervals
     
     testthat::expect_is(
-      mhealthtools:::get_left_right_events_and_tap_intervals(tapData = datTap),
+      mhealthtools:::get_left_right_events_and_tap_intervals(tap_data = datTap),
       'list') # Check if output is in correct format
     
     tempDat <- datTap[1:2,] 
     # Only 2 rows, lesser than the required 5, Should expect an error
     testthat::expect_equal(
-      mhealthtools:::get_left_right_events_and_tap_intervals(tapData = tempDat),
-      list(tapData = NA, tapInter = NA, error = TRUE))
+      mhealthtools:::get_left_right_events_and_tap_intervals(tap_data = tempDat),
+      list(tap_data = NA, tap_intervals = NA, error = TRUE))
   })
 
-tapInter <- mhealthtools:::get_left_right_events_and_tap_intervals(datTap)$tapInter 
+tapInter <- mhealthtools:::get_left_right_events_and_tap_intervals(
+  tap_data = datTap)$tapInter 
 # Get inter tap intervals
 
 testthat::test_that('Extract default inter tap time features',{
   # actual function in utils.R: intertap_summary_features
   
   testthat::expect_is(
-    mhealthtools:::intertap_summary_features(tapInter = tapInter),'data.frame')  
+    mhealthtools:::intertap_summary_features(tap_intervals = tapInter),'data.frame')  
 })
 
 testthat::test_that('Extract default tap drift features',{
@@ -97,7 +98,7 @@ testthat::test_that('Extract default tap drift features',{
   # use tapInter to test the function rather than creating a seperate 
   # tapDrift numeric vector
   testthat::expect_is(
-    mhealthtools:::tapdrift_summary_features(tapDrift = tapInter),'data.frame')
+    mhealthtools:::tapdrift_summary_features(tap_drift = tapInter),'data.frame')
 })
 
 testthat::test_that(
@@ -106,7 +107,7 @@ testthat::test_that(
     # actual function in utils.R: tap_data_summary_features
     
     testthat::expect_is(
-      mhealthtools:::tap_data_summary_features(tapData = datTap),'data.frame')  
+      mhealthtools:::tap_data_summary_features(tap_data = datTap), 'data.frame')  
   })
 
 testthat::context('Tidy the data')
@@ -243,9 +244,9 @@ testthat::test_that(
 
 testthat::context('Windowing')
 testthat::test_that('Windowing a time series',{
-  # actual function in utils: windowSignal
+  # actual function in utils: window_signal
   
-  testthat::expect_is(mhealthtools:::windowSignal(values = datAccel$x),'matrix') 
+  testthat::expect_is(mhealthtools:::window_signal(values = datAccel$x), 'matrix')
   # Check if output is in correct format
 })
 
@@ -518,17 +519,17 @@ testthat::test_that('Frequency domain energy given acceleration',{
 
 testthat::context('Spectrum')
 testthat::test_that('Get Spectrum given a time series and sampling rate',{
-  # actual function in utils: getSpectrum 
+  # actual function in utils: get_spectrum 
   accelVec <- datAccel$x[1:512] # A 512 length acceleration vector  
   
-  testthat::expect_is(mhealthtools:::getSpectrum(values = accelVec,
+  testthat::expect_is(mhealthtools:::get_spectrum(values = accelVec,
                                                  sampling_rate = 100,
                                                  nfreq = 500),'data.frame') 
   # Check if output is in correct format
   # 100 Hz sampling rate and nfreq = 512
   
   testthat::expect_equal(
-    dim(mhealthtools:::getSpectrum(
+    dim(mhealthtools:::get_spectrum(
       accelVec, sampling_rate = 100, nfreq = 256))[1], 256)
   # If nfreq is 256 points I need a spectrum that has 256 points in it, not 500!
   
@@ -536,14 +537,14 @@ testthat::test_that('Get Spectrum given a time series and sampling rate',{
 
 testthat::context('Empirical Wavelet Transform')
 testthat::test_that('Get EWT spectrum',{
-  # actual function in utils: getEWTspectrum 
+  # actual function in utils: get_ewt_spectrum
   accelVec <- datAccel$x[1:512] # A 512 length acceleration vector  
-  accelVecSpec <- mhealthtools:::getSpectrum(values = accelVec,
+  accelVecSpec <- mhealthtools:::get_spectrum(values = accelVec,
                                              sampling_rate = 100,
                                              nfreq = 500) # 500x2 spectrum
   
   testthat::expect_is(
-    mhealthtools:::getEWTspectrum(spect = accelVecSpec),'matrix') 
+    mhealthtools:::get_ewt_spectrum(spectrum = accelVecSpec),'matrix') 
   # Check if output is in correct format
   
 })

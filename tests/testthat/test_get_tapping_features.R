@@ -53,7 +53,7 @@ testthat::test_that('Wrapper to extract tapping features',{
   testthat::expect_equal(is_error_dataframe(
     mhealthtools::get_tapping_features(
       tap_data = tempDat,
-      removeDups = TRUE)), T)
+      remove_duplicates = TRUE)), T)
   
 })
 
