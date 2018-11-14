@@ -1,13 +1,23 @@
-#' Extract walk features from raw accelerometer and gyroscope data.
+#' Wrapper functionality to preprocess and extract interprettable features from 
+#' walk assay measured using smartphone raw accelerometer and gyroscpe sensors.
 #'
-#' @param accelerometer_data A data frame with columns t, x, y, z containing 
-#' accelerometer measurements. 
-#' @param gyroscope_data A data frame with columns t, x, y, z containing 
-#' gyroscope measurements. 
-#' @param gravity_data A data frame with columns t, x, y, z containing 
-#' gravity sensor measurements.
-#' @param funs Feature extraction functions that accept a single
-#' time-series vector as input. 
+#' @param accelerometer_data A n x 4 data frame with column names as t, x, y, z 
+#' containing accelerometer measurements. Here n is the total number of measurements, 
+#' t is the time of measurement, x, y and z are the linear acceleration excluding 
+#' gravity in their respective coordinates of the smartphone tri-axial accelerometers. 
+#' Here x, y, and z are wrt phones axis as reference
+#' @param gyroscope_data A n x 4 data frame with column names as t, x, y, z containing 
+#' gyroscope measurements. Here n is the total number of measurements, t is the time 
+#' of measurement, x, y and z are the angular velocity excluding gravity in their 
+#' respective coordinates of the smartphone gyroscopes. Here x, y, and z are wrt phones 
+#' axis as reference
+#' @param gravity_data A n x 4 data frame with column names as t, x, y, z containing 
+#' gravity estimations. Here n is the total number of measurements, t is the time of 
+#' measurement, x, y and z are the linear acceleration measuring gravity components in
+#' their respective coordinates of the smartphone gyroscopes. Here x, y, and z are wrt 
+#' phones axis as reference
+#' @param funs Feature extraction functions that accept a single time-series vector as input. 
+#' Check extending vignette 
 #' @param models A function which accepts as input a dataframe with columns
 #' axis, window, IMF, jerk, acceleration, velocity, displacement and
 #' outputs features. Useful for models which compute individual statistics

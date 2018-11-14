@@ -2,7 +2,8 @@
 % Please edit documentation in R/get_walk_features.R
 \name{get_walk_features}
 \alias{get_walk_features}
-\title{Extract walk features from raw accelerometer and gyroscope data.}
+\title{Wrapper functionality to preprocess and extract interprettable features from 
+walk assay measured using smartphone raw accelerometer and gyroscpe sensors.}
 \usage{
 get_walk_features(accelerometer_data, gyroscope_data,
   gravity_data = NULL, funs = NULL, models = NULL,
@@ -10,17 +11,26 @@ get_walk_features(accelerometer_data, gyroscope_data,
   25), overlap = 0.5, max_imf = 4)
 }
 \arguments{
-\item{accelerometer_data}{A data frame with columns t, x, y, z containing 
-accelerometer measurements.}
+\item{accelerometer_data}{A n x 4 data frame with column names as t, x, y, z 
+containing accelerometer measurements. Here n is the total number of measurements, 
+t is the time of measurement, x, y and z are the linear acceleration excluding 
+gravity in their respective coordinates of the smartphone tri-axial accelerometers. 
+Here x, y, and z are wrt phones axis as reference}
 
-\item{gyroscope_data}{A data frame with columns t, x, y, z containing 
-gyroscope measurements.}
+\item{gyroscope_data}{A n x 4 data frame with column names as t, x, y, z containing 
+gyroscope measurements. Here n is the total number of measurements, t is the time 
+of measurement, x, y and z are the angular velocity excluding gravity in their 
+respective coordinates of the smartphone gyroscopes. Here x, y, and z are wrt phones 
+axis as reference}
 
-\item{gravity_data}{A data frame with columns t, x, y, z containing 
-gravity sensor measurements.}
+\item{gravity_data}{A n x 4 data frame with column names as t, x, y, z containing 
+gravity estimations. Here n is the total number of measurements, t is the time of 
+measurement, x, y and z are the linear acceleration measuring gravity components in
+their respective coordinates of the smartphone gyroscopes. Here x, y, and z are wrt 
+phones axis as reference}
 
-\item{funs}{Feature extraction functions that accept a single
-time-series vector as input.}
+\item{funs}{Feature extraction functions that accept a single time-series vector as input. 
+Check extending vignette}
 
 \item{models}{A function which accepts as input a dataframe with columns
 axis, window, IMF, jerk, acceleration, velocity, displacement and
@@ -45,7 +55,8 @@ be stored under \code{$extracted_features} and the outputs from \code{models}
 will be stored under \code{$model_features}.'
 }
 \description{
-Extract walk features from raw accelerometer and gyroscope data.
+Wrapper functionality to preprocess and extract interprettable features from 
+walk assay measured using smartphone raw accelerometer and gyroscpe sensors.
 }
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder

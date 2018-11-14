@@ -14,7 +14,7 @@ touch in the smartphone, and buttonid can be one of the following values c('Tapp
 'TappedButtonRight','TappedButtonNone') indicating a tap that has been classified as to the left,
 right or neither of those places on the screen}
 
-\item{depressThr}{A numeric value indicating the threshold between two succesive taps}
+\item{depressThr}{A numeric value indicating the threshold between two successive taps}
 }
 \value{
 A 1 x 43 data frame consisting of tapping features and an error message, if any
