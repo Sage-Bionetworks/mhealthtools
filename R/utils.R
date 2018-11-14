@@ -291,7 +291,7 @@ window_start_end_times <- function(t, window_length, overlap) {
 #' @param window_length Length of the filter.
 #' @param overlap Window overlap.
 #' @return A matrix of window_length x nwindows
-window_signal <- function(values, window_length = 256, overlap = 0.5){
+window_signal <- function(values, window_length = 256, overlap = 0.5) {
   start_end_times <- window_start_end_times(
     values, window_length = window_length, overlap = overlap)
   nstart <- start_end_times$window_start_index
@@ -302,17 +302,6 @@ window_signal <- function(values, window_length = 256, overlap = 0.5){
   }, values, wn)
   colnames(a) <- 1:dim(a)[2]
   return(a)
-}
-
-#' Calculate jerk
-#' 
-#' @param acceleration An acceleration vector.
-#' @param sampling_rate Sampling rate of the acceleration vector.
-#' @return Jerk vector.
-jerk <- function(acceleration, sampling_rate) {
-  jerk <- (acceleration - dplyr::lag(acceleration)) * sampling_rate
-  jerk[1] <- 0
-  return(jerk)
 }
 
 #' Take the derivative of a vector v
@@ -335,82 +324,6 @@ derivative <- function(v) {
 integral <- function(v, sampling_rate) {
   integral <- diffinv(v)[-1]
   return(integral)
-}
-
-#' Add jerk column to sensor data
-#' 
-#' @param sensor_data A data frame with columns t, axis, acceleration.
-#' @param sampling_rate Sampling rate of the acceleration data.
-#' @return Sensor data with jerk column.
-mutate_jerk <- function(sensor_data, sampling_rate) {
-  if (has_error(sensor_data)) return(sensor_data)
-  sensor_data_with_jerk <- tryCatch({
-    sensor_data %>%
-      dplyr::group_by(axis, window) %>%
-      dplyr::mutate(jerk = jerk(acceleration, sampling_rate)) %>%
-      dplyr::ungroup()
-  }, error = function(e) {
-    dplyr::tibble(error = "Error calculating jerk")
-  })
-  return(sensor_data_with_jerk)
-}
-
-#' Calculate velocity
-#' 
-#' @param acceleration An acceleration vector.
-#' @param sampling_rate Sampling rate of the acceleration vector.
-#' @return Velocity vector.
-velocity <- function(acceleration, sampling_rate) {
-  velocity <- stats::diffinv(acceleration)[-1] * sampling_rate
-  return(velocity)
-}
-
-#' Add velocity column to sensor data
-#' 
-#' @param sensor_data A data frame with columns t, axis, acceleration.
-#' @param sampling_rate Sampling rate of the acceleration data.
-#' @return Sensor data with velocity column.
-mutate_velocity <- function(sensor_data, sampling_rate) {
-  if (has_error(sensor_data)) return(sensor_data)
-  sensor_data_with_velocity <- tryCatch({
-    sensor_data %>%
-      dplyr::group_by(axis, window) %>%
-      dplyr::mutate(velocity = velocity(acceleration, sampling_rate)) %>%
-      dplyr::ungroup()
-  }, error = function(e) {
-    dplyr::tibble(error = "Error calculating velocity")
-  })
-  return(sensor_data_with_velocity)
-}
-
-#' Calculate displacement
-#' 
-#' @param acceleration An acceleration vector.
-#' @param sampling_rate Sampling rate of the acceleration vector.
-#' @return Displacement vector.
-displacement <- function(acceleration, sampling_rate) {
-  velocity <- velocity(acceleration, sampling_rate)
-  displacement <- stats::diffinv(velocity)[-1] * sampling_rate
-  return(displacement)
-}
-
-#' Add displacement column to sensor data
-#' 
-#' @param sensor_data A data frame with columns t, axis, acceleration.
-#' @param sampling_rate Sampling rate of the acceleration data.
-#' @return Sensor data with displacement column.
-mutate_displacement <- function(sensor_data, sampling_rate) {
-  if (has_error(sensor_data)) return(sensor_data)
-  sensor_data_with_displacement <- tryCatch({
-    sensor_data %>%
-      dplyr::group_by(axis, window) %>%
-      dplyr::mutate(
-        displacement = displacement(acceleration, sampling_rate)) %>%
-      dplyr::ungroup()
-  }, error = function(e) {
-    dplyr::tibble(error = "Error calculating displacement")
-  })
-  return(sensor_data_with_displacement)
 }
 
 #' Add a column which is the "derivative" of an existing column
