@@ -183,11 +183,11 @@ tap_features <- get_tapping_features(tap_data)
 dplyr::glimpse(tap_features)
 ```
 
-You can also specify the threshold for the intertap distance in the x-axis using the `depressThr` parameter of the get_tapping_features function
+You can also specify the threshold for the intertap distance in the x-axis using the `depress_threshold` parameter of the get_tapping_features function
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
-tap_features <- get_tapping_features(tap_data, depressThr = 10)
-# Changing the threshold for intertap distance in x-axis, depressThr to 10 (default is 20)
+tap_features <- get_tapping_features(tap_data, depress_threshold = 10)
+# Changing the threshold for intertap distance in x-axis, depress_threshold to 10 (default is 20)
 ```
 ```{r}
 dplyr::glimpse(tap_features)
