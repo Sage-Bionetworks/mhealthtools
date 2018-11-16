@@ -3,5 +3,9 @@
 language: R
 sudo: false
 cache: packages
+sudo: required
 before_install:
-  - apt install libfftw3-3 libfftw3-dev libsndfile1 libsndfile1-dev
+  - sudo apt-get install -y libfftw3-3 libfftw3-dev libsndfile1 libsndfile1-dev
+addons:
+  apt:
+    update: true
