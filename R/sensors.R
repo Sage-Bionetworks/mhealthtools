@@ -103,11 +103,11 @@ kinematic_sensor_features <- function(sensor_data, acf_col = NULL,
                     dplyr::one_of(names(incidental_cols_to_preserve)),
                     dplyr::everything())
   }
-  model_features <- sensor_features(
-    sensor_data = transformed_sensor_data,
-    transform = NULL,
-    models = models)
-  if (tibble::has_name(model_features, "model_features")) {
+  if (!is.null(models)) {
+    model_features <- sensor_features(
+      sensor_data = transformed_sensor_data,
+      transform = NULL,
+      models = models)
     features$model_features <- model_features$model_features
   }
   return(features)

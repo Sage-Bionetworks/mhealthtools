@@ -584,7 +584,7 @@ time_domain_summary <- function(values, sampling_rate=NA) {
 #' @param sampling_rate Sampling_rate of \code{values}.
 #' @param npeaks Number of peaks to be computed in EWT
 #' @return A features data frame of dimension 1 x num_features
-frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
+frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
     sampling_rate <- 100
@@ -618,7 +618,7 @@ frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
     sh = seewave::sh(pdf))
   
   # Get EWT spectrum
-  ewt_spectrum <- data.frame(freq = freq, pdf = pdf) %>%
+  ewt_spectrum <- data.frame(freq = freq, pdf = pdf) %>% 
     get_ewt_spectrum(sampling_rate = sampling_rate, npeaks = npeaks)
   
   # Compute normalised point energies of each EW spctrum
@@ -676,29 +676,29 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
                              fraction_min_peak_height = 0.1,
                              min_peak_distance = 1, sampling_rate = 100) {
   # Find top peaks for EWT calculation
-  peak_freqs <- pracma::findpeaks(spectrum$pdf, 
-                                minpeakheight = fraction_min_peak_height *
+  peak_freqs <- pracma::findpeaks(spectrum$pdf,
+                                  minpeakheight = fraction_min_peak_height *
                                   max(spectrum$pdf, na.rm = T),
-                                minpeakdistance = min_peak_distance, 
-                                npeaks = npeaks,
-                                sortstr = TRUE)
+                                  minpeakdistance = min_peak_distance,
+                                  npeaks = npeaks,
+                                  sortstr = TRUE)
   
   # Convert peak frequency to radians and find mid points
-  peak_freqs <- spectrum$freq[sort(peak_freqs[, 2])] * pi * 2 / sampling_rate
+  peak_freqs <- spectrum$freq[suppressWarnings(
+    sort(peak_freqs[, 2]))] * pi * 2 / sampling_rate
   peak_freqs <- unique(c(0, peak_freqs, pi))
-  mid_peak_freqs <- c(
-    0, peak_freqs[-length(peak_freqs)] + diff(peak_freqs) / 2, pi)
+  mid_peak_freqs <- c(0, peak_freqs[-length(peak_freqs)] + diff(peak_freqs) / 2, pi)
   
   # Choose optimal scaling operator for the transition widths
-  numerator_vec <- mid_peak_freqs[2:(length(mid_peak_freqs) + 2)] - 
+  numerator_vec <- mid_peak_freqs[2:(length(mid_peak_freqs) + 2)] -
     mid_peak_freqs[1:(length(mid_peak_freqs) + 1)]
-  denominator_vec <- mid_peak_freqs[2:(length(mid_peak_freqs) + 2)] + 
+  denominator_vec <- mid_peak_freqs[2:(length(mid_peak_freqs) + 2)] +
     mid_peak_freqs[1:(length(mid_peak_freqs) + 1)]
   optimal_gamma <- min(numerator_vec / denominator_vec, na.rm = TRUE)
   
   # Compute emprical scaling and wavelets
   empirical_wavelets <- purrr::map2(
-    mid_peak_freqs[1:(length(mid_peak_freqs) - 1)], 
+    mid_peak_freqs[1:(length(mid_peak_freqs) - 1)],
     mid_peak_freqs[2:length(mid_peak_freqs)],
     .f = function(wn1, wn2, n.freq, optimal_gamma) {
       # Compute emprical scaling function for the first peak
@@ -733,12 +733,12 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
         phi.sy <- 1 - phi.sy
       }
       return(phi.sy)
-    }, 
+    },
     dim(spectrum)[1], optimal_gamma)
   
   # Compute EW modified spectrumrum
   ew_spectrum <- sapply(empirical_wavelets,
-                      function(x, spectrum) {spectrum$pdf * x}, spectrum)
+                        function(x, spectrum) {spectrum$pdf * x}, spectrum)
   
   return(ew_spectrum)
 }
@@ -755,7 +755,7 @@ frequency_domain_energy <- function(values, sampling_rate=NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for frequency_domain_energy")
     sampling_rate <- 100
-  } 
+  }
   spect <- get_spectrum(values, sampling_rate)
   freq <- spect$freq
   pdf <- spect$pdf / sum(spect$pdf, na.rm = T)
@@ -764,8 +764,8 @@ frequency_domain_energy <- function(values, sampling_rate=NA) {
   st <- seq(1, 24.5, 0.5)
   en <- seq(1.5, 25, 0.5)
   
-  features <- mapply(function(indStr, indEn){
-    ind <- which(freq >= indStr & freq <= indEn)
+  features <- mapply(function(ind_str, ind_en){
+    ind <- which(freq >= ind_str & freq <= ind_en)
     pracma::trapz(freq[ind], pdf[ind])
   }, st, en) %>% t %>% data.frame()
   colnames(features) <- paste0("EnergyInBand", gsub("\\.", "_", st))
