@@ -55,7 +55,7 @@ guanlab_nn_architecture <- function() {
 #' 
 #' @return list of keras sequential models
 load_guanlab_model <- function() {
-  weights <- guanlab_nn_weights
+  weights <- mhealthtools::guanlab_nn_weights
   models <- purrr::map(weights, function(w) {
     model <- guanlab_nn_architecture()
     model$set_weights(w)
