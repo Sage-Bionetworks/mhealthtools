@@ -57,14 +57,15 @@ testthat::test_that('Generate GuanLab architechture',{
   
 })
 
-models <- mhealthtools::load_guanlab_model()
+MODELS <- NULL # placeholder for expensive function call below
 
 testthat::test_that('Load weights into GuanLab architechture',{
   # actual function in models.R: load_guanlab_model
   
+  models <- mhealthtools::load_guanlab_model()
   testthat::expect_is(models, "list")
   # output is a list of Keras sequential models
-  
+  MODELS <- models  
 })
 
 testthat::context("Run GuanLab Model")
@@ -72,5 +73,5 @@ testthat::test_that("Extract features using GuanLab model", {
   # actual function in models.R: guanlab_model
   
   testthat::expect_is(mhealthtools::guanlab_model(
-    sensor_data = datAccel, models = models), "data.frame")
+    sensor_data = datAccel, models = MODELS), "data.frame")
 })
