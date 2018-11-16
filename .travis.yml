@@ -8,4 +8,8 @@ r_packages:
 addons:
   apt:
     update: true
-    packages: libfftw3-3 libfftw3-dev libsndfile1 libsndfile1-dev
+    packages: 
+      - libfftw3-3
+      - libfftw3-dev
+      - libsndfile1
+      - libsndfile1-dev
