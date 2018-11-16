@@ -3,10 +3,9 @@
 language: R
 sudo: false
 cache: packages
-sudo: required
-before_install:
-  - sudo apt-get install -y libfftw3-3 libfftw3-dev libsndfile1 libsndfile1-dev
-  - R -e 'devtools::install_deps(dep = T); keras::install_keras(); devtools::install_cran("ggplot2")'
+r_packages:
+  - ggplot2
 addons:
   apt:
     update: true
+    packages: libfftw3-3 libfftw3-dev libsndfile1 libsndfile1-dev
