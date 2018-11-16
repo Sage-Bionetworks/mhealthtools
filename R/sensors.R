@@ -126,7 +126,6 @@ kinematic_sensor_features <- function(sensor_data, acf_col = NULL,
 #' in \code{extract_on} from the output of \code{transform}. Each function
 #' should return a dataframe of features (normally a single-row datafame).
 #' @param extract_on A list of column names to calculate statistics from.
-#' @param extract_on A list of column names to calculate statistics from.
 #' @return A list of accelerometer features. The output from \code{extract} will
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}.
@@ -153,6 +152,8 @@ accelerometer_features_ <- function(sensor_data, transform = NULL,
 #' in \code{extract_on} from the output of \code{transform}. Each function
 #' should return a dataframe of features (normally a single-row datafame).
 #' @param extract_on A list of column names to calculate statistics from.
+#' @param models A list of functions which accept the output from
+#' \code{transform} as input and output a dataframe.
 #' @return A list of gyroscope features. The output from \code{extract} will
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}.
@@ -194,9 +195,9 @@ default_kinematic_features <- function(sampling_rate) {
 #' @param funs A list of feature extraction functions that each accept
 #' a single numeric vector as input. Each function should return a 
 #' dataframe of features (normally a single-row datafame).
-#' @param models A function which accepts as input \code{sensor_data} and
-#' outputs features. Useful for models which compute individual statistics
-#' using multiple input variables.
+#' @param models a list of functions which accepts as input a dataframe with
+#' columns \code{jerk}, \code{acceleration}, \code{velocity}, \code{displacement}
+#' as well as any columns from the dataframe outputted by \code{transformation}.
 #' @param window_length Length of sliding windows during bandpass filtering.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
@@ -244,9 +245,9 @@ accelerometer_features <- function(sensor_data,
 #' @param funs A list of feature extraction functions that each accept
 #' a single numeric vector as input. Each function should return a 
 #' dataframe of features (normally a single-row datafame).
-#' @param models A function which accepts as input \code{sensor_data} and
-#' outputs features. Useful for models which compute statistics
-#' using multiple input variables.
+#' @param models a list of functions which accepts as input a dataframe with
+#' columns \code{jerk}, \code{acceleration}, \code{velocity}, \code{displacement}
+#' as well as any columns from the dataframe outputted by \code{transformation}.
 #' @param window_length Length of sliding windows during bandpass filtering.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
@@ -318,6 +319,7 @@ transform_kinematic_sensor_data <- function(sensor_data, transformation,
 #' @param sensor_data A data frame with columns t, x, y, z containing 
 #' sensor measurements.
 #' @param window_length Length of sliding windows.
+#' @param sampling_rate Sampling rate of column \code{sensor_data}.
 #' @param time_range Timestamp range to use.
 #' @param frequency_range Frequency range for the bandpass filter.
 #' @return A data frame in tidy format

@@ -153,8 +153,7 @@ mutate_detrend <- function(sensor_data) {
 #' @param values Numeric vector.
 #' @param window_length Length of the filter.
 #' @param sampling_rate Sampling rate of the values.
-#' @param frequency_low Lower bound on frequency in Hz
-#' @param frequency_high Upper bound on frequency in Hz
+#' @param frequency_range Bounds on frequency in Hz
 #' @return Filtered time series data
 bandpass <- function(values, window_length, sampling_rate,
                      frequency_range) {
@@ -201,7 +200,7 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
 
 #' Select a specific time range from sensor data.
 #' 
-#' @param sensor_date A data frame with a \code{t} column.
+#' @param sensor_data A data frame with a \code{t} column.
 #' @param t1 Start time.
 #' @param t2 End time.
 #' @return Sensor data between time t1 and t2 (inclusive)
@@ -321,6 +320,9 @@ derivative <- function(v) {
 #' 
 #' Take the integral of a vector v by computing the inverse of
 #' the lagged differences (\code{diff} function).
+#' 
+#' @param v A numeric vector
+#' @param sampling_rate Sampling rate of \code{v}.
 integral <- function(v, sampling_rate) {
   integral <- diffinv(v)[-1]
   return(integral)
@@ -779,10 +781,10 @@ frequency_domain_energy <- function(values, sampling_rate=NA) {
 #' vector as input and outputs an atomic value -- to a single column
 #' of each group in a grouped tibble.
 #' 
-#' @param .x A tibble
-#' @param col Column to pass as a vector to \code{.f}.
-#' @param .f Function to be mapped to \code{col} for each group.
-#' @param ... Additional arguments to \code{.f}.
+#' @param x A tibble
+#' @param col Column to pass as a vector to \code{f}.
+#' @param f Function to be mapped to \code{col} for each group.
+#' @param ... Additional arguments to \code{f}.
 #' @return A tibble indexed by groups with an additional column containing
 #' the output of the mapped function.
 map_groups <- function(x, col, f, ...) {
