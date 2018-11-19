@@ -455,6 +455,8 @@ transform_gyroscope_data <- function(sensor_data,
     dplyr::rename(velocity = value) %>%
     mutate_derivative(sampling_rate = sampling_rate,
                       col = "velocity", derived_col = "acceleration") %>%
+    mutate_derivative(sampling_rate = sampling_rate,
+                      col = "acceleration", derived_col = "jerk") %>% 
     mutate_integral(sampling_rate = sampling_rate,
                     col = "velocity", derived_col = "displacement")
   return(transformed_sensor_data)
