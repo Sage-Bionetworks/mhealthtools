@@ -36,6 +36,7 @@ Imports:
 Remotes: url::http://download.r-forge.r-project.org/src/contrib/statcomp_0.0.1.1000.tar.gz
 URL: https://github.com/Sage-Bionetworks/mHealthTools
 RoxygenNote: 6.1.1
+Encoding: UTF-8
 Suggests:
     testthat,
     knitr,
