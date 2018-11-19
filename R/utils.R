@@ -412,8 +412,8 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
     dplyr::as_tibble() %>%
     tidyr::gather(window, value) %>%
     dplyr::group_by(window) %>%
-    dplyr::summarise(max = max(value, na.rm = T),
-                     min = min(value, na.rm = T))
+    dplyr::summarise(max = max(value, na.rm = F),
+                     min = min(value, na.rm = F))
   return(gravity_summary)
 }
 

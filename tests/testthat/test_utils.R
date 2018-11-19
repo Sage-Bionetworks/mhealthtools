@@ -390,7 +390,9 @@ testthat::test_that(
     
     testthat::expect_equal(
       testOutput, data.frame(window = as.character(1),
-                             max = NA, min = NA, stringsAsFactors=FALSE) )
+                             max = as.numeric(NA),
+                             min = as.numeric(NA),
+                             stringsAsFactors=FALSE) )
     # This needs to have max and min as NA, but is not. 
     # The actual output is [window = '1', max = 0.08, min =0.08]
     # All values are NA except for the last value, our window length is 256,
