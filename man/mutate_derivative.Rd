@@ -2,7 +2,8 @@
 % Please edit documentation in R/utils.R
 \name{mutate_derivative}
 \alias{mutate_derivative}
-\title{Add a column which is the "derivative" of an existing column to a time-series dataframe.}
+\title{Add a column which is the "derivative" of an existing column
+to a time-series dataframe.}
 \usage{
 mutate_derivative(sensor_data, sampling_rate, col, derived_col)
 }

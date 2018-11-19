@@ -2,7 +2,8 @@
 % Please edit documentation in R/utils.R
 \name{mutate_integral}
 \alias{mutate_integral}
-\title{Add a column which is the "integral" of an existing column to a time-series dataframe.}
+\title{Add a column which is the "integral" of an existing column
+to a time-series dataframe.}
 \usage{
 mutate_integral(sensor_data, sampling_rate, col, derived_col)
 }

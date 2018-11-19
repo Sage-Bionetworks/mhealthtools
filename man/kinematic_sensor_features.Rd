@@ -4,8 +4,9 @@
 \alias{kinematic_sensor_features}
 \title{Extract kinematic sensor features}
 \usage{
-kinematic_sensor_features(sensor_data, acf_col = NULL, transform = NULL,
-  extract = NULL, extract_on = NULL, models = NULL)
+kinematic_sensor_features(sensor_data, acf_col = NULL,
+  transform = NULL, extract = NULL, extract_on = NULL,
+  models = NULL)
 }
 \arguments{
 \item{sensor_data}{A dataframe.}
@@ -31,5 +32,6 @@ will be stored under \code{$model_features}.
 }
 \description{
 Extract kinematic (accelerometer/gyroscope) features. This function is not 
-normally called directly. See \code{accelerometer_features} and \code{gyroscope_features}.
+normally called directly. See \code{accelerometer_features}
+and \code{gyroscope_features}.
 }

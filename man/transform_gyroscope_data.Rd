@@ -4,9 +4,9 @@
 \alias{transform_gyroscope_data}
 \title{Prepare gyroscope sensor data for feature extraction}
 \usage{
-transform_gyroscope_data(sensor_data, transformation = NA,
-  window_length = 256, time_range = c(1, 9), frequency_range = c(1, 25),
-  sampling_rate = 100)
+transform_gyroscope_data(sensor_data, transformation = NULL,
+  window_length = 256, time_range = c(1, 9), frequency_range = c(1,
+  25), sampling_rate = 100)
 }
 \arguments{
 \item{sensor_data}{A dataframe with columns t, x, y, z.}

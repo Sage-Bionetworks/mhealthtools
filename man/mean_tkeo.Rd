@@ -2,16 +2,19 @@
 % Please edit documentation in R/utils.R
 \name{mean_tkeo}
 \alias{mean_tkeo}
-\title{Calculate the Mean Teager-Kaiser energy, adapted from TKEO function in library(seewave) using f = 1, m = 1, M = 1}
+\title{Calculate the Mean Teager-Kaiser energy,
+adapted from TKEO function in library(seewave) using f = 1, m = 1, M = 1}
 \usage{
 mean_tkeo(x)
 }
 \arguments{
-\item{x}{A vector x whose Mean Taiger-Kaiser Energy Operator value needs to be calculated}
+\item{x}{A vector x whose Mean Taiger-Kaiser Energy Operator value
+needs to be calculated}
 }
 \value{
 A numeric value that is representative of the MeanTKEO
 }
 \description{
-Calculate the Mean Teager-Kaiser energy, adapted from TKEO function in library(seewave) using f = 1, m = 1, M = 1
+Calculate the Mean Teager-Kaiser energy,
+adapted from TKEO function in library(seewave) using f = 1, m = 1, M = 1
 }
