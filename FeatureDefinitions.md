@@ -52,6 +52,58 @@ output: html_document
 | buttonNoneFreq    | frequency where neither the left or right buttons were hit |
 | corXY             | correlation between the X and Y coordinates of the hits |
 
+
+## Acceleromter and Gyroscope
+### (Walking, Tremor, Rest etc.,)
+
+| Feature Name <br />(.tm =time <br /> .fr=frequency)      | Description   |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| complexity.tm    | Complexity of a time series  $$ \sqrt{\frac{Var(f_s^2*\frac{d^2 x}{dt^2 })}{(Var(f_s* \frac{dx}{dt})}} $$ Where $Var$ means variance |
+| dfa.tm           | Scaling exponent estimated after performing detrended fluctuation analysis(DFA) |
+| energy.tm        | Total energy |
+| IQR.tm           | Interquartile Range (Q25 - Q75) |
+| Kurtosis.tm      | $$E\left[\left(\frac{X-μ}{σ}\right)^4\right]$$ Where $X$ is the signal, $μ$ is the mean and $σ$ is the standard deviation; and $E[.]$ is the expectation |
+| mean.tm 		   | Mean $$E[X]$$ Where $X$ is the signal and $E[.]$ is the expectation |
+| median.tm        | Median <br /> Middle value of the measurements, i.e the 50th Quartile |
+| mn.tm            | Minimum $$x_{min},x_{min}≤x,∀x$$ |
+| mobility.tm      | Mobility of a time series $$\sqrt{\frac{Var(f_s* \frac{dx}{dt})}{Var(x)}}$$ Where $Var$ means variance |
+| mode.tm          | Mode, Most occuring measure $$x_{mode}, \#x_{mode} ≥ \#x,∀x$$ |
+| mtkeo.tm         | Mean of the Teager-Kaiser energy operator |
+| mx.tm            | Max $$x_{max}, x_{max} ≥x,∀x$$ |
+| Q25.tm           | $25th$ Quartile | 
+| Q75.tm           | $75th$ Quartile |
+| range.tm         | Range: Max - Min $$x_{max} - x_{min}$$ |
+| rmsmag.tm        | Root Mean Square Magnitude |
+| rough.tm         | Roughness or Total Curvature of the time series |
+| rugo.tm          | Rugosity of the time series |
+| sd.tm            | Standard Deviation $$E[(X-μ)^2]$$ Where $X$ is the signal, $μ$ is the mean and $E[.]$ is the expectation |
+| skewness.tm      | $$E\left[\left(\frac{X-μ}{σ}\right)^3\right]$$ Where $X$ is the signal, $μ$ is the mean and $σ$ is the standard deviation; and $E[.]$ is the expectation |
+| cent.fr          | Centroid of the frequency spectrum, i.e the weighted mean of all frequencies present in  the Fourier Spectrum $$Centroid =  \frac{Σf.H(f)}{ΣH(f)}$$ Where $f$ is the frequency, and $H(f)$ is the spectral magnitude at that frequency |
+| ewt.permEnt.fr   | Permutation entropy of the probability mass function(PMF) obtained from the energies of the modes obtained from Empirical Wavelet Transform(EWT) |
+| ewt.renyiEnt.fr  | Renyi entropy of the PMF calculated using the modes obtained from EWT |
+| ewt.shannonEnt.fr| Shannon entropy of the PMF calculated using the modes obtained from EWT |
+| ewt.simpsonEnt.fr| Simpson entropy of the PMF calculated using the modes obtained from EWT |
+| ewt.tsallisEnt.fr| Tsallis entropy of the PMF calculated using the modes obtained from EWT |
+| IQR.fr           | Interquartile range (Q75-Q25) |
+| kurt.fr          | Kurtosis of the frequency probability  distribution |
+| md.fr            | Median frequency |
+| mn.fr            | Mean frequency |
+| mod.fr           | Frequency with the maximum amplitude in the frequency spectrum, i.e mode frequency |
+| mx.fr            | Maximum amplitude of the frequency probability distribution |
+| Q25.fr           | 25th Quartile of the frequency spectrum |
+| Q75.fr           | 75th Quartile of the frequency spectrum |
+| sd.fr            | Standard deviation of the frequency spectrum |
+| sem.fr           | Mean standard deviation, i.e  $$\frac{sd}{\sqrt{n}}$$ |
+| sfm.fr           | Spectral Flatness Measure of the frequency probability distribution |
+| sh.fr            | Shannon Entropy of the frequency probability distribution |
+| skew.fr          | Skewness of the frequency probability distribution |
+| EnergyInBandk    | Energy present in k-(k+1) Hz band of the frequency spectrum |
+
+
+
+
+# OLD FILE 
+
 ## Voice
 
 | Feature Name                | Definition                                                 |
