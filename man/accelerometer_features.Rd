@@ -26,9 +26,9 @@ cleaning steps performed.}
 a single numeric vector as input. Each function should return a 
 dataframe of features (normally a single-row datafame).}
 
-\item{models}{A function which accepts as input \code{sensor_data} and
-outputs features. Useful for models which compute individual statistics
-using multiple input variables.}
+\item{models}{a list of functions which accepts as input a dataframe with
+columns \code{jerk}, \code{acceleration}, \code{velocity}, \code{displacement}
+as well as any columns from the dataframe outputted by \code{transformation}.}
 
 \item{window_length}{Length of sliding windows during bandpass filtering.}
 

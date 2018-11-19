@@ -248,6 +248,14 @@ testthat::test_that('Windowing a time series',{
   
   testthat::expect_is(mhealthtools:::window_signal(values = datAccel$x), 'matrix')
   # Check if output is in correct format
+  
+  # If input is all NA's except for a value(the last one, we should expect something
+  # similar, all NAs except for one value, which is what we see, also if we input all
+  # NA's we see an output with all NA's )
+  gravityVec <- c(rep(NA,255),1)
+  tempVal <- mhealthtools:::window_signal(values = gravityVec)
+  testthat::expect_is(tempVal, 'matrix')
+  
 })
 
 testthat::test_that('Windowing the sensor data by axis',{

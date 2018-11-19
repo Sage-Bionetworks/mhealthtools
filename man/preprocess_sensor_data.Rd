@@ -13,6 +13,8 @@ sensor measurements.}
 
 \item{window_length}{Length of sliding windows.}
 
+\item{sampling_rate}{Sampling rate of column \code{sensor_data}.}
+
 \item{frequency_range}{Frequency range for the bandpass filter.}
 
 \item{time_range}{Timestamp range to use.}

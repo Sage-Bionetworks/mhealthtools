@@ -20,6 +20,9 @@ in \code{extract_on} from the output of \code{transform}. Each function
 should return a dataframe of features (normally a single-row datafame).}
 
 \item{extract_on}{A list of column names to calculate statistics from.}
+
+\item{models}{A list of functions which accept the output from
+\code{transform} as input and output a dataframe.}
 }
 \value{
 A list of gyroscope features. The output from \code{extract} will

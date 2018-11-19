@@ -35,6 +35,16 @@ testthat::test_that('Wrapper to extract tapping features',{
   testthat::expect_equal(is_error_dataframe(
     mhealthtools::get_tapping_features(tap_data = tempDat)), T)
   
+  # Checking depress_threshold parameter
+  testthat::expect_is(mhealthtools::get_tapping_features(tap_data = dat,
+                                                         depress_threshold = 20),
+                      'data.frame')
+  # For an invalid depress_threshold parameter we should get an error, e.g
+  # if it is not a number (of it is a negative number, no problem as we will
+  # be doing x > depress_threshold, so..)
+  testthat::expect_equal(is_error_dataframe(
+    mhealthtools::get_tapping_features(tap_data = dat, depress_threshold = NA)), T)
+  
   tempDat <- dat[1:2,] 
   # tempDat now has just 2 rows of observations, we should expect the
   # relevant error as this is less that the required 5

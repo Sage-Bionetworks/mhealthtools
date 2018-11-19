@@ -20,8 +20,6 @@ in \code{extract_on} from the output of \code{transform}. Each function
 should return a dataframe of features (normally a single-row datafame).}
 
 \item{extract_on}{A list of column names to calculate statistics from.}
-
-\item{extract_on}{A list of column names to calculate statistics from.}
 }
 \value{
 A list of accelerometer features. The output from \code{extract} will
