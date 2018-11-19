@@ -159,7 +159,7 @@ accelerometer_features_ <- function(sensor_data, transform = NULL,
 #' will be stored under \code{$model_features}.
 gyroscope_features_ <- function(sensor_data, transform = NULL, extract = NULL,
                                 extract_on = c("acceleration", "velocity",
-                                               "displacement", "jerk"), models = NULL) {
+                                               "displacement"), models = NULL) {
   kinematic_sensor_features(
     sensor_data = sensor_data, transform = transform, extract = extract,
     extract_on = extract_on, models = models, acf_col = "velocity")
