@@ -761,7 +761,6 @@ frequency_domain_energy <- function(values, sampling_rate=NA) {
   spect <- get_spectrum(values, sampling_rate)
   freq <- spect$freq
   pdf <- spect$pdf / sum(spect$pdf, na.rm = T)
-  cdf <- cumsum(pdf)
   
   st <- seq(1, 24.5, 0.5)
   en <- seq(1.5, 25, 0.5)
