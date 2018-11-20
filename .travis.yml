@@ -3,6 +3,7 @@
 language: R
 sudo: false
 cache: packages
+warnings_are_errors: false
 before_install:
   - R -e 'install.packages("devtools"); devtools::install_github("rstudio/keras"); keras::install_keras()'
 r_packages:
