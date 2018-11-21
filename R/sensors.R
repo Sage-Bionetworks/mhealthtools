@@ -256,7 +256,8 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
         max_imf = IMF)(preprocessed_sensor_data)
     }
   } else {
-    transformed_sensor_data <- preprocessed_sensor_data
+    transformed_sensor_data <- preprocessed_sensor_data %>% 
+      dplyr::group_by(axis)
   }
   transformed_sensor_data <- transformed_sensor_data %>% 
     dplyr::rename(acceleration = value)
