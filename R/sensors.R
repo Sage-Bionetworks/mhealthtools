@@ -1,41 +1,61 @@
-#' Extract features from sensor data
+#' Extract sensor features
 #' 
 #' A 'pure' implementation of the feature extraction process. This function
 #' is not normally called directly.
 #' 
 #' The feature extraction paradigm is implemented as such:
 #' 
-#' Input: raw feature data
+#' Input: raw sensor data
 #' Transform: into a format suitable for calculating statistics upon
 #' Extract: features by computing statistics upon individual, grouped columns --
 #'          or with a model.
 #' Return: A list of feature dataframes
 #' 
 #' @param sensor_data A dataframe.
-#' @param transform A function which accepts \code{sensor_data} as input
-#' and outputs a dataframe.
+#' @param preprocess A list of functions to be applied sequentially to \code{sensor_data}.
+#' Within this function, the distinction between \code{preprocess} and \code{transform}
+#' is purely semantic. There are no differences besides \code{preprocess} functions
+#' being applied before \code{transform} functions.
+#' @param transform See \code{preprocess}.
 #' @param extract A list of functions to be applied to each of the columns
 #' in \code{extract_on} from the output of \code{transform}. Each function
 #' should return a dataframe of features (normally a single-row datafame).
-#' @param extract_on A list of column names to compute statistics on.
+#' @param extract_on A list of column names to compute features from.
 #' @param models A list of functions which accept the output from
 #' \code{transform} as input and output a dataframe.
-#' @return A list of feature dataframes. The output from \code{extract} will
+#' @return A list of features. The output from \code{extract} will
 #' be stored under \code{$extracted_features} and the output from \code{models}
-#' will be stored under \code{$model_features}. If \code{transform} returns
-#' an error dataframe (see \code{has_error}), the error dataframe is stored
+#' will be stored under \code{$model_features}. If \code{preprocess} or \code{transform}
+#' returns #' an error dataframe (see \code{has_error}), the error dataframe is stored
 #' under \code{$error}.
-sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
-                            extract_on = NULL, models = NULL) {
-  features <- list()
-  if (is.null(transform)) {
-    transform <- function(x) x
+sensor_features <- function(sensor_data, preprocess = NULL, transform = NULL,
+                            extract = NULL, extract_on = NULL, models = NULL) {
+  
+  features <- list(extracted_features = NULL,
+                   model_features = NULL,
+                   error = NULL)
+  
+  if (is.null(preprocess)) {
+    preprocess <- list(function(x) x)
   }
-  transformed_sensor_data <- transform(sensor_data)
+  if (is.null(transform)) {
+    transform <- list(function(x) x)
+  }
+  
+  preprocessed_sensor_data <- sensor_data %>% 
+    purrr::reduce(rev(preprocess), purrr::compose)()
+  if (has_error(preprocessed_sensor_data)) {
+    features$error <- preprocessed_sensor_data
+    return(features)
+  }
+  
+  transformed_sensor_data <- preprocessed_sensor_data %>%
+    purrr::reduce(rev(transform), purrr::compose)()
   if (has_error(transformed_sensor_data)) {
     features$error <- transformed_sensor_data
     return(features)
   }
+  
   if (!is.null(extract) && !is.null(extract_on)) {
     transformed_sensor_data_groups <- dplyr::groups(transformed_sensor_data)
     features$extracted_features <- purrr::map_dfr(
@@ -61,26 +81,53 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
 #' and \code{gyroscope_features}.
 #' 
 #' @param sensor_data A dataframe.
-#' @param acf_col Column name to calculate acf upon.
-#' @param transform A function which accepts \code{sensor_data} as input
-#' and outputs a dataframe.
+#' @param preprocess A list of functions to be applied sequentially to \code{sensor_data}.
+#' Within this function, the distinction between \code{preprocess} and \code{transform}
+#' is purely semantic. There are no differences besides \code{preprocess} functions
+#' being applied before \code{transform} functions.
+#' @param transform See \code{preprocess}.
 #' @param extract A list of functions to be applied to each of the columns
 #' in \code{extract_on} from the output of \code{transform}. Each function
 #' should return a dataframe of features (normally a single-row datafame).
-#' @param extract_on A list of column names to calculate statistics from.
+#' @param extract_on A list of column names to compute features from.
 #' @param models A list of functions which accept the output from
+#' @param acf_col Column name to calculate acf upon.
 #' \code{transform} as input and output a dataframe.
-#' @return A list of feature dataframes. The output from \code{extract} will
+#' @return A list of features. The output from \code{extract} will
 #' be stored under \code{$extracted_features} and the output from \code{models}
-#' will be stored under \code{$model_features}.
-kinematic_sensor_features <- function(sensor_data, acf_col = NULL,
+#' will be stored under \code{$model_features}. If \code{preprocess} or \code{transform}
+#' returns #' an error dataframe (see \code{has_error}), the error dataframe is stored
+#' under \code{$error}.
+kinematic_sensor_features <- function(sensor_data, preprocess = NULL,
                                       transform = NULL, extract = NULL,
-                                      extract_on = NULL, models = NULL) {
-  features <- list()
-  if (is.null(transform)) {
-    transform <- function(x) x
+                                      extract_on = NULL, models = NULL,
+                                      acf_col = NULL) {
+  # TODO what to do with error element within features?
+  features <- list(extracted_features = NULL,
+                   model_features = NULL,
+                   error = NULL)
+  
+  if (is.null(preprocess)) {
+    preprocess <- list(function(x) x)
   }
-  transformed_sensor_data <- transform(sensor_data)
+  if (is.null(transform)) {
+    transform <- list(function(x) x)
+  }
+  
+  preprocessed_sensor_data <- sensor_data %>% 
+    purrr::reduce(rev(preprocess), purrr::compose)()
+  if (has_error(preprocessed_sensor_data)) {
+    features$error <- preprocessed_sensor_data
+    return(features)
+  }
+  
+  transformed_sensor_data <- preprocessed_sensor_data %>%
+    purrr::reduce(rev(transform), purrr::compose)()
+  if (has_error(transformed_sensor_data)) {
+    features$error <- transformed_sensor_data
+    return(features)
+  }
+  
   if (!is.null(extract) && !is.null(extract_on)) {
     transformed_sensor_data_groups <- dplyr::groups(transformed_sensor_data)
     incidental_cols_to_preserve <- transformed_sensor_data %>%
@@ -88,16 +135,17 @@ kinematic_sensor_features <- function(sensor_data, acf_col = NULL,
       dplyr::distinct(!!!transformed_sensor_data_groups, .keep_all = T)
     movement_features <- sensor_features(
       sensor_data = transformed_sensor_data,
-      transform = NULL,
       extract = extract,
       extract_on = extract_on)
     acf_features <- sensor_features(
       sensor_data = transformed_sensor_data,
-      transform = purrr::partial(calculate_acf, col = acf_col),
+      transform = list(purrr::partial(calculate_acf, col = acf_col)),
       extract = extract,
       extract_on = "acf")
-    features$extracted_features <- dplyr::bind_rows(
-      movement_features[[1]], acf_features[[1]]) %>%
+    extracted_features <- list(movement_features, acf_features) %>% 
+      purrr::map(function(f) if (!is.null(f$error)) f$error else f$extracted_features)
+    features$extracted_features <- extracted_features %>% 
+      dplyr::bind_rows() %>%
       dplyr::left_join(incidental_cols_to_preserve) %>%
       dplyr::select(measurementType,
                     dplyr::one_of(names(incidental_cols_to_preserve)),
@@ -106,7 +154,6 @@ kinematic_sensor_features <- function(sensor_data, acf_col = NULL,
   if (!is.null(models)) {
     model_features <- sensor_features(
       sensor_data = transformed_sensor_data,
-      transform = NULL,
       models = models)
     features$model_features <- model_features$model_features
   }
@@ -236,13 +283,14 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
     tidy_sensor_data() %>% 
     { if (is.null(time_filter)) . 
       else filter_time(., time_filter[1], time_filter[2]) } %>% 
-    { if (is.null(detrend)) .
+    { if (detrend) .
       else mutate_detrend(.) } %>% 
     { if (is.null(frequency_filter)) .
       else mutate_bandpass(.,
                            window_length = 256,
                            sampling_rate = sampling_rate,
                            frequency_range = frequency_filter) }
+  if (has_error(preprocessed_sensor_data)) return(preprocessed_sensor_data)
   
   if (!is.null(window_length) && !is.null(window_overlap)) {
     if (IMF == 1) {
@@ -257,8 +305,11 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
     }
   } else {
     transformed_sensor_data <- preprocessed_sensor_data %>% 
+      dplyr::select(-t) %>%
       dplyr::group_by(axis)
   }
+  if (has_error(transformed_sensor_data)) return(transformed_sensor_data)
+  
   transformed_sensor_data <- transformed_sensor_data %>% 
     dplyr::rename(acceleration = value)
   if (mutate) {
@@ -273,6 +324,7 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
   } else {
     extract_on <- c("acceleration")
   }
+  if (has_error(transformed_sensor_data)) return(transformed_sensor_data)
  
   features <- kinematic_sensor_features(
     sensor_data = transformed_sensor_data,
@@ -467,15 +519,16 @@ preprocess_sensor_data <- function(sensor_data, window_length,
 #' @return A function that accepts as input a dataframe with columns 
 #' t, axis, value and outputs a windowed transformation of that dataframe
 transformation_window <- function(window_length, overlap) {
-  transformation_window <- function(sensor_data, window_length, overlap) {
-    window(sensor_data = sensor_data,
-           window_length = window_length,
-           overlap = overlap) %>%
-      dplyr::group_by(axis, window)
-  }
-  partial_transformation_window <- purrr::partial(
-    transformation_window, window_length = window_length, overlap = overlap)
-  return(partial_transformation_window)
+  purrr::partial(
+    transformation_window <- function(sensor_data, window_length, overlap) {
+      if (has_error(sensor_data)) return(sensor_data)
+      window(sensor_data = sensor_data,
+             window_length = window_length,
+             overlap = overlap) %>%
+        dplyr::group_by(axis, window)
+    },
+    window_length = window_length,
+    overlap = overlap)
 }
 
 #' Generate a function for windowing sensor data after applying EMD
@@ -491,6 +544,7 @@ transformation_window <- function(window_length, overlap) {
 transformation_imf_window <- function(window_length, overlap, max_imf) {
   purrr::partial(
     function(sensor_data, window_length, overlap, max_imf) {
+      if (has_error(sensor_data)) return(sensor_data)
       values <- sensor_data %>%
         tidyr::spread(key = "axis", value = "value")
       imf <- purrr::map2(values %>% dplyr::select(t), values %>% dplyr::select(-t),
