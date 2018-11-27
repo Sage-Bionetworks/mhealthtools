@@ -99,10 +99,11 @@ has_error <- function(sensor_data) {
 
 #' Gather the axial columns
 #' 
-#' Gathers x, y, and z columns into a single \code{axis} column and
+#' Gather x, y, and z columns into a single \code{axis} column and
 #' normalize the \code{t} column to begin at \code{t} = 0.
 #' 
-#' @param sensor_data A data frame with a time column, \code{t}.
+#' @param sensor_data A data frame with a time column \code{t},
+#' and at least one additional axial column.
 #' @return Sensor data in tidy format.
 tidy_sensor_data <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
@@ -112,7 +113,8 @@ tidy_sensor_data <- function(sensor_data) {
     normalized_sensor_data <-  sensor_data %>% dplyr::mutate(t = t - t0)
     index <- order(sensor_data$t)
     tidy_sensor_data <- normalized_sensor_data[index, ] %>%
-      tidyr::gather(axis, value, -t)
+      tidyr::gather(axis, value, -t) %>% 
+      dplyr::group_by(axis)
   }, error = function(e) {
     dplyr::tibble(
       error = "Could not put sensor data in tidy format by gathering the axes.")
@@ -132,16 +134,13 @@ detrend <- function(time, values) {
 
 #' Detrend sensor data
 #' 
-#' @param sensor_data A data frame with columns t, axis, value.
+#' @param sensor_data A data frame with columns t, value.
 #' @return Sensor data with detrended values.
 mutate_detrend <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
   detrended_sensor_data <- tryCatch({
     detrended_sensor_data <- sensor_data %>%
-      dplyr::group_by(axis) %>%
-      dplyr::mutate(
-        value = detrend(t, value)) %>%
-      dplyr::ungroup()
+      dplyr::mutate(value = detrend(t, value))
   }, error = function(e) {
     dplyr::tibble(error = "Detrend error")
   })
@@ -177,7 +176,7 @@ bandpass <- function(values, window_length, sampling_rate,
 
 #' Apply a pass-band filter to sensor data
 #' 
-#' @param sensor_date A data frame with columns t, axis, value.
+#' @param sensor_date A data frame with column value.
 #' @param window_length Length of the filter.
 #' @param sampling_rate Sampling rate of the value column.
 #' @param frequency_range Bounds on frequency in Hz
@@ -187,11 +186,8 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
   if (has_error(sensor_data)) return(sensor_data)
   bandpass_filtered_sensor_data <- tryCatch({
     sensor_data %>%
-      dplyr::group_by(axis) %>%
-      dplyr::mutate(
-        value = bandpass(value, window_length, sampling_rate,
-                         frequency_range)) %>%
-      dplyr::ungroup()
+      dplyr::mutate(value = bandpass(value, window_length,
+                                     sampling_rate, frequency_range))
   }, error = function(e) {
     dplyr::tibble(error = "Bandpass filter error")
   })
@@ -545,6 +541,7 @@ tapdrift_summary_features <- function(tap_drift) {
 #' @param values A numeric vector.
 #' @param sampling_rate Sampling_rate of \code{values}.
 #' @return A features data frame of dimension 1 x n_features
+#' @export
 time_domain_summary <- function(values, sampling_rate=NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
@@ -586,6 +583,7 @@ time_domain_summary <- function(values, sampling_rate=NA) {
 #' @param sampling_rate Sampling_rate of \code{values}.
 #' @param npeaks Number of peaks to be computed in EWT
 #' @return A features data frame of dimension 1 x num_features
+#' @export
 frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
@@ -753,6 +751,7 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
 #' @param values A timeseries vector.
 #' @param sampling_rate Sampling rate of the signal (by default it is 100 Hz).
 #' @return A features data frame of dimension 1 x 48.
+#' @export
 frequency_domain_energy <- function(values, sampling_rate=NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for frequency_domain_energy")
