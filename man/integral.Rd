@@ -6,6 +6,11 @@
 \usage{
 integral(v, sampling_rate)
 }
+\arguments{
+\item{v}{A numeric vector}
+
+\item{sampling_rate}{Sampling rate of \code{v}.}
+}
 \description{
 Take the integral of a vector v by computing the inverse of
 the lagged differences (\code{diff} function).

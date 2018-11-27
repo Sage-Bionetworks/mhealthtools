@@ -13,9 +13,7 @@ bandpass(values, window_length, sampling_rate, frequency_range)
 
 \item{sampling_rate}{Sampling rate of the values.}
 
-\item{frequency_low}{Lower bound on frequency in Hz}
-
-\item{frequency_high}{Upper bound on frequency in Hz}
+\item{frequency_range}{Bounds on frequency in Hz}
 }
 \value{
 Filtered time series data

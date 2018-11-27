@@ -7,13 +7,13 @@
 map_groups(x, col, f, ...)
 }
 \arguments{
-\item{col}{Column to pass as a vector to \code{.f}.}
+\item{x}{A tibble}
 
-\item{...}{Additional arguments to \code{.f}.}
+\item{col}{Column to pass as a vector to \code{f}.}
 
-\item{.x}{A tibble}
+\item{f}{Function to be mapped to \code{col} for each group.}
 
-\item{.f}{Function to be mapped to \code{col} for each group.}
+\item{...}{Additional arguments to \code{f}.}
 }
 \value{
 A tibble indexed by groups with an additional column containing

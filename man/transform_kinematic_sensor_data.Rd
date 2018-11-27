@@ -2,35 +2,66 @@
 % Please edit documentation in R/sensors.R
 \name{transform_kinematic_sensor_data}
 \alias{transform_kinematic_sensor_data}
-\title{Apply standard transformations to kinematic sensor data}
+\title{Return parameters to be used in general feature functions}
 \usage{
-transform_kinematic_sensor_data(sensor_data, transformation, window_length,
-  time_range, frequency_range, sampling_rate)
+transform_kinematic_sensor_data(sensor_data, metric, time_filter = NULL,
+  detrend = F, frequency_filter = NULL, IMF = 1,
+  window_length = NULL, window_overlap = NULL,
+  derived_kinematics = F, funs = NULL, models = NULL)
 }
 \arguments{
-\item{sensor_data}{A dataframe with columns t, x, y, z.}
+\item{sensor_data}{An \code{n} x 4 data frame with column names \code{t}, \code{x},
+\code{y}, \code{z} containing gyroscope measurements. Here \code{n} is the
+total number of measurements, \code{t} is the timestamp of each measurement, and
+\code{x}, \code{y} and \code{z} are linear velocity measurements.}
 
-\item{transformation}{A function which accepts a tidy version of \code{sensor_data},
-with columns t, axis, value, as input and outputs a dataframe suitable for 
-feature extraction. By default, the tidy sensor data is windowed before feature
-extraction. This is a more user-friendly version of the \code{transform} 
-parameter required for more generic functions like \code{sensor_features}. Namely,
-its input will already be "cleaned" by detrending, bandpassing, etc. See 
-\code{preprocess_sensor_data} for all the cleaning steps performed.}
+\item{time_filter}{A length 2 numeric vector specifying the time range 
+of measurements to use during preprocessing and feature extraction after
+normalizing the first timestamp to 0. A \code{NULL} value means do not 
+filter any measurements.}
 
-\item{window_length}{Length of sliding windows during bandpass filtering.}
+\item{detrend}{Whether to detrend the signal.}
 
-\item{time_range}{Timestamp range to use.}
+\item{frequency_filter}{A length 2 numeric vector specifying the frequency range
+of the signal (in hertz) to use during preprocessing and feature extraction.
+A \code{NULL} value means do not filter frequencies.}
 
-\item{frequency_range}{Frequency range for the bandpass filter.}
+\item{IMF}{The number of IMFs used during an empirical mode decomposition
+transformation. The default value of 1 means do not apply EMD to the signal.}
 
-\item{sampling_rate}{Sampling rate of the acceleration vector.}
+\item{window_length}{Length of the sliding window used during the windowing 
+transformation. Both \code{window_length} and \code{window_overlap} must be
+set for the windowing transformation to be applied.}
+
+\item{window_overlap}{Window overlap used during the windowing transformation.
+Both \code{window_length} and \code{window_overlap} must be set for the
+windowing transformation to be applied.}
+
+\item{derived_kinematics}{Whether to add columns for \code{jerk}, \code{velocity},
+and \code{displacement} before extracting features.}
+
+\item{funs}{A function or list of feature extraction functions that each
+accept a single numeric vector as input. Each function should return a 
+dataframe of features (normally a single-row datafame). The input vectors
+will be the axial measurements from \code{sensor_data} after the chosen
+preprocessing and transformation steps have been applied. If no argument
+is supplied to either \code{funs} or \code{models}, a default set
+of feature extraction functions (as described in \code{default_kinematic_features})
+will be supplied for this parameter.}
+
+\item{models}{A list of functions, each of which accept as input 
+\code{sensor_data} after the chosen preprocessing and transformation
+steps have been applied and return features. Useful for models which compute
+individual statistics using multiple input variables.}
 }
 \value{
-A dataframe.
+A list of parameters to be used in the general feature functions.
 }
 \description{
-Apply standard transformations to kinematic (accelerometer/gyroscope)
-sensor data. This function is not normally called directly. See
-\code{transform_accelerometer_data} and \code{transform_gyroscope_data}.
+Using the parameters passed to convenience functions like 
+\code{accelerometer_features} and \code{gyroscope_features},
+build a parameter set that can be used with more general functions
+like \code{kinematic_sensor_data} and \code{sensor_data}. This function
+is not normally called directly. See \code{accelerometer_features} and
+\code{gyroscope_features}.
 }
