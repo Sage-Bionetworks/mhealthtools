@@ -523,7 +523,7 @@ transform_kinematic_sensor_data <- function(sensor_data, metric,
         return(purrr::partial(time_domain_summary,
                               sampling_rate = sampling_rate))
       } else if (identical(f, frequency_domain_energy)) {
-        return(purrr::partial(time_domain_summary,
+        return(purrr::partial(frequency_domain_energy,
                               sampling_rate = sampling_rate))
       } else if (identical(f, frequency_domain_summary)) {
         return(purrr::partial(frequency_domain_summary,
