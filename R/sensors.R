@@ -516,7 +516,7 @@ transform_kinematic_sensor_data <- function(sensor_data, metric,
     models = models)
   if (is.null(funs) && is.null(models)) {
     funs <- default_kinematic_features(sampling_rate = sampling_rate)
-  } else {
+  } else if (!is.null(funs)) {
     if (!is.list(funs)) funs <- list(funs)
     funs <- purrr::map(funs, function(f) {
       if (identical(f, time_domain_summary)) {

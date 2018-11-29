@@ -4,10 +4,11 @@
 \alias{get_walk_features}
 \title{Extract walk features from raw accelerometer and gyroscope data.}
 \usage{
-get_walk_features(accelerometer_data, gyroscope_data,
-  gravity_data = NULL, funs = NULL, models = NULL,
-  window_length = 256, time_range = c(1, 9), frequency_range = c(1,
-  25), overlap = 0.5, max_imf = 4)
+get_walk_features(accelerometer_data = NULL, gyroscope_data = NULL,
+  gravity_data = NULL, time_filter = NULL, detrend = F,
+  frequency_filter = NULL, IMF = 1, window_length = NULL,
+  window_overlap = NULL, derived_kinematics = F, funs = NULL,
+  models = NULL)
 }
 \arguments{
 \item{accelerometer_data}{A data frame with columns t, x, y, z containing 
@@ -19,6 +20,9 @@ gyroscope measurements.}
 \item{gravity_data}{A data frame with columns t, x, y, z containing 
 gravity sensor measurements.}
 
+\item{window_length}{Length of sliding windows for bandpass filter
+and windowing transformation.}
+
 \item{funs}{Feature extraction functions that accept a single
 time-series vector as input.}
 
@@ -26,9 +30,6 @@ time-series vector as input.}
 axis, window, IMF, jerk, acceleration, velocity, displacement and
 outputs features. Useful for models which compute individual statistics
 using multiple input variables.}
-
-\item{window_length}{Length of sliding windows for bandpass filter
-and windowing transformation.}
 
 \item{time_range}{Timestamp range to use.}
 

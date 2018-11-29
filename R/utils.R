@@ -420,12 +420,12 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
 #' 
 #' @param gravity A dataframe with gravity vectors for columns
 #' @param window_length Length of the filter.
-#' @param overlap Window overlap.
+#' @param window_overlap Window overlap.
 #' @return Rotations errors for each window.
-tag_outlier_windows <- function(gravity, window_length, overlap) {
+tag_outlier_windows <- function(gravity, window_length, window_overlap) {
   gr_error <- tryCatch({
     gr_error <- gravity %>%
-      purrr::map(tag_outlier_windows_, window_length, overlap) %>%
+      purrr::map(tag_outlier_windows_, window_length, window_overlap) %>%
       dplyr::bind_rows(.id = "axis") %>%
       dplyr::mutate(error = sign(max) != sign(min)) %>%
       dplyr::group_by(window) %>%

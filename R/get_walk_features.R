@@ -26,64 +26,87 @@
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @importFrom magrittr "%>%"
 get_walk_features <- function(
-  accelerometer_data, gyroscope_data, gravity_data = NULL,
-  funs = NULL, models = NULL, window_length = 256, time_range = c(1, 9),
-  frequency_range = c(1, 25), overlap = 0.5, max_imf = 4) {
+  accelerometer_data = NULL, gyroscope_data = NULL, gravity_data = NULL,
+  time_filter = NULL, detrend = F, frequency_filter = NULL, IMF = 1,
+  window_length = NULL, window_overlap = NULL, derived_kinematics = F,
+  funs = NULL, models = NULL) {
   
-  features <- list()
+  features <- list(extracted_features = NULL,
+                   model_features = NULL,
+                   error = NULL,
+                   outlier_windows = NULL)
   
   # check input integrity
-  if (any(is.na(accelerometer_data))) {
+  if (!is.null(accelerometer_data) && any(is.na(accelerometer_data))) {
     features$error <- dplyr::tibble(error = "Malformed accelerometer data")
     return(features)
-  } else if (any(is.na(gyroscope_data))) {
+  } else if (!is.null(gyroscope_data) && any(is.na(gyroscope_data))) {
     features$error <- dplyr::tibble(error = "Malformed gyroscope data")
     return(features)
   }
   
   # Get accelerometer features
-  features_accel <- accelerometer_features(
-    sensor_data = accelerometer_data,
-    transformation = transformation_imf_window(window_length = window_length,
-                                               overlap = overlap,
-                                               max_imf = max_imf),
-    funs = funs,
-    models = models,
-    window_length = window_length,
-    time_range = time_range,
-    frequency_range = frequency_range)
+  if (!is.null(accelerometer_data)) {
+    features_accel <- accelerometer_features(
+      sensor_data = accelerometer_data,
+      time_filter = time_filter,
+      detrend = detrend,
+      frequency_filter = frequency_filter,
+      IMF = IMF,
+      window_length = window_length,
+      window_overlap = window_overlap,
+      derived_kinematics = derived_kinematics,
+      funs = funs,
+      models = models)
+  } else {
+    features_accel <- list()
+  }
   
   # Get gyroscope features
-  features_gyro <- gyroscope_features(
-    sensor_data = gyroscope_data,
-    transformation = transformation_imf_window(window_length = window_length,
-                                               overlap = overlap,
-                                               max_imf = max_imf),
-    funs = funs,
-    models = models,
-    window_length = window_length,
-    time_range = time_range,
-    frequency_range = frequency_range)
+  if (!is.null(gyroscope_data)) {
+    features_gyro <- gyroscope_features(
+      sensor_data = gyroscope_data,
+      time_filter = time_filter,
+      detrend = detrend,
+      frequency_filter = frequency_filter,
+      IMF = IMF,
+      window_length = window_length,
+      window_overlap = window_overlap,
+      derived_kinematics = derived_kinematics,
+      funs = funs,
+      models = models)
+  } else {
+    features_gyro <- list()
+  }
   
   # Combine features into a single list
-  if (!is.null(funs)) {
+  if (!is.null(features_accel$extracted_features) ||
+      !is.null(features_gyro$extracted_features)) {
     features$extracted_features <- dplyr::bind_rows(
       accelerometer = features_accel$extracted_features,
       gyroscope = features_gyro$extracted_features,
       .id = "sensor")
-    # tag outlier windows if there are no other errors
-    if (!has_error(features$extracted_features) && !is.null(gravity_data) &&
-        rlang::has_name(features$extracted_features, "window")) {
-      gr_error <- tag_outlier_windows(gravity_data, window_length, overlap)
-      features$extracted_features <- features$extracted_features %>%
-        {if (rlang::has_name(., "error")) dplyr::select(-error) else .} %>%
-        dplyr::left_join(gr_error, by = "window")
-    }
+  } else if (!is.null(features_accel$error) ||
+             !is.null(features_gyro$error)) {
+    features$error <- dplyr::bind_rows(
+      accelerometer = features_accel$error,
+      gyroscope = features_gyro$error,
+      .id = "sensor")
   }
-  if (!is.null(models)) {
+  if (!is.null(features_accel$model_features) ||
+      !is.null(features_gyro$model_features)) {
     features$model_features <- list(
       accelerometer = features_accel$model_features,
       gyroscope = features_gyro$model_features)
+  }
+  
+  # tag outlier windows if there was a windowing transformation performed
+  if (!is.null(features$extracted_features) && !is.null(gravity_data) &&
+      !is.null(window_length) && !is.null(window_overlap)) {
+    features$outlier_windows <- tag_outlier_windows(
+      gravity = gravity_data,
+      window_length = window_length,
+      window_overlap = window_overlap)
   }
   
   return(features)
