@@ -217,9 +217,9 @@ filter_time <- function(sensor_data, t1, t2) {
 #' 
 #' @param sensor_data A data frame with columns t, axis, value.
 #' @param window_length Length of the filter
-#' @param overlap window overlap
+#' @param window_overlap window overlap
 #' @return Windowed sensor data
-window <- function(sensor_data, window_length, overlap) {
+window <- function(sensor_data, window_length, window_overlap) {
   if (has_error(sensor_data)) return(sensor_data)
   tryCatch({
     spread_sensor_data <- sensor_data %>%
@@ -227,7 +227,7 @@ window <- function(sensor_data, window_length, overlap) {
     windowed_sensor_data <- spread_sensor_data %>%
       dplyr::select(x, y, z) %>%
       purrr::map(window_signal,
-                 window_length = window_length, overlap = overlap)
+                 window_length = window_length, window_overlap = window_overlap)
     tidy_windowed_sensor_data <- lapply(
       windowed_sensor_data,
       function(windowed_matrix) {
@@ -239,7 +239,7 @@ window <- function(sensor_data, window_length, overlap) {
       dplyr::bind_rows(.id = "axis")
     start_end_times <- window_start_end_times(spread_sensor_data$t,
                                               window_length = window_length,
-                                              overlap = overlap)
+                                              window_overlap = window_overlap)
     tidy_windowed_sensor_data <- tidy_windowed_sensor_data %>%
       dplyr::left_join(start_end_times, by = "window") %>%
       dplyr::select(axis, window, window_start_time,
@@ -254,17 +254,17 @@ window <- function(sensor_data, window_length, overlap) {
 #' 
 #' @param t A numeric time vector
 #' @param window_length Length of the filter
-#' @param overlap Window overlap
+#' @param window_overlap Window overlap
 #' @return A dataframe with columns window, window_start_time,
 #' window_end_time, window_start_index, window_end_index
-window_start_end_times <- function(t, window_length, overlap) {
+window_start_end_times <- function(t, window_length, window_overlap) {
   seq_length <- length(t)
   if (seq_length < window_length) {
     window_length <- seq_length
-    overlap <- 1
+    window_overlap <- 1
   }
-  start_indices <- seq(1, seq_length, window_length * overlap)
-  end_indices <- seq(window_length, seq_length, window_length * overlap)
+  start_indices <- seq(1, seq_length, window_length * window_overlap)
+  end_indices <- seq(window_length, seq_length, window_length * window_overlap)
   start_indices <- start_indices[1:length(end_indices)]
   start_times <- t[start_indices]
   end_times <- t[end_indices]
@@ -284,11 +284,11 @@ window_start_end_times <- function(t, window_length, overlap) {
 #'  
 #' @param values Timeseries vector of length n.
 #' @param window_length Length of the filter.
-#' @param overlap Window overlap.
+#' @param window_overlap Window overlap.
 #' @return A matrix of window_length x nwindows
-window_signal <- function(values, window_length = 256, overlap = 0.5) {
+window_signal <- function(values, window_length = 256, window_overlap = 0.5) {
   start_end_times <- window_start_end_times(
-    values, window_length = window_length, overlap = overlap)
+    values, window_length = window_length, window_overlap = window_overlap)
   nstart <- start_end_times$window_start_index
   nend <- start_end_times$window_end_index
   wn <- seewave::hamming.w(window_length)
@@ -399,12 +399,13 @@ calculate_acf <- function(sensor_data, col) {
 #' 
 #' @param gravity_vector A gravity vector
 #' @param window_length Length of the filter.
-#' @param overlap Window overlap.
+#' @param window_overlap Window overlap.
 #' @return Min and max values for each window.
-tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
+tag_outlier_windows_ <- function(gravity_vector, window_length, window_overlap) {
   if (!is.vector(gravity_vector)) stop("Input must be a numeric vector")
   gravity_summary <- gravity_vector %>%
-    window_signal(window_length = window_length, overlap = overlap) %>%
+    window_signal(window_length = window_length,
+                  window_overlap = window_overlap) %>%
     dplyr::as_tibble() %>%
     tidyr::gather(window, value) %>%
     dplyr::group_by(window) %>%

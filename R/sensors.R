@@ -239,7 +239,7 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
                                    window_length = NULL, window_overlap = NULL,
                                    derived_kinematics = F, funs = NULL,
                                    models = NULL) {
-  parameters <- transform_kinematic_sensor_data(
+  args <- prepare_kinematic_sensor_args(
     sensor_data = sensor_data,
     metric = "acceleration",
     time_filter = time_filter,
@@ -253,12 +253,12 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
     models = models)
   features <- kinematic_sensor_features(
     sensor_data = sensor_data,
-    preprocess = parameters$preprocess,
-    transformation = parameters$transformation,
-    extract = parameters$extract,
-    extract_on = parameters$extract_on,
+    preprocess = args$preprocess,
+    transformation = args$transformation,
+    extract = args$extract,
+    extract_on = args$extract_on,
     models = models,
-    acf_col = parameters$acf_col)
+    acf_col = args$acf_col)
   return(features)
 }
 
@@ -308,7 +308,7 @@ gyroscope_features <- function(sensor_data, time_filter = NULL, detrend = F,
                                    window_length = NULL, window_overlap = NULL,
                                    derived_kinematics = F, funs = NULL,
                                    models = NULL) {
-  parameters <- transform_kinematic_sensor_data(
+  args <- prepare_kinematic_sensor_args(
     sensor_data = sensor_data,
     metric = "velocity",
     time_filter = time_filter,
@@ -322,12 +322,12 @@ gyroscope_features <- function(sensor_data, time_filter = NULL, detrend = F,
     models = models)
   features <- kinematic_sensor_features(
     sensor_data = sensor_data,
-    preprocess = parameters$preprocess,
-    transformation = parameters$transformation,
-    extract = parameters$extract,
-    extract_on = parameters$extract_on,
+    preprocess = args$preprocess,
+    transformation = args$transformation,
+    extract = args$extract,
+    extract_on = args$extract_on,
     models = models,
-    acf_col = parameters$acf_col)
+    acf_col = args$acf_col)
   return(features)
 }
 
@@ -450,11 +450,11 @@ kinematic_sensor_argument_validator <- function(
 }
 
 
-#' Return parameters to be used in general feature functions
+#' Return arguments to be used in general feature functions
 #' 
-#' Using the parameters passed to convenience functions like 
+#' Using the arguments passed to convenience functions like 
 #' \code{accelerometer_features} and \code{gyroscope_features},
-#' build a parameter set that can be used with more general functions
+#' build an argument set that can be used with more general functions
 #' like \code{kinematic_sensor_data} and \code{sensor_data}. This function
 #' is not normally called directly. See \code{accelerometer_features} and
 #' \code{gyroscope_features}.
@@ -493,8 +493,8 @@ kinematic_sensor_argument_validator <- function(
 #' \code{sensor_data} after the chosen preprocessing and transformation
 #' steps have been applied and return features. Useful for models which compute
 #' individual statistics using multiple input variables.
-#' @return A list of parameters to be used in the general feature functions.
-transform_kinematic_sensor_data <- function(sensor_data, metric,
+#' @return A list of arguments to be used in the general feature functions.
+prepare_kinematic_sensor_args <- function(sensor_data, metric,
                                             time_filter = NULL, detrend = F,
                                             frequency_filter = NULL, IMF = 1,
                                             window_length = NULL,
@@ -618,13 +618,13 @@ transform_kinematic_sensor_data <- function(sensor_data, metric,
     extract_on <- metric
   } 
   
-  parameters <- list(preprocess = preprocess,
+  args <- list(preprocess = preprocess,
                      transformation = transformation,
                      extract = funs,
                      extract_on = extract_on,
                      acf_col = metric)
   
-  return(parameters)
+  return(args)
 }
 
 #' Generate a function for applying a window transformation to sensor data
