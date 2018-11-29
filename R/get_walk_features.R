@@ -6,19 +6,36 @@
 #' gyroscope measurements. 
 #' @param gravity_data A data frame with columns t, x, y, z containing 
 #' gravity sensor measurements.
-#' @param funs Feature extraction functions that accept a single
-#' time-series vector as input. 
-#' @param models A function which accepts as input a dataframe with columns
-#' axis, window, IMF, jerk, acceleration, velocity, displacement and
-#' outputs features. Useful for models which compute individual statistics
-#' using multiple input variables.
-#' @param window_length Length of sliding windows for bandpass filter
-#' and windowing transformation.
-#' @param time_range Timestamp range to use.
-#' @param frequency_range Frequency range for the bandpass filter.
-#' @param overlap Window overlap for the windowing transformation.
-#' @param max_imf Number of intrinsic mode functions to use for 
-#' empirical mode decomposition.
+#' @param time_filter A length 2 numeric vector specifying the time range 
+#' of measurements to use during preprocessing and feature extraction after
+#' normalizing the first timestamp to 0. A \code{NULL} value means do not 
+#' filter any measurements.
+#' @param detrend Whether to detrend the signal.
+#' @param frequency_filter A length 2 numeric vector specifying the frequency range
+#' of the signal (in hertz) to use during preprocessing and feature extraction.
+#' A \code{NULL} value means do not filter frequencies.
+#' @param IMF The number of IMFs used during an empirical mode decomposition
+#' transformation. The default value of 1 means do not apply EMD to the signal.
+#' @param window_length Length of the sliding window used during the windowing 
+#' transformation. Both \code{window_length} and \code{window_overlap} must be
+#' set for the windowing transformation to be applied.
+#' @param window_overlap Window overlap used during the windowing transformation.
+#' Both \code{window_length} and \code{window_overlap} must be set for the
+#' windowing transformation to be applied.
+#' @param derived_kinematics Whether to add columns for \code{jerk}, \code{velocity},
+#' and \code{displacement} before extracting features.
+#' @param funs A function or list of feature extraction functions that each
+#' accept a single numeric vector as input. Each function should return a 
+#' dataframe of features (normally a single-row datafame). The input vectors
+#' will be the axial measurements from \code{sensor_data} after the chosen
+#' preprocessing and transformation steps have been applied. If no argument
+#' is supplied to either \code{funs} or \code{models}, a default set
+#' of feature extraction functions (as described in \code{default_kinematic_features})
+#' will be supplied for this parameter.
+#' @param models A list of functions, each of which accept as input 
+#' \code{sensor_data} after the chosen preprocessing and transformation
+#' steps have been applied and return features. Useful for models which compute
+#' individual statistics using multiple input variables.
 #' @return A list of feature dataframes. The outputs from \code{funs} will
 #' be stored under \code{$extracted_features} and the outputs from \code{models}
 #' will be stored under \code{$model_features}.'
