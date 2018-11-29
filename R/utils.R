@@ -153,8 +153,7 @@ mutate_detrend <- function(sensor_data) {
 #' @param values Numeric vector.
 #' @param window_length Length of the filter.
 #' @param sampling_rate Sampling rate of the values.
-#' @param frequency_low Lower bound on frequency in Hz
-#' @param frequency_high Upper bound on frequency in Hz
+#' @param frequency_range Bounds on frequency in Hz
 #' @return Filtered time series data
 bandpass <- function(values, window_length, sampling_rate,
                      frequency_range) {
@@ -201,7 +200,7 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
 
 #' Select a specific time range from sensor data.
 #' 
-#' @param sensor_date A data frame with a \code{t} column.
+#' @param sensor_data A data frame with a \code{t} column.
 #' @param t1 Start time.
 #' @param t2 End time.
 #' @return Sensor data between time t1 and t2 (inclusive)
@@ -321,6 +320,9 @@ derivative <- function(v) {
 #' 
 #' Take the integral of a vector v by computing the inverse of
 #' the lagged differences (\code{diff} function).
+#' 
+#' @param v A numeric vector
+#' @param sampling_rate Sampling rate of \code{v}.
 integral <- function(v, sampling_rate) {
   integral <- diffinv(v)[-1]
   return(integral)
@@ -584,7 +586,7 @@ time_domain_summary <- function(values, sampling_rate=NA) {
 #' @param sampling_rate Sampling_rate of \code{values}.
 #' @param npeaks Number of peaks to be computed in EWT
 #' @return A features data frame of dimension 1 x num_features
-frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
+frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
     sampling_rate <- 100
@@ -618,7 +620,7 @@ frequency_domain_summary <- function(values, sampling_rate=NA, npeaks = NA) {
     sh = seewave::sh(pdf))
   
   # Get EWT spectrum
-  ewt_spectrum <- data.frame(freq = freq, pdf = pdf) %>%
+  ewt_spectrum <- data.frame(freq = freq, pdf = pdf) %>% 
     get_ewt_spectrum(sampling_rate = sampling_rate, npeaks = npeaks)
   
   # Compute normalised point energies of each EW spctrum
@@ -676,29 +678,29 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
                              fraction_min_peak_height = 0.1,
                              min_peak_distance = 1, sampling_rate = 100) {
   # Find top peaks for EWT calculation
-  peak_freqs <- pracma::findpeaks(spectrum$pdf, 
-                                minpeakheight = fraction_min_peak_height *
+  peak_freqs <- pracma::findpeaks(spectrum$pdf,
+                                  minpeakheight = fraction_min_peak_height *
                                   max(spectrum$pdf, na.rm = T),
-                                minpeakdistance = min_peak_distance, 
-                                npeaks = npeaks,
-                                sortstr = TRUE)
+                                  minpeakdistance = min_peak_distance,
+                                  npeaks = npeaks,
+                                  sortstr = TRUE)
   
   # Convert peak frequency to radians and find mid points
-  peak_freqs <- spectrum$freq[sort(peak_freqs[, 2])] * pi * 2 / sampling_rate
+  peak_freqs <- spectrum$freq[suppressWarnings(
+    sort(peak_freqs[, 2]))] * pi * 2 / sampling_rate
   peak_freqs <- unique(c(0, peak_freqs, pi))
-  mid_peak_freqs <- c(
-    0, peak_freqs[-length(peak_freqs)] + diff(peak_freqs) / 2, pi)
+  mid_peak_freqs <- c(0, peak_freqs[-length(peak_freqs)] + diff(peak_freqs) / 2, pi)
   
   # Choose optimal scaling operator for the transition widths
-  numerator_vec <- mid_peak_freqs[2:(length(mid_peak_freqs) + 2)] - 
+  numerator_vec <- mid_peak_freqs[2:(length(mid_peak_freqs) + 2)] -
     mid_peak_freqs[1:(length(mid_peak_freqs) + 1)]
-  denominator_vec <- mid_peak_freqs[2:(length(mid_peak_freqs) + 2)] + 
+  denominator_vec <- mid_peak_freqs[2:(length(mid_peak_freqs) + 2)] +
     mid_peak_freqs[1:(length(mid_peak_freqs) + 1)]
   optimal_gamma <- min(numerator_vec / denominator_vec, na.rm = TRUE)
   
   # Compute emprical scaling and wavelets
   empirical_wavelets <- purrr::map2(
-    mid_peak_freqs[1:(length(mid_peak_freqs) - 1)], 
+    mid_peak_freqs[1:(length(mid_peak_freqs) - 1)],
     mid_peak_freqs[2:length(mid_peak_freqs)],
     .f = function(wn1, wn2, n.freq, optimal_gamma) {
       # Compute emprical scaling function for the first peak
@@ -733,12 +735,12 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
         phi.sy <- 1 - phi.sy
       }
       return(phi.sy)
-    }, 
+    },
     dim(spectrum)[1], optimal_gamma)
   
   # Compute EW modified spectrumrum
   ew_spectrum <- sapply(empirical_wavelets,
-                      function(x, spectrum) {spectrum$pdf * x}, spectrum)
+                        function(x, spectrum) {spectrum$pdf * x}, spectrum)
   
   return(ew_spectrum)
 }
@@ -755,17 +757,16 @@ frequency_domain_energy <- function(values, sampling_rate=NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for frequency_domain_energy")
     sampling_rate <- 100
-  } 
+  }
   spect <- get_spectrum(values, sampling_rate)
   freq <- spect$freq
   pdf <- spect$pdf / sum(spect$pdf, na.rm = T)
-  cdf <- cumsum(pdf)
   
   st <- seq(1, 24.5, 0.5)
   en <- seq(1.5, 25, 0.5)
   
-  features <- mapply(function(indStr, indEn){
-    ind <- which(freq >= indStr & freq <= indEn)
+  features <- mapply(function(ind_str, ind_en){
+    ind <- which(freq >= ind_str & freq <= ind_en)
     pracma::trapz(freq[ind], pdf[ind])
   }, st, en) %>% t %>% data.frame()
   colnames(features) <- paste0("EnergyInBand", gsub("\\.", "_", st))
@@ -779,10 +780,10 @@ frequency_domain_energy <- function(values, sampling_rate=NA) {
 #' vector as input and outputs an atomic value -- to a single column
 #' of each group in a grouped tibble.
 #' 
-#' @param .x A tibble
-#' @param col Column to pass as a vector to \code{.f}.
-#' @param .f Function to be mapped to \code{col} for each group.
-#' @param ... Additional arguments to \code{.f}.
+#' @param x A tibble
+#' @param col Column to pass as a vector to \code{f}.
+#' @param f Function to be mapped to \code{col} for each group.
+#' @param ... Additional arguments to \code{f}.
 #' @return A tibble indexed by groups with an additional column containing
 #' the output of the mapped function.
 map_groups <- function(x, col, f, ...) {
