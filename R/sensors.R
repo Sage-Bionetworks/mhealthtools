@@ -562,14 +562,14 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
     transformation <- list(
       transformation_window(
         window_length = window_length,
-        overlap = window_overlap))
+        window_overlap = window_overlap))
   } else if (IMF > 1) {
     if (is.null(window_length)) window_length <- 256
     if (is.null(window_overlap)) window_overlap <- 0.5
     transformation <- list(
       transformation_imf_window(
         window_length = window_length,
-        overlap = window_overlap,
+        window_overlap = window_overlap,
         max_imf = IMF))
   } else {
     transformation <- list(
@@ -630,20 +630,20 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
 #' Generate a function for applying a window transformation to sensor data
 #' 
 #' @param window_length Length of the sliding window
-#' @param overlap Window overlap
+#' @param window_overlap Window overlap
 #' @return A function that accepts as input a dataframe with columns 
 #' t, axis, value and outputs a windowed transformation of that dataframe
-transformation_window <- function(window_length, overlap) {
+transformation_window <- function(window_length, window_overlap) {
   purrr::partial(
-    transformation_window <- function(sensor_data, window_length, overlap) {
+    transformation_window <- function(sensor_data, window_length, window_overlap) {
       if (has_error(sensor_data)) return(sensor_data)
       window(sensor_data = sensor_data,
              window_length = window_length,
-             overlap = overlap) %>%
+             window_overlap = window_overlap) %>%
         dplyr::group_by(axis, window)
     },
     window_length = window_length,
-    overlap = overlap)
+    window_overlap = window_overlap)
 }
 
 #' Generate a function for windowing sensor data after applying EMD
@@ -651,14 +651,14 @@ transformation_window <- function(window_length, overlap) {
 #' Apply empirical mode decomposition to sensor data, then window the result.
 #' 
 #' @param window_length Length of the sliding window
-#' @param overlap Window overlap
+#' @param window_overlap Window overlap
 #' @param max_imf The maximum number of IMF's during EMD
 #' @return A function that accepts as input a dataframe with columns 
 #' t, axis, value and outputs a windowed transformation of that 
 #' dataframe's EMD.
-transformation_imf_window <- function(window_length, overlap, max_imf) {
+transformation_imf_window <- function(window_length, window_overlap, max_imf) {
   purrr::partial(
-    function(sensor_data, window_length, overlap, max_imf) {
+    function(sensor_data, window_length, window_overlap, max_imf) {
       if (has_error(sensor_data)) return(sensor_data)
       values <- sensor_data %>%
         tidyr::spread(key = "axis", value = "value")
@@ -674,7 +674,7 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
           windowed_imf <- purrr::map_dfr(
             df, function(col) {
               window_signal(col, window_length = window_length,
-                           overlap = overlap) %>%
+                           window_overlap = window_overlap) %>%
                 dplyr::as_tibble() %>%
                 tidyr::gather(key = "window", value = "value", convert = T)
             }, .id = "IMF") %>% dplyr::mutate(IMF = as.integer(IMF))
@@ -683,6 +683,6 @@ transformation_imf_window <- function(window_length, overlap, max_imf) {
       return(windowed_imf)
     },
     window_length = window_length,
-    overlap = overlap,
+    window_overlap = window_overlap,
     max_imf = max_imf)
 }

@@ -1,11 +1,5 @@
 context("Sensors")
 
-### Get minified accelerometer and gyroscope data 
-mini_accelerometer_data <- dplyr::filter(accelerometer_data, t < 2)
-mini_gyroscope_data <- dplyr::filter(t < 2, gyroscope_data)
-mini_gravity_data <- dplyr::filter(gravity_data, t < 2)
-
-### Individual test functions
 test_that("Wrapper to extract accelerometer features", {
   expect_is(accelerometer_features(
     sensor_data = mini_accelerometer_data), "list")
@@ -32,7 +26,7 @@ test_that(
   expect_is(
     transformation_window(
       window_length = 256,
-      overlap = 0.5),
+      window_overlap = 0.5),
     "function")
 })
 
@@ -41,7 +35,7 @@ test_that(
   expect_is(
     transformation_imf_window(
       window_length = 256,
-      overlap = 0.5,
+      window_overlap = 0.5,
       max_imf = 4),
     "function")
 })
