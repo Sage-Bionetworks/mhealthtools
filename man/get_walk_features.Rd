@@ -60,9 +60,13 @@ steps have been applied and return features. Useful for models which compute
 individual statistics using multiple input variables.}
 }
 \value{
-A list of feature dataframes. The outputs from \code{funs} will
+A list. The outputs from \code{funs} will
 be stored under \code{$extracted_features} and the outputs from \code{models}
-will be stored under \code{$model_features}.'
+will be stored under \code{$model_features}. If there is an error 
+during the transform process, an error dataframe will be stored under
+\code{$error}. If gravity_data is passed and window_length and 
+window_overlap are set, phone rotation information will be stored
+under \code{$outlier_windows}.
 }
 \description{
 Extract walk features from raw accelerometer and gyroscope data.

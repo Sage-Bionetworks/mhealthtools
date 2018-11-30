@@ -9,28 +9,28 @@ test_that("No arguments", {
 })
   
 test_that("Accelerometer data only", {
-  walk_features_accel_only <- get_walk_features(
+  features_accel_only <- get_walk_features(
     accelerometer_data = mini_accelerometer_data)
-  expect_is(walk_features_accel_only, "list")
-  expect_is(walk_features_accel_only$extracted_features, "data.frame")
+  expect_is(features_accel_only, "list")
+  expect_is(features_accel_only$extracted_features, "data.frame")
 })
 # the test case is symmetrical for gyroscope data only, skipping
 test_that("Both accelerometer and gyroscope data", {
-  walk_features_both <- get_walk_features(
+  features_both <- get_walk_features(
       accelerometer_data = mini_accelerometer_data,
       gyroscope_data = mini_gyroscope_data)
-  expect_is(walk_features_both, "list")
-  expect_is(walk_features_both$extracted_features, "data.frame")
+  expect_is(features_both, "list")
+  expect_is(features_both$extracted_features, "data.frame")
 })
   
 test_that("Gravity data", {
-  walk_features_with_gravity <- get_walk_features(
+  features_with_gravity <- get_walk_features(
     accelerometer_data = mini_accelerometer_data,
     gravity_data = mini_gravity_data,
     window_length = 64,
     window_overlap = 0.5)
-  expect_is(walk_features_with_gravity, "list")
-  expect_is(walk_features_with_gravity$outlier_windows, "data.frame")
+  expect_is(features_with_gravity, "list")
+  expect_is(features_with_gravity$outlier_windows, "data.frame")
 })
   
 test_that("Passing a model", {
@@ -39,19 +39,21 @@ test_that("Passing a model", {
     feature <- feature %>%  unlist() %>%  as.numeric()
     return(data.frame(f1 = mean(feature, na.rm = T)))
   }
-  walk_features_with_model <- get_walk_features(
+  features_with_model <- get_walk_features(
       accelerometer_data = mini_accelerometer_data,
       gyroscope_data = mini_gyroscope_data,
       models = custom_model)
-  expect_is(walk_features_with_model, "list")
-  expect_is(walk_features_with_model$model_features, "list")
-  expect_is(walk_features_with_model$model_features$accelerometer[[1]],
+  expect_is(features_with_model, "list")
+  expect_is(features_with_model$model_features, "list")
+  expect_is(features_with_model$model_features$accelerometer[[1]],
             "data.frame")
-  expect_is(walk_features_with_model$model_features$gyroscope[[1]],
+  expect_is(features_with_model$model_features$gyroscope[[1]],
             "data.frame")
 })
   
 test_that("Input data contains NA", {
-  expect_equal(is_error_dataframe(get_walk_features(accelerometer_data = NA)), T)
-  expect_equal(is_error_dataframe(get_walk_features(gyroscope_data = NA)), T)
+  expect_equal(is_error_dataframe(
+    get_walk_features(accelerometer_data = NA)), T)
+  expect_equal(is_error_dataframe(
+    get_walk_features(gyroscope_data = NA)), T)
 })

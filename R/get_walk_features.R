@@ -36,9 +36,13 @@
 #' \code{sensor_data} after the chosen preprocessing and transformation
 #' steps have been applied and return features. Useful for models which compute
 #' individual statistics using multiple input variables.
-#' @return A list of feature dataframes. The outputs from \code{funs} will
+#' @return A list. The outputs from \code{funs} will
 #' be stored under \code{$extracted_features} and the outputs from \code{models}
-#' will be stored under \code{$model_features}.'
+#' will be stored under \code{$model_features}. If there is an error 
+#' during the transform process, an error dataframe will be stored under
+#' \code{$error}. If gravity_data is passed and window_length and 
+#' window_overlap are set, phone rotation information will be stored
+#' under \code{$outlier_windows}.
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @importFrom magrittr "%>%"
