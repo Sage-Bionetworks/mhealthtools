@@ -4,34 +4,54 @@
 \alias{kinematic_sensor_features}
 \title{Extract kinematic sensor features}
 \usage{
-kinematic_sensor_features(sensor_data, acf_col = NULL,
-  transform = NULL, extract = NULL, extract_on = NULL,
-  models = NULL)
+kinematic_sensor_features(sensor_data, preprocess = NULL,
+  transformation = NULL, extract = NULL, extract_on = NULL,
+  models = NULL, acf_col = NULL)
 }
 \arguments{
 \item{sensor_data}{A dataframe.}
 
-\item{acf_col}{Column name to calculate acf upon.}
+\item{preprocess}{A function or list of functions to be applied sequentially
+to \code{sensor_data}. In practice, there is no difference between \code{preprocess}
+and \code{transformation}, except the functions in \code{preprocess} are applied
+before those in \code{transformation}. It is suggested that \code{preprocess}
+is used to apply mathematical transformations to the data that stay within
+the original vector space (i.e., the values are indexed by timestamp and
+axis), and that \code{transformation} is used to apply mathematical transformations
+that put the data in new vector spaces (e.g., by windowing the data).}
 
-\item{transform}{A function which accepts \code{sensor_data} as input
-and outputs a dataframe.}
+\item{transformation}{A function or list of functions to be applied sequentially
+to \code{sensor_data}. See \code{preprocess}.}
 
-\item{extract}{A list of functions to be applied to each of the columns
-in \code{extract_on} from the output of \code{transform}. Each function
+\item{extract}{A function or list of functions to be applied to each of the
+columns in \code{extract_on} from the output of \code{transform}. Each function
 should return a dataframe of features (normally a single-row datafame).}
 
-\item{extract_on}{A list of column names to calculate statistics from.}
+\item{extract_on}{A string or list of column names to compute features from.
+If \code{NULL}, features will be extracted from all non-grouped columns.}
 
-\item{models}{A list of functions which accept the output from
+\item{models}{A function or list of functions which accept the output from
 \code{transform} as input and output a dataframe.}
+
+\item{acf_col}{Column name to calculate acf upon.}
 }
 \value{
-A list of feature dataframes. The output from \code{extract} will
+A list of features. The output from \code{extract} will
 be stored under \code{$extracted_features} and the output from \code{models}
-will be stored under \code{$model_features}.
+will be stored under \code{$model_features}. If applying \code{preprocess}
+or \code{transformation} returns an error dataframe (see \code{has_error}),
+the error dataframe is stored under \code{$error}.
 }
 \description{
 Extract kinematic (accelerometer/gyroscope) features. This function is not 
 normally called directly. See \code{accelerometer_features}
 and \code{gyroscope_features}.
+}
+\details{
+Although this function is primarily a helper function for
+\code{accelerometer_features} and \code{gyroscope_features}, you
+may want to use this function rather than \code{sensor_features}
+if your transformed sensor data will have incidental columns
+(columns that belong neither to the index nor \code{extract_on})
+or you would like ACF features.
 }

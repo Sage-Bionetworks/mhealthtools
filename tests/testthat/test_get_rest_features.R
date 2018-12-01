@@ -1,107 +1,59 @@
-####################################################
-# File to test get_rest_features.R of the mHealthTools package
-# Author: Meghasyam Tummalacherla
-# email: meghasyam@sagebase.org
-####################################################
+context("get_rest_features")
 
-######################## *** NOTE *** ########################
-## Still have to write tests for 
-# (throws error for custom models) get_rest_features
-######################## *** NOTE *** ########################
-
-# When I input gravity sensor data into the function get_rest_features,
-# the whole error column is like 'Phone rotated within window' for all the windows.
-# Is this normal, or is this happening because of the test data (I don't think so)
-# This needs to be checked
-
-### Require mHealthTools
-# require(mhealthtools)
-
-### Data file from a test user in Synapse
-# Sample accelerometer data was taken from a control, test user with 
-# the recordId 5cf10e77-793f-49ab-ae96-38028aeefc28, from the table
-# syn5734657, for his hand to nose left test - 'data/phone_data_test.json'
-
-### Required Libraries
-# library(testthat)
-# library(jsonlite)
-# library(dplyr)
-# library(data.table)
-# library(signal)
-# library(seewave)
-# library(stringr)
-# library(purrr)
-
-### Load data file
-testthat::context('Load Required Data Files')
-dat <- mhealthtools::sensor_data
-
-### flatten data to the format needed for mHealthTools
-flatten_data <- function(dat, metric) {
-  dat <- dat %>% 
-    dplyr::select(timestamp, metric) %>% 
-    jsonlite::flatten()
-  names(dat) <- c("t", "x", "y", "z")
-  return(tibble::as_tibble(dat))
-}
-
-### Get the formatted accelerometer and gyroscope data to use in testing below
-datAccel <- flatten_data(dat,'userAcceleration')
-datGyro  <- flatten_data(dat,'rotationRate')
-datGravity <- flatten_data(dat, 'gravity')
-
-### Individual test functions
-testthat::context('Get Rest Features')
-testthat::test_that('Get accelerometer, gyroscope features',{
-  # actual function in get_rest_features.R: get_rest_features
+test_that("No arguments", {
+  expect_equal(get_rest_features(),
+               list(extracted_features = NULL,
+                    model_features = NULL,
+                    error = NULL,
+                    outlier_windows = NULL))
+})
   
-  testthat::expect_is(mhealthtools::get_rest_features(
-    accelerometer_data = datAccel, gyroscope_data = datGyro), 'list') 
-  # Give both Accelerometer and Gyroscope data and expect a dataframe,
-  # with rest of the inputs being default
-  testthat::expect_is(mhealthtools::get_rest_features(
-    accelerometer_data = datAccel, gyroscope_data = datGyro, 
-    gravity_data = datGravity), 'list') 
-  # Similar test to previous one except also included gravity data
+test_that("Accelerometer data only", {
+  features_accel_only <- get_rest_features(
+    accelerometer_data = mini_accelerometer_data)
+  expect_is(features_accel_only, "list")
+  expect_is(features_accel_only$extracted_features, "data.frame")
+})
+# the test case is symmetrical for gyroscope data only, skipping
+test_that("Both accelerometer and gyroscope data", {
+  features_both <- get_rest_features(
+      accelerometer_data = mini_accelerometer_data,
+      gyroscope_data = mini_gyroscope_data)
+  expect_is(features_both, "list")
+  expect_is(features_both$extracted_features, "data.frame")
+})
   
-  testthat::expect_is(mhealthtools::get_rest_features(
-    accelerometer_data = datAccel, gyroscope_data = datGyro,
-    funs = list(mean)), 'list')
-  # Custom functions should also work (using base mean as the list of functions,
-  # this works even if mean does not give a dataframe of features as output??)
+test_that("Gravity data", {
+  features_with_gravity <- get_rest_features(
+    accelerometer_data = mini_accelerometer_data,
+    gravity_data = mini_gravity_data,
+    window_length = 64,
+    window_overlap = 0.5)
+  expect_is(features_with_gravity, "list")
+  expect_is(features_with_gravity$outlier_windows, "data.frame")
+})
   
-  custom_model <- function(dat){
-    avec <- dat['acceleration']*dat['velocity'] 
-    
-    avec <- avec %>% 
-      unlist() %>% 
-      as.numeric() 
-    
-    return(data.frame(f1 = mean(avec, na.rm = T)))
+test_that("Passing a model", {
+  custom_model <- function(dat) {
+    feature <- dat[, 2]
+    feature <- feature %>%  unlist() %>%  as.numeric()
+    return(data.frame(f1 = mean(feature, na.rm = T)))
   }
+  features_with_model <- get_rest_features(
+      accelerometer_data = mini_accelerometer_data,
+      gyroscope_data = mini_gyroscope_data,
+      models = custom_model)
+  expect_is(features_with_model, "list")
+  expect_is(features_with_model$model_features, "list")
+  expect_is(features_with_model$model_features$accelerometer[[1]],
+            "data.frame")
+  expect_is(features_with_model$model_features$gyroscope[[1]],
+            "data.frame")
+})
   
-  testthat::expect_is(mhealthtools::get_rest_features(
-    accelerometer_data = datAccel,
-    gyroscope_data = datGyro,
-    models = list(custom_model = custom_model)), 'list')
-  # Custom models should also work, the output format of custom models is not
-  # defined specifically like the output of each function in the list of funs
-  
-  
-  testthat::expect_equal(is_error_dataframe(
-    mhealthtools:::get_rest_features(
-      accelerometer_data = NA,
-      gyroscope_data = datGyro)), T)
-  # Give error tibble if accelerometer data has any NAs
-  
-  testthat::expect_equal(is_error_dataframe(
-    mhealthtools:::get_rest_features(
-      accelerometer_data = datAccel,
-      gyroscope_data = NA)), T)
-  # Give error tibble if gyroscope data has any NAs  
-  
-  # The processing errors for acceleromter_features and gyroscope_features
-  # have been handled in test_sensors.R
-  # tag_outlier_windows was also handled in test_utils.R
-  
+test_that("Input data contains NA", {
+  expect_equal(is_error_dataframe(
+    get_rest_features(accelerometer_data = NA)), T)
+  expect_equal(is_error_dataframe(
+    get_rest_features(gyroscope_data = NA)), T)
 })

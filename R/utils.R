@@ -99,10 +99,11 @@ has_error <- function(sensor_data) {
 
 #' Gather the axial columns
 #' 
-#' Gathers x, y, and z columns into a single \code{axis} column and
+#' Gather x, y, and z columns into a single \code{axis} column and
 #' normalize the \code{t} column to begin at \code{t} = 0.
 #' 
-#' @param sensor_data A data frame with a time column, \code{t}.
+#' @param sensor_data A data frame with a time column \code{t},
+#' and at least one additional axial column.
 #' @return Sensor data in tidy format.
 tidy_sensor_data <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
@@ -112,7 +113,8 @@ tidy_sensor_data <- function(sensor_data) {
     normalized_sensor_data <-  sensor_data %>% dplyr::mutate(t = t - t0)
     index <- order(sensor_data$t)
     tidy_sensor_data <- normalized_sensor_data[index, ] %>%
-      tidyr::gather(axis, value, -t)
+      tidyr::gather(axis, value, -t) %>% 
+      dplyr::group_by(axis)
   }, error = function(e) {
     dplyr::tibble(
       error = "Could not put sensor data in tidy format by gathering the axes.")
@@ -132,16 +134,13 @@ detrend <- function(time, values) {
 
 #' Detrend sensor data
 #' 
-#' @param sensor_data A data frame with columns t, axis, value.
+#' @param sensor_data A data frame with columns t, value.
 #' @return Sensor data with detrended values.
 mutate_detrend <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
   detrended_sensor_data <- tryCatch({
     detrended_sensor_data <- sensor_data %>%
-      dplyr::group_by(axis) %>%
-      dplyr::mutate(
-        value = detrend(t, value)) %>%
-      dplyr::ungroup()
+      dplyr::mutate(value = detrend(t, value))
   }, error = function(e) {
     dplyr::tibble(error = "Detrend error")
   })
@@ -177,7 +176,7 @@ bandpass <- function(values, window_length, sampling_rate,
 
 #' Apply a pass-band filter to sensor data
 #' 
-#' @param sensor_date A data frame with columns t, axis, value.
+#' @param sensor_date A data frame with column value.
 #' @param window_length Length of the filter.
 #' @param sampling_rate Sampling rate of the value column.
 #' @param frequency_range Bounds on frequency in Hz
@@ -187,11 +186,8 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
   if (has_error(sensor_data)) return(sensor_data)
   bandpass_filtered_sensor_data <- tryCatch({
     sensor_data %>%
-      dplyr::group_by(axis) %>%
-      dplyr::mutate(
-        value = bandpass(value, window_length, sampling_rate,
-                         frequency_range)) %>%
-      dplyr::ungroup()
+      dplyr::mutate(value = bandpass(value, window_length,
+                                     sampling_rate, frequency_range))
   }, error = function(e) {
     dplyr::tibble(error = "Bandpass filter error")
   })
@@ -221,9 +217,9 @@ filter_time <- function(sensor_data, t1, t2) {
 #' 
 #' @param sensor_data A data frame with columns t, axis, value.
 #' @param window_length Length of the filter
-#' @param overlap window overlap
+#' @param window_overlap window overlap
 #' @return Windowed sensor data
-window <- function(sensor_data, window_length, overlap) {
+window <- function(sensor_data, window_length, window_overlap) {
   if (has_error(sensor_data)) return(sensor_data)
   tryCatch({
     spread_sensor_data <- sensor_data %>%
@@ -231,7 +227,7 @@ window <- function(sensor_data, window_length, overlap) {
     windowed_sensor_data <- spread_sensor_data %>%
       dplyr::select(x, y, z) %>%
       purrr::map(window_signal,
-                 window_length = window_length, overlap = overlap)
+                 window_length = window_length, window_overlap = window_overlap)
     tidy_windowed_sensor_data <- lapply(
       windowed_sensor_data,
       function(windowed_matrix) {
@@ -243,7 +239,7 @@ window <- function(sensor_data, window_length, overlap) {
       dplyr::bind_rows(.id = "axis")
     start_end_times <- window_start_end_times(spread_sensor_data$t,
                                               window_length = window_length,
-                                              overlap = overlap)
+                                              window_overlap = window_overlap)
     tidy_windowed_sensor_data <- tidy_windowed_sensor_data %>%
       dplyr::left_join(start_end_times, by = "window") %>%
       dplyr::select(axis, window, window_start_time,
@@ -258,17 +254,17 @@ window <- function(sensor_data, window_length, overlap) {
 #' 
 #' @param t A numeric time vector
 #' @param window_length Length of the filter
-#' @param overlap Window overlap
+#' @param window_overlap Window overlap
 #' @return A dataframe with columns window, window_start_time,
 #' window_end_time, window_start_index, window_end_index
-window_start_end_times <- function(t, window_length, overlap) {
+window_start_end_times <- function(t, window_length, window_overlap) {
   seq_length <- length(t)
   if (seq_length < window_length) {
     window_length <- seq_length
-    overlap <- 1
+    window_overlap <- 1
   }
-  start_indices <- seq(1, seq_length, window_length * overlap)
-  end_indices <- seq(window_length, seq_length, window_length * overlap)
+  start_indices <- seq(1, seq_length, window_length * window_overlap)
+  end_indices <- seq(window_length, seq_length, window_length * window_overlap)
   start_indices <- start_indices[1:length(end_indices)]
   start_times <- t[start_indices]
   end_times <- t[end_indices]
@@ -288,11 +284,11 @@ window_start_end_times <- function(t, window_length, overlap) {
 #'  
 #' @param values Timeseries vector of length n.
 #' @param window_length Length of the filter.
-#' @param overlap Window overlap.
+#' @param window_overlap Window overlap.
 #' @return A matrix of window_length x nwindows
-window_signal <- function(values, window_length = 256, overlap = 0.5) {
+window_signal <- function(values, window_length = 256, window_overlap = 0.5) {
   start_end_times <- window_start_end_times(
-    values, window_length = window_length, overlap = overlap)
+    values, window_length = window_length, window_overlap = window_overlap)
   nstart <- start_end_times$window_start_index
   nend <- start_end_times$window_end_index
   wn <- seewave::hamming.w(window_length)
@@ -403,12 +399,13 @@ calculate_acf <- function(sensor_data, col) {
 #' 
 #' @param gravity_vector A gravity vector
 #' @param window_length Length of the filter.
-#' @param overlap Window overlap.
+#' @param window_overlap Window overlap.
 #' @return Min and max values for each window.
-tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
+tag_outlier_windows_ <- function(gravity_vector, window_length, window_overlap) {
   if (!is.vector(gravity_vector)) stop("Input must be a numeric vector")
   gravity_summary <- gravity_vector %>%
-    window_signal(window_length = window_length, overlap = overlap) %>%
+    window_signal(window_length = window_length,
+                  window_overlap = window_overlap) %>%
     dplyr::as_tibble() %>%
     tidyr::gather(window, value) %>%
     dplyr::group_by(window) %>%
@@ -424,12 +421,12 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, overlap) {
 #' 
 #' @param gravity A dataframe with gravity vectors for columns
 #' @param window_length Length of the filter.
-#' @param overlap Window overlap.
+#' @param window_overlap Window overlap.
 #' @return Rotations errors for each window.
-tag_outlier_windows <- function(gravity, window_length, overlap) {
+tag_outlier_windows <- function(gravity, window_length, window_overlap) {
   gr_error <- tryCatch({
     gr_error <- gravity %>%
-      purrr::map(tag_outlier_windows_, window_length, overlap) %>%
+      purrr::map(tag_outlier_windows_, window_length, window_overlap) %>%
       dplyr::bind_rows(.id = "axis") %>%
       dplyr::mutate(error = sign(max) != sign(min)) %>%
       dplyr::group_by(window) %>%
@@ -545,6 +542,7 @@ tapdrift_summary_features <- function(tap_drift) {
 #' @param values A numeric vector.
 #' @param sampling_rate Sampling_rate of \code{values}.
 #' @return A features data frame of dimension 1 x n_features
+#' @export
 time_domain_summary <- function(values, sampling_rate=NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
@@ -586,6 +584,7 @@ time_domain_summary <- function(values, sampling_rate=NA) {
 #' @param sampling_rate Sampling_rate of \code{values}.
 #' @param npeaks Number of peaks to be computed in EWT
 #' @return A features data frame of dimension 1 x num_features
+#' @export
 frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
@@ -753,6 +752,7 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
 #' @param values A timeseries vector.
 #' @param sampling_rate Sampling rate of the signal (by default it is 100 Hz).
 #' @return A features data frame of dimension 1 x 48.
+#' @export
 frequency_domain_energy <- function(values, sampling_rate=NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for frequency_domain_energy")
