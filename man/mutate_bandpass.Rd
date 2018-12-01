@@ -13,7 +13,7 @@ mutate_bandpass(sensor_data, window_length, sampling_rate, frequency_range)
 
 \item{frequency_range}{Bounds on frequency in Hz}
 
-\item{sensor_date}{A data frame with columns t, axis, value.}
+\item{sensor_date}{A data frame with column value.}
 }
 \value{
 Filtered time series data

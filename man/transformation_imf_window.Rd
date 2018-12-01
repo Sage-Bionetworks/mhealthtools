@@ -4,12 +4,12 @@
 \alias{transformation_imf_window}
 \title{Generate a function for windowing sensor data after applying EMD}
 \usage{
-transformation_imf_window(window_length, overlap, max_imf)
+transformation_imf_window(window_length, window_overlap, max_imf)
 }
 \arguments{
 \item{window_length}{Length of the sliding window}
 
-\item{overlap}{Window overlap}
+\item{window_overlap}{Window overlap}
 
 \item{max_imf}{The maximum number of IMF's during EMD}
 }

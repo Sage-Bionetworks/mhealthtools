@@ -55,13 +55,9 @@ testthat::context('Sampling rate')
 testthat::test_that("Check Sampling rate calculation",{
   # actual function in utils: get_sampling_rate
   samplingRate = (length(datAccel$t))/(max(datAccel$t)-min(datAccel$t))
-  testthat::expect_that(mhealthtools:::get_sampling_rate(sensor_data = dat), 
-                        equals(samplingRate)) 
+  testthat::expect_equal(get_sampling_rate(sensor_data = dat), samplingRate) 
   # Is the function returning expected numeric output for a valid input
-  testthat::expect_that(mhealthtools:::get_sampling_rate(sensor_data = NA),
-                        equals(NA)) 
-  # Is the function giving NA for an invalid input
-  
+  testthat::expect_equal(get_sampling_rate(sensor_data = NA), NA)
 })
 
 testthat::context('Tapping')
@@ -126,8 +122,7 @@ testthat::test_that("Tidying sensor data",{
   tempDat$error <- rep(NA, length(tempDat$t))
   tempDat$error[1] <- 'some error' # Just a non NA value for error
   # tidy_sensor_data should return the input, i.e, an identity function
-  testthat::expect_that(mhealthtools:::tidy_sensor_data(sensor_data = tempDat), 
-                        equals(tempDat))
+  testthat::expect_equal(tidy_sensor_data(sensor_data = tempDat), tempDat)
   
   # this will set off warnings of not having columns error and t,
   # so we are supressing warnings and then will re-start them
@@ -262,14 +257,14 @@ testthat::test_that('Windowing the sensor data by axis',{
   # actual function in utils: window
   testthat::expect_is(mhealthtools:::window(sensor_data = datAccelTidy,
                                             window_length =  256,
-                                            overlap =  0.5),
+                                            window_overlap =  0.5),
                       'data.frame') 
   # 256 window length, 0.5 overlap, checking output format
   testthat::expect_equal(is_error_dataframe(
     mhealthtools:::window(
       sensor_data = datAccel,
       window_length = 256,
-      overlap = 0.5)), T)
+      window_overlap = 0.5)), T)
   # throw an error if Input is not in correct format
 })
 
@@ -278,13 +273,13 @@ testthat::test_that('Compute start and stop timestamp for each window',{
   testthat::expect_is(
     mhealthtools:::window_start_end_times(t = datAccel$t,
                                           window_length = 10,
-                                          overlap = 0.5), 'data.frame')
+                                          window_overlap = 0.5), 'data.frame')
   # Check output format
   
   testthat::expect_error(mhealthtools:::window_start_end_times(
     t = datAccel$t, 
     window_length = NA,
-    overlap = 0.5))
+    window_overlap = 0.5))
   # Throw a data error if any parameter doesn't confirm to norms
 })
 
@@ -377,15 +372,15 @@ testthat::test_that(
     testthat::expect_is(
       mhealthtools:::tag_outlier_windows_(gravity_vector = gravityVec,
                                           window_length = 256,
-                                          overlap =  0.5),
+                                          window_overlap =  0.5),
       'data.frame')
-    # Check if output is in correct format. 256 Window length and 0.5 overlap
+    # Check if output is in correct format. 256 Window length and 0.5 window_overlap
     
     gravityVec <- c(rep(NA,255),1)
     testOutput <- mhealthtools:::tag_outlier_windows_(
       gravity_vector = gravityVec,
       window_length = 256,
-      overlap =  0.5) %>%
+      window_overlap =  0.5) %>%
       as.data.frame()
     
     testthat::expect_equal(
@@ -408,7 +403,7 @@ testthat::test_that(
     testthat::expect_is(
       mhealthtools:::tag_outlier_windows(gravity = dat$gravity,
                                          window_length = 256,
-                                         overlap = 0.5),
+                                         window_overlap = 0.5),
       'data.frame') 
   })
 
