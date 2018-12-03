@@ -4,10 +4,11 @@
 \alias{get_tremor_features}
 \title{Extract tremor features from raw accelerometer and gyroscope data.}
 \usage{
-get_tremor_features(accelerometer_data, gyroscope_data,
-  gravity_data = NULL, funs = NULL, models = NULL,
-  window_length = 256, time_range = c(1, 9), frequency_range = c(1,
-  25), overlap = 0.5)
+get_tremor_features(accelerometer_data = NULL, gyroscope_data = NULL,
+  gravity_data = NULL, time_filter = NULL, detrend = F,
+  frequency_filter = NULL, IMF = 1, window_length = NULL,
+  window_overlap = NULL, derived_kinematics = F, funs = NULL,
+  models = NULL)
 }
 \arguments{
 \item{accelerometer_data}{A data frame with columns t, x, y, z containing 
@@ -19,27 +20,53 @@ gyroscope measurements.}
 \item{gravity_data}{A data frame with columns t, x, y, z containing 
 gravity sensor measurements.}
 
-\item{funs}{A list of feature extraction functions that accept a single
-numeric vector as input.}
+\item{time_filter}{A length 2 numeric vector specifying the time range 
+of measurements to use during preprocessing and feature extraction after
+normalizing the first timestamp to 0. A \code{NULL} value means do not 
+filter any measurements.}
 
-\item{models}{A function which accepts as input a dataframe with columns
-axis, window, jerk, acceleration, velocity, displacement and
-outputs features. Useful for models which compute individual statistics
-using multiple input variables.}
+\item{detrend}{Whether to detrend the signal.}
 
-\item{window_length}{Length of sliding windows for bandpass filter
-and windowing transformation.}
+\item{frequency_filter}{A length 2 numeric vector specifying the frequency range
+of the signal (in hertz) to use during preprocessing and feature extraction.
+A \code{NULL} value means do not filter frequencies.}
 
-\item{time_range}{Timestamp range to use.}
+\item{IMF}{The number of IMFs used during an empirical mode decomposition
+transformation. The default value of 1 means do not apply EMD to the signal.}
 
-\item{frequency_range}{Frequency range for the bandpass filter.}
+\item{window_length}{Length of the sliding window used during the windowing 
+transformation. Both \code{window_length} and \code{window_overlap} must be
+set for the windowing transformation to be applied.}
 
-\item{overlap}{Window overlap for the windowing transformation.}
+\item{window_overlap}{Window overlap used during the windowing transformation.
+Both \code{window_length} and \code{window_overlap} must be set for the
+windowing transformation to be applied.}
+
+\item{derived_kinematics}{Whether to add columns for \code{jerk}, \code{velocity},
+and \code{displacement} before extracting features.}
+
+\item{funs}{A function or list of feature extraction functions that each
+accept a single numeric vector as input. Each function should return a 
+dataframe of features (normally a single-row datafame). The input vectors
+will be the axial measurements from \code{sensor_data} after the chosen
+preprocessing and transformation steps have been applied. If no argument
+is supplied to either \code{funs} or \code{models}, a default set
+of feature extraction functions (as described in \code{default_kinematic_features})
+will be supplied for this parameter.}
+
+\item{models}{A list of functions, each of which accept as input 
+\code{sensor_data} after the chosen preprocessing and transformation
+steps have been applied and return features. Useful for models which compute
+individual statistics using multiple input variables.}
 }
 \value{
-A list of feature dataframes. The outputs from \code{funs} will
+A list. The outputs from \code{funs} will
 be stored under \code{$extracted_features} and the outputs from \code{models}
-will be stored under \code{$model_features}.'
+will be stored under \code{$model_features}. If there is an error 
+during the transform process, an error dataframe will be stored under
+\code{$error}. If gravity_data is passed and window_length and 
+window_overlap are set, phone rotation information will be stored
+under \code{$outlier_windows}.
 }
 \description{
 Extract tremor features from raw accelerometer and gyroscope data.
