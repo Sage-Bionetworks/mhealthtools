@@ -176,7 +176,7 @@ bandpass <- function(values, window_length, sampling_rate,
 
 #' Apply a pass-band filter to sensor data
 #' 
-#' @param sensor_date A data frame with column value.
+#' @param sensor_data A data frame with column value.
 #' @param window_length Length of the filter.
 #' @param sampling_rate Sampling rate of the value column.
 #' @param frequency_range Bounds on frequency in Hz

@@ -17,13 +17,11 @@ LazyData: TRUE
 Imports:
     seewave,
     dplyr,
-    data.table,
     purrr,
     tibble,
     tidyr,
     signal,
     e1071,
-    stringr,
     stats,
     EMD,
     pracma,
