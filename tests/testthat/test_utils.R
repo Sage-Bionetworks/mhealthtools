@@ -4,8 +4,6 @@
 # email: meghasyam@sagebase.org
 ####################################################
 
-# Continue from Line 699
-
 ######################## *** NOTE *** ########################
 ## Still have to write tests for 
 # map_groups [~PHIL]
@@ -712,6 +710,15 @@ testthat::test_that('Get Spectrum given a time series and sampling rate',{
       accelVec, sampling_rate = 100, nfreq = 256))[1], 256)
   # If nfreq is 256 points I need a spectrum that has 256 points in it, not 500!
   
+  # HC - Hard Coded example
+  testDat <- datAccel$x[1:100]
+  testthat::expect_equal(
+    mhealthtools:::get_spectrum(values = testDat,
+                                sampling_rate = 100,
+                                nfreq = 20),
+    mhealthtools:::test_get_spectrum
+  )
+  
 })
 
 testthat::context('Empirical Wavelet Transform')
@@ -726,6 +733,19 @@ testthat::test_that('Get EWT spectrum',{
     mhealthtools:::get_ewt_spectrum(spectrum = accelVecSpec),'matrix') 
   # Check if output is in correct format
   
+  # HC - Hard Coded example
+  testDat <- mhealthtools:::get_spectrum(values =  datAccel$x[1:200],
+                                         sampling_rate = 100,
+                                         nfreq = 50)
+  testthat::expect_equal(
+    mhealthtools:::get_ewt_spectrum(spectrum = testDat,
+                                    npeaks = 3,
+                                    fraction_min_peak_height = 0.1,
+                                    min_peak_distance = 1,
+                                    sampling_rate = 100),
+    mhealthtools:::test_get_ewt_spectrum
+  )
+  
 })
 
 testthat::context('Individual feature extraction functions')
@@ -733,6 +753,13 @@ testthat::test_that('fatigue',{
   # actual function in utils.R: fatigue 
   
   testthat::expect_is(mhealthtools:::fatigue(x = tapInter),'list')
+  
+  # HC - Hard Coded example
+  testDat <- tapInter
+  testthat::expect_equal(
+    mhealthtools:::fatigue(x = testDat),
+    mhealthtools:::test_fatigue
+  )
 })
 
 testthat::test_that('Calculate Drift',{
@@ -741,18 +768,32 @@ testthat::test_that('Calculate Drift',{
   testthat::expect_is(mhealthtools:::calculate_drift(x = datTap$x,
                                                      y = datTap$y),
                       'numeric')
+  
+  # HC - Hard Coded example
+  testX <- datTap$x
+  testY <- datTap$y
+  testthat::expect_equal(mhealthtools:::calculate_drift(x = testX,y = testY),
+                         mhealthtools:::test_calculate_drift)
 })
 
 testthat::test_that('Mean Teager-Kaiser Energy (mtkeo)',{
   # actual function in utils.R: mean_tkeo 
   
   testthat::expect_is(mhealthtools:::mean_tkeo(x = tapInter), 'numeric')
+  
+  # HC - Hard Coded example
+  testDat <- tapInter
+  testthat::expect_equal(mhealthtools:::mean_tkeo(x = testDat), 0.01147268)
 })
 
 testthat::test_that('Co-efficient of Variation (coef_var)',{
   # actual function in utils.R: coef_var
   
   testthat::expect_is(mhealthtools:::coef_var(x = tapInter), 'numeric')
+  
+  # HC - Hard Coded example
+  testDat <- tapInter
+  testthat:::expect_equal(mhealthtools:::coef_var(x = testDat), 86.62279)
 })
 
 
