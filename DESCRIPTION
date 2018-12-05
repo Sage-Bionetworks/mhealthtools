@@ -16,6 +16,7 @@ License: GPL-3
 LazyData: TRUE
 Imports:
     seewave,
+    data.table,
     dplyr,
     purrr,
     tibble,

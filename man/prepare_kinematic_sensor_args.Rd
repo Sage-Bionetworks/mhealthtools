@@ -15,6 +15,10 @@ prepare_kinematic_sensor_args(sensor_data, metric, time_filter = NULL,
 total number of measurements, \code{t} is the timestamp of each measurement, and
 \code{x}, \code{y} and \code{z} are linear velocity measurements.}
 
+\item{metric}{Name of the metric measured by this sensor. For accelerometer
+data, the metric is acceleration. Whereas for gyroscope data the metric is
+velocity.}
+
 \item{time_filter}{A length 2 numeric vector specifying the time range 
 of measurements to use during preprocessing and feature extraction after
 normalizing the first timestamp to 0. A \code{NULL} value means do not 
