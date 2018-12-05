@@ -57,10 +57,12 @@ testthat::test_that("Check Sampling rate calculation",{
   
   # HC - Hard Coded example
   samplingRate = (length(datAccel$t))/(max(datAccel$t)-min(datAccel$t))
-  testthat::expect_equal(get_sampling_rate(sensor_data = dat), samplingRate) 
+  testthat::expect_equal(mhealthtools:::get_sampling_rate(sensor_data = dat),
+                         samplingRate) 
   # Is the function returning expected numeric output for a valid input
   
-  testthat::expect_equal(get_sampling_rate(sensor_data = NA), NA)
+  testthat::expect_equal(mhealthtools:::get_sampling_rate(sensor_data = NA),
+                         NA)
 })
 
 testthat::context('Tapping')
@@ -160,7 +162,8 @@ testthat::test_that("Tidying sensor data",{
   tempDat$error[1] <- 'some error' # Just a non NA value for error
   # tidy_sensor_data should return the input, i.e, an identity function
   # because there is a non-zero error value in the error column
-  testthat::expect_equal(tidy_sensor_data(sensor_data = tempDat), tempDat)
+  testthat::expect_equal(mhealthtools:::tidy_sensor_data(sensor_data = tempDat),
+                         tempDat)
   
   # this will set off warnings of not having columns error and t,
   # so we are supressing warnings and then will re-start them
@@ -173,7 +176,7 @@ testthat::test_that("Tidying sensor data",{
   
   # HC - Hard Coded example
   testthat::expect_equal(
-    mhealthtools::tidy_sensor_data(sensor_data = datAccel),
+    mhealthtools:::tidy_sensor_data(sensor_data = datAccel),
     mhealthtools:::test_tidy_sensor_data
   )
   
@@ -252,7 +255,8 @@ testthat::test_that('Bandpass a timeseries data',{
   # Input is NA, so expect an error
   
   # HC - Hard Coded example
-  testDat <- datAccel$x[1:200]
+  t <- seq(0,3,0.01)
+  testDat <- sin(20*t) + cos(10*t) 
   testthat::expect_equal(
     mhealthtools:::bandpass(values = testDat,
                             window_length = 20,
@@ -600,12 +604,13 @@ testthat::test_that(
                              stringsAsFactors=FALSE) )
     
     # HC - Hard Coded example
-    testDat <- c(1,2,5,9,10,22,4,5,90)
-    testthat::expect_equal(
-      mhealthtools:::tag_outlier_windows_(gravity_vector = testDat,
-                                          window_length = 4,
-                                          window_overlap =  0.5)
-    ) 
+    # testDat <- c(1,2,5,9,10,22,4,5,90)
+    # testthat::expect_equal(
+    #   mhealthtools:::tag_outlier_windows_(gravity_vector = testDat,
+    #                                       window_length = 4,
+    #                                       window_overlap =  0.5),
+    #   mhealthtools:::test_tag_outlier_windows
+    # ) 
     ## HC EXAMPLE TO BE WRITTEN AFTER FUNCTION CHANGES
     
   })
