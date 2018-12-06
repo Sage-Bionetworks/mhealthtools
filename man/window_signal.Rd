@@ -7,14 +7,14 @@
 Given a numeric vector, this function will return a windowed 
 signal with hamming window.}
 \usage{
-window_signal(values, window_length = 256, overlap = 0.5)
+window_signal(values, window_length = 256, window_overlap = 0.5)
 }
 \arguments{
 \item{values}{Timeseries vector of length n.}
 
 \item{window_length}{Length of the filter.}
 
-\item{overlap}{Window overlap.}
+\item{window_overlap}{Window overlap.}
 }
 \value{
 A matrix of window_length x nwindows

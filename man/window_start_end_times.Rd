@@ -4,14 +4,14 @@
 \alias{window_start_end_times}
 \title{Compute start/end timestamps for each window}
 \usage{
-window_start_end_times(t, window_length, overlap)
+window_start_end_times(t, window_length, window_overlap)
 }
 \arguments{
 \item{t}{A numeric time vector}
 
 \item{window_length}{Length of the filter}
 
-\item{overlap}{Window overlap}
+\item{window_overlap}{Window overlap}
 }
 \value{
 A dataframe with columns window, window_start_time,

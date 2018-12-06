@@ -4,12 +4,12 @@
 \alias{transformation_window}
 \title{Generate a function for applying a window transformation to sensor data}
 \usage{
-transformation_window(window_length, overlap)
+transformation_window(window_length, window_overlap)
 }
 \arguments{
 \item{window_length}{Length of the sliding window}
 
-\item{overlap}{Window overlap}
+\item{window_overlap}{Window overlap}
 }
 \value{
 A function that accepts as input a dataframe with columns 

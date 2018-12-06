@@ -16,26 +16,25 @@ License: GPL-3
 LazyData: TRUE
 Imports:
     seewave,
-    dplyr,
     data.table,
+    dplyr,
     purrr,
     tibble,
     tidyr,
     signal,
     e1071,
-    stringr,
     stats,
     EMD,
-    e1071,
     pracma,
     rlang,
-    tibble,
     magrittr,
     keras,
-    fractal
-Remotes: url::http://download.r-forge.r-project.org/src/contrib/statcomp_0.0.1.1000.tar.gz
+    fractal,
+    statcomp
+Remotes: cran/statcomp
 URL: https://github.com/Sage-Bionetworks/mHealthTools
 RoxygenNote: 6.1.1
+Encoding: UTF-8
 Suggests:
     testthat,
     knitr,

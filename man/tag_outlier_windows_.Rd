@@ -4,14 +4,14 @@
 \alias{tag_outlier_windows_}
 \title{Get min and max gravity values for each window}
 \usage{
-tag_outlier_windows_(gravity_vector, window_length, overlap)
+tag_outlier_windows_(gravity_vector, window_length, window_overlap)
 }
 \arguments{
 \item{gravity_vector}{A gravity vector}
 
 \item{window_length}{Length of the filter.}
 
-\item{overlap}{Window overlap.}
+\item{window_overlap}{Window overlap.}
 }
 \value{
 Min and max values for each window.

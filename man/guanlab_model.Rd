@@ -13,7 +13,7 @@ guanlab_model(sensor_data, models = load_guanlab_model)
 \item{sensor_data}{Kinematic sensor data containing columns
 t, x, y, z.}
 
-\item{model}{A list of models to use for prediction.}
+\item{models}{A list of models to use for prediction.}
 }
 \value{
 10 different "features", which are actually just 

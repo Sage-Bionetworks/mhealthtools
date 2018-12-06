@@ -5,60 +5,69 @@
 \title{Wrapper functionality to preprocess and extract interprettable features from 
 walk assay measured using smartphone raw accelerometer and gyroscpe sensors.}
 \usage{
-get_walk_features(accelerometer_data, gyroscope_data,
-  gravity_data = NULL, funs = list(frequency_domain_summary,
-  time_domain_summary, frequency_domain_energy), models = NULL,
-  window_length = 256, time_range = c(1, 9), frequency_range = c(1,
-  25), overlap = 0.5, max_imf = 4)
+get_walk_features(accelerometer_data = NULL, gyroscope_data = NULL,
+  gravity_data = NULL, time_filter = NULL, detrend = F,
+  frequency_filter = NULL, IMF = 1, window_length = NULL,
+  window_overlap = NULL, derived_kinematics = F, funs = NULL,
+  models = NULL)
 }
 \arguments{
-\item{accelerometer_data}{A n x 4 data frame with column names as t, x, y, z 
-containing accelerometer measurements. Here n is the total number of measurements, 
-t is the time of measurement, x, y and z are the linear acceleration excluding 
-gravity in their respective coordinates of the smartphone tri-axial accelerometers. 
-x, y, and z co-ordinates are wrt phones axis as reference}
+\item{accelerometer_data}{A data frame with columns t, x, y, z containing 
+accelerometer measurements.}
 
-\item{gyroscope_data}{A n x 4 data frame with column names as t, x, y, z containing 
-gyroscope measurements. Here n is the total number of measurements, t is the time 
-of measurement, x, y and z are the angular velocity excluding gravity in their 
-respective coordinates of the smartphone gyroscopes. x, y, and z co-ordinates are wrt 
-phones axis as reference}
+\item{gyroscope_data}{A data frame with columns t, x, y, z containing 
+gyroscope measurements.}
 
-\item{gravity_data}{A n x 4 data frame with column names as t, x, y, z containing 
-gravity estimations. Here n is the total number of measurements, t is the time of 
-measurement, x, y and z are the linear acceleration measuring gravity components in
-their respective coordinates of the smartphone gyroscopes. x, y, and z are wrt 
-phones axis as reference}
+\item{gravity_data}{A data frame with columns t, x, y, z containing 
+gravity sensor measurements.}
 
-\item{funs}{Multiple feature extraction functions as lists. By default we provide three 
-functionalities including \code{time_domain_summary}, \code{frequency_domain_summary},
-and \code{frequency_domain_energy}. Check extending Extending vignette for how to desing 
-your own feature extraction functions.}
+\item{time_filter}{A length 2 numeric vector specifying the time range 
+of measurements to use during preprocessing and feature extraction after
+normalizing the first timestamp to 0. A \code{NULL} value means do not 
+filter any measurements.}
 
-\item{models}{A function which accepts as input a dataframe with columns axis, window, 
-IMF, jerk, acceleration, velocity, displacement and outputs features. Useful for models
-which compute individual statistics using multiple input variables.}
+\item{detrend}{Whether to detrend the signal.}
 
-\item{window_length}{Length of Hamming sliding windows for bandpass filter and windowing 
-transformation. The default should only be changed by expert users.}
+\item{frequency_filter}{A length 2 numeric vector specifying the frequency range
+of the signal (in hertz) to use during preprocessing and feature extraction.
+A \code{NULL} value means do not filter frequencies.}
 
-\item{time_range}{Time range of the assay to use in s. We suggest using c(1, 9) for 
-Sage Bionetworks specific assays. The default should only be changed by expert users.}
+\item{IMF}{The number of IMFs used during an empirical mode decomposition
+transformation. The default value of 1 means do not apply EMD to the signal.}
 
-\item{frequency_range}{Frequency range for the bandpass filter in Hz. We suggest to use 
-c(1, 25) for sage Bionetworks specific assays. The default should only be changed by expert 
-users.}
+\item{window_length}{Length of the sliding window used during the windowing 
+transformation. Both \code{window_length} and \code{window_overlap} must be
+set for the windowing transformation to be applied.}
 
-\item{overlap}{Window overlap for the Hamming windowing transformation.}
+\item{window_overlap}{Window overlap used during the windowing transformation.
+Both \code{window_length} and \code{window_overlap} must be set for the
+windowing transformation to be applied.}
 
-\item{max_imf}{Number of intrinsic mode functions to use for empirical mode decomposition. 
-Specifying 1 gives no emprical mode decomposition.}
+\item{derived_kinematics}{Whether to add columns for \code{jerk}, \code{velocity},
+and \code{displacement} before extracting features.}
+
+\item{funs}{A function or list of feature extraction functions that each
+accept a single numeric vector as input. Each function should return a 
+dataframe of features (normally a single-row datafame). The input vectors
+will be the axial measurements from \code{sensor_data} after the chosen
+preprocessing and transformation steps have been applied. If no argument
+is supplied to either \code{funs} or \code{models}, a default set
+of feature extraction functions (as described in \code{default_kinematic_features})
+will be supplied for this parameter.}
+
+\item{models}{A list of functions, each of which accept as input 
+\code{sensor_data} after the chosen preprocessing and transformation
+steps have been applied and return features. Useful for models which compute
+individual statistics using multiple input variables.}
 }
 \value{
-A list of feature dataframes for each \code{funs} feature extraction function will 
-be stored under \code{$extracted_features} and the outputs from \code{models} will be stored under 
-\code{$model_features}. See https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md 
-for feature definitions from the defualt functions
+A list. The outputs from \code{funs} will
+be stored under \code{$extracted_features} and the outputs from \code{models}
+will be stored under \code{$model_features}. If there is an error 
+during the transform process, an error dataframe will be stored under
+\code{$error}. If gravity_data is passed and window_length and 
+window_overlap are set, phone rotation information will be stored
+under \code{$outlier_windows}.
 }
 \description{
 Wrapper functionality to preprocess and extract interprettable features from 
