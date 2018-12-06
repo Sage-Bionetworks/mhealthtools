@@ -9,9 +9,9 @@
 # map_groups [~PHIL]
 # extract_features [~PHIL]
 # (throws error) tag_outlier_windows_ 
-# [The error is valid, reaffirming my suspicion that NA's
-# are handled differently in the underlying signal package]
 # (throws error for NA window length) window_start_end_times 
+# All HC - Hard Coded examples have their data stored in
+# R/sysdata.rda (http://r-pkgs.had.co.nz/data.html)
 ######################## *** NOTE *** ########################
 
 ### Require mHealthTools
@@ -54,10 +54,15 @@ datGravity <- flatten_data(dat, 'gravity')
 testthat::context('Sampling rate')
 testthat::test_that("Check Sampling rate calculation",{
   # actual function in utils: get_sampling_rate
+  
+  # HC - Hard Coded example
   samplingRate = (length(datAccel$t))/(max(datAccel$t)-min(datAccel$t))
-  testthat::expect_equal(get_sampling_rate(sensor_data = dat), samplingRate) 
+  testthat::expect_equal(mhealthtools:::get_sampling_rate(sensor_data = dat),
+                         samplingRate) 
   # Is the function returning expected numeric output for a valid input
-  testthat::expect_equal(get_sampling_rate(sensor_data = NA), NA)
+  
+  testthat::expect_equal(mhealthtools:::get_sampling_rate(sensor_data = NA),
+                         NA)
 })
 
 testthat::context('Tapping')
@@ -69,22 +74,43 @@ testthat::test_that(
       mhealthtools:::get_left_right_events_and_tap_intervals(tap_data = datTap),
       'list') # Check if output is in correct format
     
+    testthat::expect_is(
+      mhealthtools:::get_left_right_events_and_tap_intervals(tap_data = datTap,
+                                                             depress_threshold = 10),
+      'list') # Check if output is in correct format, for a different 
+    # depress_threshold (default is 20)
+    
     tempDat <- datTap[1:2,] 
     # Only 2 rows, lesser than the required 5, Should expect an error
     testthat::expect_equal(
       mhealthtools:::get_left_right_events_and_tap_intervals(tap_data = tempDat),
       list(tap_data = NA, tap_intervals = NA, error = TRUE))
+    
+    # HC - Hard Coded example  
+    testDat <- datTap[1:8,]
+    testthat::expect_equal(
+      mhealthtools:::get_left_right_events_and_tap_intervals(tap_data = testDat),
+      mhealthtools:::test_get_left_right_events_and_tap_intervals
+    )
+    
   })
 
 tapInter <- mhealthtools:::get_left_right_events_and_tap_intervals(
-  tap_data = datTap)$tapInter 
+  tap_data = datTap)$tap_intervals
 # Get inter tap intervals
 
 testthat::test_that('Extract default inter tap time features',{
   # actual function in utils.R: intertap_summary_features
   
   testthat::expect_is(
-    mhealthtools:::intertap_summary_features(tap_intervals = tapInter),'data.frame')  
+    mhealthtools:::intertap_summary_features(tap_intervals = tapInter),'data.frame')
+  
+  # HC - Hard Coded example
+  testthat::expect_equal(
+    mhealthtools:::intertap_summary_features(tap_intervals = tapInter),
+    mhealthtools:::test_intertap_summary_features
+  )
+  
 })
 
 testthat::test_that('Extract default tap drift features',{
@@ -95,6 +121,13 @@ testthat::test_that('Extract default tap drift features',{
   # tapDrift numeric vector
   testthat::expect_is(
     mhealthtools:::tapdrift_summary_features(tap_drift = tapInter),'data.frame')
+  
+  # HC - Hard Coded example
+  testthat::expect_equal(
+    mhealthtools:::tapdrift_summary_features(tap_drift = tapInter),
+    mhealthtools:::test_tapdrift_summary_features
+  )
+  
 })
 
 testthat::test_that(
@@ -103,8 +136,14 @@ testthat::test_that(
     # actual function in utils.R: tap_data_summary_features
     
     testthat::expect_is(
-      mhealthtools:::tap_data_summary_features(tap_data = datTap), 'data.frame')  
-  })
+      mhealthtools:::tap_data_summary_features(tap_data = datTap), 'data.frame')
+    
+    # HC - Hard Coded example    
+    testthat::expect_equal(
+      mhealthtools:::tap_data_summary_features(tap_data = datTap),
+      mhealthtools:::test_tap_data_summary_features
+    )
+})
 
 testthat::context('Tidy the data')
 testthat::test_that("Tidying sensor data",{
@@ -122,7 +161,9 @@ testthat::test_that("Tidying sensor data",{
   tempDat$error <- rep(NA, length(tempDat$t))
   tempDat$error[1] <- 'some error' # Just a non NA value for error
   # tidy_sensor_data should return the input, i.e, an identity function
-  testthat::expect_equal(tidy_sensor_data(sensor_data = tempDat), tempDat)
+  # because there is a non-zero error value in the error column
+  testthat::expect_equal(mhealthtools:::tidy_sensor_data(sensor_data = tempDat),
+                         tempDat)
   
   # this will set off warnings of not having columns error and t,
   # so we are supressing warnings and then will re-start them
@@ -132,6 +173,12 @@ testthat::test_that("Tidying sensor data",{
   testthat::expect_equal(is_error_dataframe(
     mhealthtools:::tidy_sensor_data(sensor_data = tempDat)), T)
   options(warn = 1) # Turn warnings on again
+  
+  # HC - Hard Coded example
+  testthat::expect_equal(
+    mhealthtools:::tidy_sensor_data(sensor_data = datAccel),
+    mhealthtools:::test_tidy_sensor_data
+  )
   
 })
 
@@ -147,6 +194,16 @@ testthat::test_that("Detrend the data given a time series",{
     mhealthtools:::detrend(time = datAccel$t,values =  datAccel$y), 'numeric') 
   # Expected format
   
+  # Check to see how NA's are handled (they are removed, i.e.,
+  # below we will see points 2,3,4,6 as 1 has (time NA),5 has (values NA))
+  mhealthtools:::detrend(time = c(NA,2,3,4,5,6), values = c(10,20,30,40,NA,60))
+  
+  # HC - Hard Coded example
+  testthat::expect_equal(
+    mhealthtools:::detrend(time = datAccel$t[1:100], values = datAccel$y[1:100]),
+    mhealthtools:::test_detrend
+  )
+
 })
 
 testthat::test_that("Detrend the given sensor data",{
@@ -158,6 +215,13 @@ testthat::test_that("Detrend the given sensor data",{
   # Given wrong format of data, the function should throw an error
   testthat::expect_equal(is_error_dataframe(
     mhealthtools:::mutate_detrend(sensor_data = datAccel)), T)
+  
+  # HC - Hard Coded example
+  testDat <- datAccelTidy %>% dplyr::filter(t < 1)
+  testthat::expect_equal(
+    mhealthtools:::mutate_detrend(sensor_data = testDat),
+    mhealthtools:::test_mutate_detrend
+  )
   
 })
 
@@ -189,6 +253,17 @@ testthat::test_that('Bandpass a timeseries data',{
                             sampling_rate = 100,
                             frequency_range =  c(1,10))) 
   # Input is NA, so expect an error
+  
+  # HC - Hard Coded example
+  t <- seq(0,3,0.01)
+  testDat <- sin(20*t) + cos(10*t) 
+  testthat::expect_equal(
+    mhealthtools:::bandpass(values = testDat,
+                            window_length = 20,
+                            sampling_rate = 100,
+                            frequency_range = c(2,8)),
+    mhealthtools:::test_bandpass
+  )
 })
 
 testthat::test_that('Bandpass the tidy sensor data', {
@@ -215,6 +290,17 @@ testthat::test_that('Bandpass the tidy sensor data', {
       frequency_range = c(1,51))), T) 
   # Error if freq ranges of bandpass filter violate Nyquist criterion
   
+  # HC - Hard Coded example
+  testDat <- datAccelTidy %>% dplyr::filter(t < 1)
+  testthat::expect_equal(
+    mhealthtools:::mutate_bandpass(
+      sensor_data = testDat,
+      window_length = 50,
+      sampling_rate = 100,
+      frequency_range = c(4,20)),
+    mhealthtools:::test_mutate_bandpass
+  )
+  
 })
 
 testthat::test_that(
@@ -225,17 +311,29 @@ testthat::test_that(
                                                    t2 = 2),
                         'data.frame') 
     # Check if output is in correct format
+    
     testthat::expect_error(
       mhealthtools:::filter_time(sensor_data = datAccel[,"x"],
                                  t1 = 1,
                                  t2 = 2)) 
     # throw an error if there is no t column
-    # Maybe throw an error if t2(100s) of the window (t1,t2) 
-    # is more than the actual time in the sensor data (0-10s)
-    # Maybe throw an error if t1(11s) of the window (t1,t2) 
-    # is more than the actual time in the sensor data (0-10s)
     
-  })
+    tempDat <- data.frame(t = c(NA, seq(10),NA), x = sample(100,12)/10)
+    tempDat$t[5] <- NA
+    testthat::expect_is(mhealthtools:::filter_time(sensor_data = tempDat,
+                                                   t1 = 1,
+                                                   t2 = 20),
+                        'data.frame') 
+    # NA behavior, they are removed i.r t = c(1,2,NA,4,5,NA), t1 = 2, t2 = 4,
+    # then the output will have t = c(2,4), NA's (3 was missing) are removed
+    
+    # HC - Hard Coded example
+    testthat::expect_equal(
+      mhealthtools:::filter_time(sensor_data = datAccelTidy,
+                                 t1 = 1, t2 = 2),
+      mhealthtools:::test_filter_time
+    )
+})
 
 testthat::context('Windowing')
 testthat::test_that('Windowing a time series',{
@@ -243,6 +341,41 @@ testthat::test_that('Windowing a time series',{
   
   testthat::expect_is(mhealthtools:::window_signal(values = datAccel$x), 'matrix')
   # Check if output is in correct format
+  
+  # If input is all NA's except for a value(the last one, we should expect something
+  # similar, all NAs except for one value, which is what we see, also if we input all
+  # NA's we see an output with all NA's )
+  gravityVec <- c(rep(NA,255),1)
+  tempVal <- mhealthtools:::window_signal(values = gravityVec)
+  testthat::expect_is(tempVal, 'matrix')
+  
+  tempVec <- seq(1,50) # length 10
+  tempVal <- mhealthtools:::window_signal(values = tempVec,
+                                          window_length = 256,
+                                          window_overlap = 0.5)
+
+  ############
+  # UNCOMMENT FOLLOWING TEST AFTER EDITING window_signal
+  ############
+  # testthat::expect_error(mhealthtools:::window_signal(values = tempVec,
+  #                                                     window_length = 256,
+  #                                                     window_overlap = 0.5))
+  # Above we have a length 50, and a window_length of 256,
+  # if you plot tempVal(the output of window_signal), you will see a lot
+  # of spurious data, which we don't need
+  # We should throw an error if the window_length is less than that of
+  # the input signal, or correct it by changing the window_length to that
+  # of the input, or zero-pad the input to get to the signal of the length
+  # window_length
+  
+  # HC - Hard Coded example
+  testDat <- seq(16)
+  testthat::expect_equal(
+    mhealthtools:::window_signal(values = testDat, 
+                                 window_length = 4,
+                                 window_overlap = 0.5),
+    mhealthtools:::test_window_signal
+  )
 })
 
 testthat::test_that('Windowing the sensor data by axis',{
@@ -250,14 +383,43 @@ testthat::test_that('Windowing the sensor data by axis',{
   testthat::expect_is(mhealthtools:::window(sensor_data = datAccelTidy,
                                             window_length =  256,
                                             window_overlap =  0.5),
-                      'data.frame') 
+                      'data.frame')
   # 256 window length, 0.5 overlap, checking output format
+  
+  
+  ############
+  # UNCOMMENT FOLLOWING TEST AFTER EDITING window
+  ############
+  # 
+  # tempDat <- datAccelTidy %>%
+  #   dplyr::filter(t < 2)
+  # # A max possible window length of 2s ~ 2 x 100(sampling rate) = 200 samples 
+  # testthat::expect_equal(is_error_dataframe(
+  #   mhealthtools:::window(sensor_data = tempDat,
+  #                         window_length =  256,
+  #                         window_overlap =  0.5)), T)
+  # We should throw an error if window_length is more than that possible,
+  # or we should handle these errors differently
+  # Maybe throw an error frame with 'window_length greater than max t' etc.,
+  # Look at the test for window_signal that tackles the problem at a unit level,
+  # because the above test for window would be a regression test.
+  
   testthat::expect_equal(is_error_dataframe(
     mhealthtools:::window(
       sensor_data = datAccel,
       window_length = 256,
       window_overlap = 0.5)), T)
   # throw an error if Input is not in correct format
+  
+  # HC - Hard Coded example
+  testDat <- datAccelTidy %>% dplyr::filter(t<1)
+  testthat::expect_equal(
+    mhealthtools:::window(
+      sensor_data = testDat,
+      window_length = 60,
+      window_overlap = 0.5),
+    mhealthtools:::test_window
+  )
 })
 
 testthat::test_that('Compute start and stop timestamp for each window',{
@@ -273,6 +435,18 @@ testthat::test_that('Compute start and stop timestamp for each window',{
     window_length = NA,
     window_overlap = 0.5))
   # Throw a data error if any parameter doesn't confirm to norms
+  
+  
+  # HC - Hard Coded example
+  testDat <- datAccel$t[1:40]
+  testthat::expect_equal(
+    mhealthtools:::window_start_end_times(
+      t = testDat,
+      window_length = 10,
+      window_overlap = 0.5),
+    mhealthtools:::test_window_start_end_times
+  )
+  
 })
 
 testthat::context('Derivative Calculation')
@@ -283,6 +457,12 @@ testthat::test_that(
     testthat::expect_is(mhealthtools:::derivative(v = datAccel$x), 'numeric') 
     # Check if output is in correct format
     
+    # HC - Hard Coded example
+    testDat <- datAccel$x[1:100]
+    testthat::expect_equal(
+      mhealthtools:::derivative(testDat),
+      mhealthtools:::test_derivative
+    )
   })
 
 testthat::test_that(
@@ -306,6 +486,26 @@ testthat::test_that(
         derived_col = 'dx')), T) 
     # Throw an error if input is not in correct format
     
+    testthat::expect_equal(is_error_dataframe(
+      mhealthtools:::mutate_derivative(
+        sensor_data = datAccelTidy,
+        col = 'x',
+        derived_col = 'dx')), T) 
+    # If Sampling rate is not provided, instead of outputting error(current status)
+    # can we just calculate sampling rate using mhealthtools:::get_sampling_rate
+    # for the default setting if sampling_rate is not provided, because the docstring
+    # for the function, asks for a data frame with the t column
+    
+    # HC - Hard Coded example
+    testDat <- datAccel %>% dplyr::filter(t < 1)
+    testthat::expect_equal(
+      mhealthtools:::mutate_derivative(sensor_data = testDat,
+                                       sampling_rate = 100,
+                                       col = 'x',
+                                       derived_col = 'dx'),
+      mhealthtools:::test_mutate_derivative
+    )
+    
   })
 
 testthat::context('Integral Calculation')
@@ -315,6 +515,14 @@ testthat::test_that(
     
     testthat::expect_is(mhealthtools:::integral(v = datAccel$x), 'numeric') 
     # Check if output is in correct format
+    
+    # HC - Hard Coded example
+    testDat <- datAccel$x[1:100]
+    testthat::expect_equal(
+      mhealthtools:::integral(v = testDat),
+      mhealthtools:::test_integral
+    )
+    
     
   })
 
@@ -331,13 +539,16 @@ testthat::test_that(
                                      derived_col = 'dx'),'data.frame') 
     # Check output format
     
-    testthat::expect_equal(is_error_dataframe( 
-      # Throw an error if input is not in correct format
-      mhealthtools:::mutate_integral(
-        sensor_data = datAccelTidy,
-        sampling_rate = 100,
-        col = 'x',
-        derived_col = 'dx')), T) 
+    # HC - Hard Coded example
+    testDat <- datAccel %>% dplyr::filter(t < 1)
+    testthat::expect_equal(
+      mhealthtools:::mutate_integral(sensor_data = testDat,
+                                       sampling_rate = 100,
+                                       col = 'x',
+                                       derived_col = 'dx'),
+      mhealthtools:::test_mutate_integral
+    )
+    
   })
 
 testthat::context('ACF calculation')
@@ -352,6 +563,8 @@ testthat::test_that(
       # Throw an error if input is not in correct format
       mhealthtools:::calculate_acf(
         sensor_data = datAccel)), T) 
+    
+    ## HC EXAMPLE TO BE WRITTEN AFTER FUNCTION CHANGES
   })
 
 testthat::context('Tag and Identify outlier windows based on device rotation
@@ -377,12 +590,19 @@ testthat::test_that(
     
     testthat::expect_equal(
       testOutput, data.frame(window = as.character(1),
-                             max = NA, min = NA, stringsAsFactors=FALSE) )
-    # This needs to have max and min as NA, but is not. 
-    # The actual output is [window = '1', max = 0.08, min =0.08]
-    # All values are NA except for the last value, our window length is 256,
-    # same as the length of gravityVec
-    # min(gravityVec) and max(gravityVec) should be NA
+                             max = as.numeric(NA),
+                             min = as.numeric(NA),
+                             stringsAsFactors=FALSE) )
+    
+    # HC - Hard Coded example
+    # testDat <- c(1,2,5,9,10,22,4,5,90)
+    # testthat::expect_equal(
+    #   mhealthtools:::tag_outlier_windows_(gravity_vector = testDat,
+    #                                       window_length = 4,
+    #                                       window_overlap =  0.5),
+    #   mhealthtools:::test_tag_outlier_windows
+    # ) 
+    ## HC EXAMPLE TO BE WRITTEN AFTER FUNCTION CHANGES
     
   })
 
@@ -394,7 +614,17 @@ testthat::test_that(
       mhealthtools:::tag_outlier_windows(gravity = dat$gravity,
                                          window_length = 256,
                                          window_overlap = 0.5),
-      'data.frame') 
+      'data.frame')
+    
+    testthat::expect_equal(
+      is_error_dataframe(mhealthtools:::tag_outlier_windows(gravity = dat$gravity[1:100],
+                                                            window_length = 256,
+                                                            window_overlap = 0.5)),
+      T)
+    # Throw an error frame if window_length more than gravity
+    
+    ## HC EXAMPLE TO BE WRITTEN AFTER FUNCTION CHANGES
+    
   })
 
 testthat::context('Features')
@@ -407,6 +637,14 @@ testthat::test_that('Time domain summary given acceleration',{
     mhealthtools:::time_domain_summary(values = accelVec,
                                        sampling_rate = 100),
     'data.frame') # Check if output is of correct format
+  
+  # HC - Hard Coded example
+  testDat <- datAccel$x[1:100]
+  testthat::expect_equal(
+    mhealthtools:::time_domain_summary(values = testDat,
+                                       sampling_rate = 100),
+    mhealthtools:::test_time_domain_summary
+  )
   
 })
 
@@ -421,6 +659,15 @@ testthat::test_that('Frequency domain summary given acceleration',{
                                             npeaks = 3),
     'data.frame') # Check if output is of correct format
   
+  # HC - Hard Coded example
+  testDat <- datAccel$x[1:200]
+  testthat::expect_equal(
+    mhealthtools:::frequency_domain_summary(values = testDat,
+                                            sampling_rate = 100,
+                                            npeaks = 3),
+    mhealthtools:::test_frequency_domain_summary
+  )
+  
 })
 
 testthat::test_that('Frequency domain energy given acceleration',{
@@ -433,6 +680,14 @@ testthat::test_that('Frequency domain energy given acceleration',{
                                            sampling_rate = 100),
     'data.frame') # Check if output is of correct format
   
+  # HC - Hard Coded example
+  testDat <- datAccel$x[1:200]
+  testthat::expect_equal(
+    mhealthtools:::frequency_domain_energy(values = testDat,
+                                            sampling_rate = 100),
+    mhealthtools:::test_frequency_domain_energy
+  )
+  
 })
 
 testthat::context('Spectrum')
@@ -441,8 +696,8 @@ testthat::test_that('Get Spectrum given a time series and sampling rate',{
   accelVec <- datAccel$x[1:512] # A 512 length acceleration vector  
   
   testthat::expect_is(mhealthtools:::get_spectrum(values = accelVec,
-                                                 sampling_rate = 100,
-                                                 nfreq = 500),'data.frame') 
+                                                  sampling_rate = 100,
+                                                  nfreq = 500),'data.frame') 
   # Check if output is in correct format
   # 100 Hz sampling rate and nfreq = 512
   
@@ -451,6 +706,15 @@ testthat::test_that('Get Spectrum given a time series and sampling rate',{
       accelVec, sampling_rate = 100, nfreq = 256))[1], 256)
   # If nfreq is 256 points I need a spectrum that has 256 points in it, not 500!
   
+  # HC - Hard Coded example
+  testDat <- datAccel$x[1:100]
+  testthat::expect_equal(
+    mhealthtools:::get_spectrum(values = testDat,
+                                sampling_rate = 100,
+                                nfreq = 20),
+    mhealthtools:::test_get_spectrum
+  )
+  
 })
 
 testthat::context('Empirical Wavelet Transform')
@@ -458,12 +722,25 @@ testthat::test_that('Get EWT spectrum',{
   # actual function in utils: get_ewt_spectrum
   accelVec <- datAccel$x[1:512] # A 512 length acceleration vector  
   accelVecSpec <- mhealthtools:::get_spectrum(values = accelVec,
-                                             sampling_rate = 100,
-                                             nfreq = 500) # 500x2 spectrum
+                                              sampling_rate = 100,
+                                              nfreq = 500) # 500x2 spectrum
   
   testthat::expect_is(
     mhealthtools:::get_ewt_spectrum(spectrum = accelVecSpec),'matrix') 
   # Check if output is in correct format
+  
+  # HC - Hard Coded example
+  testDat <- mhealthtools:::get_spectrum(values =  datAccel$x[1:200],
+                                         sampling_rate = 100,
+                                         nfreq = 50)
+  testthat::expect_equal(
+    mhealthtools:::get_ewt_spectrum(spectrum = testDat,
+                                    npeaks = 3,
+                                    fraction_min_peak_height = 0.1,
+                                    min_peak_distance = 1,
+                                    sampling_rate = 100),
+    mhealthtools:::test_get_ewt_spectrum
+  )
   
 })
 
@@ -472,6 +749,13 @@ testthat::test_that('fatigue',{
   # actual function in utils.R: fatigue 
   
   testthat::expect_is(mhealthtools:::fatigue(x = tapInter),'list')
+  
+  # HC - Hard Coded example
+  testDat <- tapInter
+  testthat::expect_equal(
+    mhealthtools:::fatigue(x = testDat),
+    mhealthtools:::test_fatigue
+  )
 })
 
 testthat::test_that('Calculate Drift',{
@@ -480,18 +764,32 @@ testthat::test_that('Calculate Drift',{
   testthat::expect_is(mhealthtools:::calculate_drift(x = datTap$x,
                                                      y = datTap$y),
                       'numeric')
+  
+  # HC - Hard Coded example
+  testX <- datTap$x
+  testY <- datTap$y
+  testthat::expect_equal(mhealthtools:::calculate_drift(x = testX,y = testY),
+                         mhealthtools:::test_calculate_drift)
 })
 
 testthat::test_that('Mean Teager-Kaiser Energy (mtkeo)',{
   # actual function in utils.R: mean_tkeo 
   
   testthat::expect_is(mhealthtools:::mean_tkeo(x = tapInter), 'numeric')
+  
+  # HC - Hard Coded example
+  testDat <- tapInter
+  testthat::expect_equal(mhealthtools:::mean_tkeo(x = testDat), 0.01147268)
 })
 
 testthat::test_that('Co-efficient of Variation (coef_var)',{
   # actual function in utils.R: coef_var
   
   testthat::expect_is(mhealthtools:::coef_var(x = tapInter), 'numeric')
+  
+  # HC - Hard Coded example
+  testDat <- tapInter
+  testthat:::expect_equal(mhealthtools:::coef_var(x = testDat), 86.62279)
 })
 
 

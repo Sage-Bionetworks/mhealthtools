@@ -6,6 +6,6 @@ is_error_dataframe <- function(df) {
 }
 
 ### Get minified accelerometer and gyroscope data 
-mini_accelerometer_data <- dplyr::filter(accelerometer_data, t < 2)
-mini_gyroscope_data <- dplyr::filter(gyroscope_data, t < 2)
-mini_gravity_data <- dplyr::filter(gravity_data, t < 2)
+mini_accelerometer_data <- dplyr::filter(mhealthtools::accelerometer_data, t < 2)
+mini_gyroscope_data <- dplyr::filter(mhealthtools::gyroscope_data, t < 2)
+mini_gravity_data <- dplyr::filter(mhealthtools::gravity_data, t < 2)

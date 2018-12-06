@@ -176,7 +176,7 @@ bandpass <- function(values, window_length, sampling_rate,
 
 #' Apply a pass-band filter to sensor data
 #' 
-#' @param sensor_date A data frame with column value.
+#' @param sensor_data A data frame with column value.
 #' @param window_length Length of the filter.
 #' @param sampling_rate Sampling rate of the value column.
 #' @param frequency_range Bounds on frequency in Hz
@@ -409,8 +409,8 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, window_overlap) 
     dplyr::as_tibble() %>%
     tidyr::gather(window, value) %>%
     dplyr::group_by(window) %>%
-    dplyr::summarise(max = max(value, na.rm = T),
-                     min = min(value, na.rm = T))
+    dplyr::summarise(max = max(value, na.rm = F),
+                     min = min(value, na.rm = F))
   return(gravity_summary)
 }
 
@@ -705,6 +705,11 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
       # Compute emprical scaling function for the first peak
       phi.sy <- rep(0, n.freq)
       w <- seq(0, pi, len = n.freq)
+      
+      # Check to see if wn1 is 0, to avoid dividing by 0
+      if(wn1 == 0){
+        wn1 = 0.00001
+      }
       
       # Compute beta (an arbitary coefficient)
       x <- (1 / (2 * optimal_gamma * wn1)) * (abs(w) - (1 - optimal_gamma) * wn1)

@@ -463,6 +463,9 @@ kinematic_sensor_argument_validator <- function(
 #' \code{y}, \code{z} containing gyroscope measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
 #' \code{x}, \code{y} and \code{z} are linear velocity measurements. 
+#' @param metric Name of the metric measured by this sensor. For accelerometer
+#' data, the metric is acceleration. Whereas for gyroscope data the metric is
+#' velocity.
 #' @param time_filter A length 2 numeric vector specifying the time range 
 #' of measurements to use during preprocessing and feature extraction after
 #' normalizing the first timestamp to 0. A \code{NULL} value means do not 

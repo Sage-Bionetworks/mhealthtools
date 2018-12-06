@@ -16,14 +16,13 @@ License: GPL-3
 LazyData: TRUE
 Imports:
     seewave,
-    dplyr,
     data.table,
+    dplyr,
     purrr,
     tibble,
     tidyr,
     signal,
     e1071,
-    stringr,
     stats,
     EMD,
     pracma,
@@ -35,6 +34,7 @@ Imports:
 Remotes: cran/statcomp
 URL: https://github.com/Sage-Bionetworks/mHealthTools
 RoxygenNote: 6.1.1
+Encoding: UTF-8
 Suggests:
     testthat,
     knitr,
