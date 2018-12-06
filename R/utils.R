@@ -706,6 +706,11 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
       phi.sy <- rep(0, n.freq)
       w <- seq(0, pi, len = n.freq)
       
+      # Check to see if wn1 is 0, to avoid dividing by 0
+      if(wn1 == 0){
+        wn1 = 0.00001
+      }
+      
       # Compute beta (an arbitary coefficient)
       x <- (1 / (2 * optimal_gamma * wn1)) * (abs(w) - (1 - optimal_gamma) * wn1)
       beta1 <- x^4 * (35 - 84 * x + 70 * x^2 - 20 * x^3)
