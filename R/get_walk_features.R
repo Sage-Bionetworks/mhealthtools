@@ -11,20 +11,24 @@
 #' of measurements to use during preprocessing and feature extraction after
 #' normalizing the first timestamp to 0. A \code{NULL} value means do not 
 #' filter any measurements.
-#' @param detrend Whether to detrend the signal.
+#' @param detrend A logical value indicating whether to detrend the signal. 
+#' By default the value is FALSE.
 #' @param frequency_filter A length 2 numeric vector specifying the frequency range
 #' of the signal (in hertz) to use during preprocessing and feature extraction.
 #' A \code{NULL} value means do not filter frequencies.
-#' @param IMF The number of IMFs used during an empirical mode decomposition
+#' @param IMF The number of IMFs used during an empirical mode decomposition (EMD)
 #' transformation. The default value of 1 means do not apply EMD to the signal.
-#' @param window_length Length of the sliding window used during the windowing 
-#' transformation. Both \code{window_length} and \code{window_overlap} must be
-#' set for the windowing transformation to be applied.
-#' @param window_overlap Window overlap used during the windowing transformation.
+#' @param window_length A numerical value representing the length of the sliding 
+#' window used during the windowing transformation. Both \code{window_length} and
+#'  \code{window_overlap} must be set for the windowing transformation to be applied.
+#' @param window_overlap Fraction between (0, 1) specifying the window overlap used 
+#' during the windowing transformation. Note, 1 represents no overlap.
 #' Both \code{window_length} and \code{window_overlap} must be set for the
 #' windowing transformation to be applied.
-#' @param derived_kinematics Whether to add columns for \code{jerk}, \code{velocity},
-#' and \code{displacement} before extracting features.
+#' @param derived_kinematics A logical value specifying whether to add derived 
+#' kinematic features like \code{displacement}, \code{velocity}, \code{acceleration},
+#' and \code{jerk} from raw \code{accelerometer_data} and 
+#' \code{gyroscope_data}.
 #' @param funs A function or list of feature extraction functions that each
 #' accept a single numeric vector as input. Each function should return a 
 #' dataframe of features (normally a single-row datafame). The input vectors
@@ -52,13 +56,20 @@
 #' data(gyroscope_data)
 #' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data)
 #' 
-#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, time_range = c(2,8))
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, time_filter = c(2,8))
 #' 
-#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, time_range = c(2,8), frequency_range = c(1,25))
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, detrend = T)
 #' 
-#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, overlap = 0.3)
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, frequency_filter = c(0.5, 25))
 #' 
-#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, max_imf = 1)
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, IMF = 3)
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, window_length = 512, window_overlap = 0.9)
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, derived_kinematics = F)
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, 
+#'                                funs = list(time_domain_summary))
 #' @importFrom magrittr "%>%"
 get_walk_features <- function(
   accelerometer_data = NULL, gyroscope_data = NULL, gravity_data = NULL,

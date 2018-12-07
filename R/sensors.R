@@ -173,10 +173,10 @@ kinematic_sensor_features <- function(sensor_data, preprocess = NULL,
   return(features)
 }
 
-#' Get list of default feature extraction functions
+#' Returns list of default feature extraction functions for accelerometer and gyroscope data
+#' in mhealthtools
 #' 
-#' @param sampling_rate Sampling rate of the data these functions will be
-#' applied to.
+#' @param sampling_rate Sampling rate of the data in Hz.
 #' @return A list of closures for three feature extraction functions supplied
 #' with this package that can be passed to the \code{extract} parameter
 #' in \code{*_features} functions.
