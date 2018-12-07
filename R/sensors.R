@@ -16,14 +16,17 @@
 #' to \code{sensor_data}.
 #' @param extract A function or list of functions to be applied to each of the
 #' columns in \code{extract_on} from the output of \code{transform}. Each function
-#' should return a dataframe of features (normally a single-row datafame).
+#' should return a single-row dataframe of features. If the output of
+#' \code{transform} has incidental columns (columns not contained in either the
+#' grouping columns of \code{transform} nor \code{extract_on}, they will be
+#' preserved in the outputted features.
 #' @param extract_on A string or list of column names to compute features from.
 #' If \code{NULL}, features will be extracted from all non-grouped columns.
 #' @param models A function or list of functions which accept the output from
-#' \code{transform} as input and output a dataframe.
+#' \code{transform} as input and output features.
 #' @return A list of features. The output from \code{extract} will
 #' be stored under \code{$extracted_features} and the output from \code{models}
-#' will be stored under \code{$model_features}. If \code{preprocess} or \code{transform}
+#' will be stored under \code{$model_features}. If \code{transform}
 #' returns an error dataframe (see \code{has_error}), the error dataframe is stored
 #' under \code{$error}.
 sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
@@ -59,11 +62,19 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
   
   if (!is.null(extract) && !is.null(extract_on)) {
     transformed_sensor_data_groups <- dplyr::groups(transformed_sensor_data)
+    incidental_cols_to_preserve <- transformed_sensor_data %>%
+      dplyr::select(-dplyr::one_of(extract_on)) %>%
+      dplyr::distinct(!!!transformed_sensor_data_groups, .keep_all = T)
     features$extracted_features <- purrr::map_dfr(
       extract_on,
       ~ extract_features(transformed_sensor_data, ., extract)) %>%
-      dplyr::distinct(
-        !!!transformed_sensor_data_groups, measurementType, .keep_all = T)
+      dplyr::distinct(!!!transformed_sensor_data_groups,
+                      measurementType,
+                      .keep_all = T) %>% 
+      dplyr::left_join(incidental_cols_to_preserve) %>%
+      dplyr::select(measurementType,
+                    dplyr::one_of(names(incidental_cols_to_preserve)),
+                    dplyr::everything())
   }
   if (!is.null(models)) {
     features$model_features <- purrr::map(models, ~ .(transformed_sensor_data))
@@ -75,124 +86,16 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
   return(features)
 }
 
-#' Extract kinematic sensor features
-#' 
-#' Extract kinematic (accelerometer/gyroscope) features. This function is not 
-#' normally called directly. See \code{accelerometer_features}
-#' and \code{gyroscope_features}.
-#' 
-#' Although this function is primarily a helper function for
-#' \code{accelerometer_features} and \code{gyroscope_features}, you
-#' may want to use this function rather than \code{sensor_features}
-#' if your transformed sensor data will have incidental columns
-#' (columns that belong neither to the index nor \code{extract_on})
-#' or you would like ACF features.
-#' 
-#' @param sensor_data A dataframe.
-#' @param preprocess A function or list of functions to be applied sequentially
-#' to \code{sensor_data}. In practice, there is no difference between \code{preprocess}
-#' and \code{transformation}, except the functions in \code{preprocess} are applied
-#' before those in \code{transformation}. It is suggested that \code{preprocess}
-#' is used to apply mathematical transformations to the data that stay within
-#' the original vector space (i.e., the values are indexed by timestamp and
-#' axis), and that \code{transformation} is used to apply mathematical transformations
-#' that put the data in new vector spaces (e.g., by windowing the data).
-#' @param transformation A function or list of functions to be applied sequentially
-#' to \code{sensor_data}. See \code{preprocess}.
-#' @param extract A function or list of functions to be applied to each of the
-#' columns in \code{extract_on} from the output of \code{transform}. Each function
-#' should return a dataframe of features (normally a single-row datafame).
-#' @param extract_on A string or list of column names to compute features from.
-#' If \code{NULL}, features will be extracted from all non-grouped columns.
-#' @param models A function or list of functions which accept the output from
-#' \code{transform} as input and output a dataframe.
-#' @param acf_col Column name to calculate acf upon.
-#' @return A list of features. The output from \code{extract} will
-#' be stored under \code{$extracted_features} and the output from \code{models}
-#' will be stored under \code{$model_features}. If applying \code{preprocess}
-#' or \code{transformation} returns an error dataframe (see \code{has_error}),
-#' the error dataframe is stored under \code{$error}.
-kinematic_sensor_features <- function(sensor_data, preprocess = NULL,
-                                      transformation = NULL, extract = NULL,
-                                      extract_on = NULL, models = NULL,
-                                      acf_col = NULL) {
-  # TODO what to do with error element within features?
-  features <- list(extracted_features = NULL,
-                   model_features = NULL,
-                   error = NULL)
-  
-  if (!is.list(preprocess)) {
-    preprocess <- list(preprocess)
-  }
-  if (!is.list(transformation)) {
-    transformation <- list(transformation)
-  }
-  transform <- purrr::flatten(list(preprocess, transformation))
-  is_function <- unlist(purrr::map(transform, is.function))
-  transform <- transform[is_function]
-  if (length(transform) == 0) {
-    transform <- list(function(x) x)
-  }
-  
-  transformed_sensor_data <- sensor_data %>%
-    purrr::reduce(rev(transform), purrr::compose)()
-  if (has_error(transformed_sensor_data)) {
-    features$error <- transformed_sensor_data
-    return(features)
-  }
-  
-  if (!is.null(extract) && !is.null(extract_on)) {
-    transformed_sensor_data_groups <- dplyr::groups(transformed_sensor_data)
-    incidental_cols_to_preserve <- transformed_sensor_data %>%
-      dplyr::select(-dplyr::one_of(extract_on)) %>%
-      dplyr::distinct(!!!transformed_sensor_data_groups, .keep_all = T)
-    movement_features <- sensor_features(
-      sensor_data = transformed_sensor_data,
-      extract = extract,
-      extract_on = extract_on)
-    acf_features <- sensor_features(
-      sensor_data = transformed_sensor_data,
-      transform = list(purrr::partial(calculate_acf, col = acf_col)),
-      extract = extract,
-      extract_on = "acf")
-    extracted_features <- list(movement_features, acf_features) %>% 
-      purrr::map(function(f) if (!is.null(f$error)) f$error else f$extracted_features)
-    features$extracted_features <- extracted_features %>% 
-      dplyr::bind_rows() %>%
-      dplyr::left_join(incidental_cols_to_preserve) %>%
-      dplyr::select(measurementType,
-                    dplyr::one_of(names(incidental_cols_to_preserve)),
-                    dplyr::everything())
-  }
-  if (!is.null(models)) {
-    model_features <- sensor_features(
-      sensor_data = transformed_sensor_data,
-      models = models)
-    features$model_features <- model_features$model_features
-  }
-  return(features)
-}
-
 #' Default feature extraction sub-functions for accelerometer and gyroscope data.
 #' 
-#' @description \code{default_kinematic_features} is a convinient function that returns 
-#' list of all default feature extraction sub-functions for accelerometer and gyroscope 
-#' data in mhealthtools
-#' 
-#' @usage default_kinematic_features(sampling_rate)
-#' 
 #' @param sampling_rate Sampling rate of the data in Hz.
-#' 
 #' @return A list of closures for three feature extraction functions supplied
 #' with this package that can be passed to the \code{funs} parameter
 #' in \code{*_features} functions.
 #' @export
-#' 
 #' @author Phil Snyder
 #' @examples 
-#' library(mhealthtools)
-#' 
-#' fn.list = default_kinematic_features(100)
+#' funs = default_kinematic_features(100)
 default_kinematic_features <- function(sampling_rate) {
   funs <- list(
     time_domain_summary = purrr::partial(time_domain_summary,
@@ -245,16 +148,15 @@ default_kinematic_features <- function(sampling_rate) {
 #' @param funs A function or list of feature extraction functions that each
 #' accept a single numeric vector as input. Each function should return a 
 #' dataframe of features (normally a single-row datafame). The input vectors
-#' will be the axial measurements from \code{sensor_data} after the chosen
-#' preprocessing and transformation steps have been applied. If no argument
+#' will be the axial measurements from \code{sensor_data} after the transform
+#' defined by the above parameters has been applied. If no argument
 #' is supplied to either \code{funs} or \code{models}, a default set
 #' of feature extraction functions (as described in \code{default_kinematic_features})
 #' will be supplied for this parameter.
-#' @param models A list of functions, each of which accept as input 
-#' \code{sensor_data} after the chosen preprocessing and transformation
-#' steps have been applied and return features. Useful for models which compute
-#' individual statistics using multiple input variables.
-#' 
+#' @param models A list of functions, each of which accepts
+#' \code{sensor_data} as input after the transform defined by the above 
+#' parameters has been applied and returns features. Useful for models
+#' which compute individual features using multiple input variables.
 #' @return A list of accelerometer features. The output from \code{funs} will
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}. If there is an error during
@@ -301,14 +203,12 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
     derived_kinematics = derived_kinematics,
     funs = funs,
     models = models)
-  features <- kinematic_sensor_features(
+  features <- sensor_features(
     sensor_data = sensor_data,
-    preprocess = args$preprocess,
-    transformation = args$transformation,
+    transform = args$transform,
     extract = args$extract,
     extract_on = args$extract_on,
-    models = models,
-    acf_col = args$acf_col)
+    models = models)
   return(features)
 }
 
@@ -352,16 +252,15 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
 #' @param funs A function or list of feature extraction functions that each
 #' accept a single numeric vector as input. Each function should return a 
 #' dataframe of features (normally a single-row datafame). The input vectors
-#' will be the axial measurements from \code{sensor_data} after the chosen
-#' preprocessing and transformation steps have been applied. If no argument
+#' will be the axial measurements from \code{sensor_data} after the transform
+#' defined by the above parameters has been applied. If no argument
 #' is supplied to either \code{funs} or \code{models}, a default set
 #' of feature extraction functions (as described in \code{default_kinematic_features})
 #' will be supplied for this parameter.
-#' @param models A list of functions, each of which accept as input 
-#' \code{sensor_data} after the chosen preprocessing and transformation
-#' steps have been applied and return features. Useful for models which compute
-#' individual statistics using multiple input variables.
-#' 
+#' @param models A list of functions, each of which accepts
+#' \code{sensor_data} as input after the transform defined by the above 
+#' parameters has been applied and returns features. Useful for models
+#' which compute individual features using multiple input variables.
 #' @return A list of gyroscope features. The output from \code{funs} will
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}. If there is an error during
@@ -408,14 +307,12 @@ gyroscope_features <- function(sensor_data, time_filter = NULL, detrend = F,
     derived_kinematics = derived_kinematics,
     funs = funs,
     models = models)
-  features <- kinematic_sensor_features(
+  features <- sensor_features(
     sensor_data = sensor_data,
-    preprocess = args$preprocess,
-    transformation = args$transformation,
+    transform = args$transform,
     extract = args$extract,
     extract_on = args$extract_on,
-    models = models,
-    acf_col = args$acf_col)
+    models = models)
   return(features)
 }
 
@@ -450,15 +347,15 @@ gyroscope_features <- function(sensor_data, time_filter = NULL, detrend = F,
 #' @param funs A function or list of feature extraction functions that each
 #' accept a single numeric vector as input. Each function should return a 
 #' dataframe of features (normally a single-row datafame). The input vectors
-#' will be the axial measurements from \code{sensor_data} after the chosen
-#' preprocessing and transformation steps have been applied. If no argument
+#' will be the axial measurements from \code{sensor_data} after the transform
+#' defined by the above parameters has been applied. If no argument
 #' is supplied to either \code{funs} or \code{models}, a default set
 #' of feature extraction functions (as described in \code{default_kinematic_features})
 #' will be supplied for this parameter.
-#' @param models A list of functions, each of which accept as input 
-#' \code{sensor_data} after the chosen preprocessing and transformation
-#' steps have been applied and return features. Useful for models which compute
-#' individual statistics using multiple input variables.
+#' @param models A list of functions, each of which accepts
+#' \code{sensor_data} as input after the transform defined by the above 
+#' parameters has been applied and returns features. Useful for models
+#' which compute individual features using multiple input variables.
 #' @return A list of gyroscope features. The output from \code{funs} will
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}. If there is an error during
@@ -575,15 +472,15 @@ kinematic_sensor_argument_validator <- function(
 #' @param funs A function or list of feature extraction functions that each
 #' accept a single numeric vector as input. Each function should return a 
 #' dataframe of features (normally a single-row datafame). The input vectors
-#' will be the axial measurements from \code{sensor_data} after the chosen
-#' preprocessing and transformation steps have been applied. If no argument
+#' will be the axial measurements from \code{sensor_data} after the transform
+#' defined by the above parameters has been applied. If no argument
 #' is supplied to either \code{funs} or \code{models}, a default set
 #' of feature extraction functions (as described in \code{default_kinematic_features})
 #' will be supplied for this parameter.
-#' @param models A list of functions, each of which accept as input 
-#' \code{sensor_data} after the chosen preprocessing and transformation
-#' steps have been applied and return features. Useful for models which compute
-#' individual statistics using multiple input variables.
+#' @param models A list of functions, each of which accepts
+#' \code{sensor_data} as input after the transform defined by the above 
+#' parameters has been applied and returns features. Useful for models
+#' which compute individual features using multiple input variables.
 #' @return A list of arguments to be used in the general feature functions.
 prepare_kinematic_sensor_args <- function(sensor_data, metric,
                                           time_filter = NULL, detrend = F,
@@ -627,14 +524,14 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
       }
     })
   }
-  
-  preprocess <- list(tidy_sensor_data)
+ 
+  transform <- list(tidy_sensor_data)
   if (!is.null(time_filter)) {
-    preprocess[[length(preprocess) + 1]] <- 
+    transform[[length(transform) + 1]] <- 
       purrr::partial(filter_time, t1 = time_filter[[1]], t2 = time_filter[[2]])
   }
   if (detrend) {
-    preprocess[[length(preprocess) + 1]] <- mutate_detrend
+    transform[[length(transform) + 1]] <- mutate_detrend
   }
   if (!is.null(frequency_filter)) {
     if (frequency_filter[[2]] > sampling_rate / 2) {
@@ -642,7 +539,7 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
       warning(paste("Reducing the max value of frequency_filter to the",
                     "Nyquist frequency of the input."))
     }
-    preprocess[[length(preprocess) + 1]] <-
+    transform[[length(transform) + 1]] <-
       purrr::partial(mutate_bandpass,
                      window_length = 256,
                      sampling_rate = sampling_rate,
@@ -650,25 +547,25 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
   }
   
   if (IMF == 1 && !is.null(window_length) && !is.null(window_overlap)) {
-    transformation <- list(
+    transform[[length(transform) + 1]] <- 
       transformation_window(
         window_length = window_length,
-        window_overlap = window_overlap))
+        window_overlap = window_overlap)
   } else if (IMF > 1) {
     if (is.null(window_length)) window_length <- 256
     if (is.null(window_overlap)) window_overlap <- 0.5
-    transformation <- list(
+    transform[[length(transform) + 1]] <-
       transformation_imf_window(
         window_length = window_length,
         window_overlap = window_overlap,
-        max_imf = IMF))
+        max_imf = IMF)
   } else {
-    transformation <- list(
-      function(preprocessed_sensor_data) {
-        preprocessed_sensor_data %>% dplyr::select(-t)
-      })
+    transform[[length(transform) + 1]] <-
+      function(sensor_data) {
+        sensor_data %>% dplyr::select(-t)
+      }
   }
-  transformation[[2]] <- function(transformed_sensor_data) {
+  transform[[length(transform) + 1]] <- function(transformed_sensor_data) {
     transformed_sensor_data <- transformed_sensor_data %>% 
       dplyr::rename(!!metric := value)
     return(transformed_sensor_data)
@@ -681,11 +578,12 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
         mutate_integral(sampling_rate = sampling_rate,
                         col = "acceleration", derived_col = "velocity") %>%
         mutate_integral(sampling_rate = sampling_rate,
-                        col = "velocity", derived_col = "displacement")
+                        col = "velocity", derived_col = "displacement") %>% 
+        mutate_acf(col = "acceleration", lag_max = dplyr::group_size(.))
       return(transformed_sensor_data)
     }
-    transformation[[3]] <- mutate_kinematics
-    extract_on <- c("acceleration", "jerk", "velocity", "displacement")
+    transform[[length(transform) + 1]] <- mutate_kinematics
+    extract_on <- c("acceleration", "jerk", "velocity", "displacement", "acf")
   } else if (derived_kinematics && metric == "velocity") {
     mutate_kinematics <- function(transformed_sensor_data) {
       transformed_sensor_data <- transformed_sensor_data %>%
@@ -694,7 +592,8 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
         mutate_derivative(sampling_rate = sampling_rate,
                           col = "acceleration", derived_col = "jerk") %>%
         mutate_integral(sampling_rate = sampling_rate,
-                        col = "velocity", derived_col = "displacement")
+                        col = "velocity", derived_col = "displacement") %>%
+        mutate_acf(col = "velocity", lag_max = dplyr::group_size(.))
       if (is.null(models)) {
         # Don't bother with consistent accelerometer/gyroscope schema
         # if there is no model. Otherwise jerk will be included as an
@@ -703,17 +602,15 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
       }
       return(transformed_sensor_data)
     }
-    transformation[[3]] <- mutate_kinematics
-    extract_on <- c("acceleration", "velocity", "displacement")
+    transform[[length(transform) + 1]] <- mutate_kinematics
+    extract_on <- c("acceleration", "velocity", "displacement", "acf")
   } else {
     extract_on <- metric
   } 
   
-  args <- list(preprocess = preprocess,
-               transformation = transformation,
+  args <- list(transform = transform,
                extract = funs,
-               extract_on = extract_on,
-               acf_col = metric)
+               extract_on = extract_on)
   
   return(args)
 }

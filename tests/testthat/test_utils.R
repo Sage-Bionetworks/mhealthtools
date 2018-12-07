@@ -552,21 +552,11 @@ testthat::test_that(
     
   })
 
-testthat::context('ACF calculation')
-testthat::test_that(
-  'Construct a dataframe with ACF values given tidy sensor data',{
-    # actual function in utils: calculate_acf  
-    testthat::expect_is(
-      mhealthtools:::calculate_acf(sensor_data = datAccelTidy)
-      ,'data.frame') 
-    # Check if output is in correct format
-    testthat::expect_equal(is_error_dataframe( 
-      # Throw an error if input is not in correct format
-      mhealthtools:::calculate_acf(
-        sensor_data = datAccel)), T) 
-    
-    ## HC EXAMPLE TO BE WRITTEN AFTER FUNCTION CHANGES
-  })
+test_that("Construct a dataframe with ACF values given tidy sensor data", {
+    expect_is(mutate_acf(sensor_data = datAccelTidy, col = "value") , "data.frame") 
+    expect_equal(is_error_dataframe(
+      mutate_acf(sensor_data = datAccel, col = "value")), T) 
+})
 
 testthat::context('Tag and Identify outlier windows based on device rotation
                   (using gravity)')
