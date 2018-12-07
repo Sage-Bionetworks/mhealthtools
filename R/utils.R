@@ -318,8 +318,8 @@ derivative <- function(v) {
 #' the lagged differences (\code{diff} function).
 #' 
 #' @param v A numeric vector
-#' @param sampling_rate Sampling rate of \code{v}.
-integral <- function(v, sampling_rate) {
+#' @return The integral of \code{v} as a numeric vector.
+integral <- function(v) {
   integral <- diffinv(v)[-1]
   return(integral)
 }
