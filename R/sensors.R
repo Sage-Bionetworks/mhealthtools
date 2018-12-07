@@ -70,7 +70,7 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
       ~ extract_features(transformed_sensor_data, ., extract)) %>%
       dplyr::distinct(!!!transformed_sensor_data_groups,
                       measurementType,
-                      .keep_all = T) %>% 
+                      .keep_all = T) %>%
       dplyr::left_join(incidental_cols_to_preserve) %>%
       dplyr::select(measurementType,
                     dplyr::one_of(names(incidental_cols_to_preserve)),
@@ -86,7 +86,7 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
   return(features)
 }
 
-#' Default feature extraction sub-functions for accelerometer and gyroscope data.
+#' Default feature extraction functions for accelerometer and gyroscope data.
 #' 
 #' @param sampling_rate Sampling rate of the data in Hz.
 #' @return A list of closures for three feature extraction functions supplied
@@ -110,15 +110,8 @@ default_kinematic_features <- function(sampling_rate) {
 
 #' Extract accelerometer features
 #' 
-#' @description \code{accelerometer_features()} is a wrapper functionality to extract
-#' interpretable features from triaxial accelerometer data collected through smartphones.
-#' 
-#' @usage 
-#' accelerometer_feature(accelerometer_data)
-#' 
-#' accelerometer_features(sensor_data, time_filter = NULL, detrend = F, frequency_filter = NULL, 
-#'   IMF = 1, window_length = NULL, window_overlap = NULL, derived_kinematics = F, funs = NULL,
-#'   models = NULL)
+#' A convenience wrapper function for extracting interpretable features
+#' from triaxial accelerometer data collected through smartphones.
 #' 
 #' @param sensor_data An \code{n} x 4 data frame with column names \code{t}, \code{x},
 #' \code{y}, \code{z} containing accelerometer measurements. Here \code{n} is the
@@ -161,29 +154,41 @@ default_kinematic_features <- function(sampling_rate) {
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}. If there is an error during
 #' extraction, the returned result will be stored under \code{$error}.
-#' 
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
-#' library(mhealthtools)
+#' accel_features <- accelerometer_features(accelerometer_data)
+#' accel_features <- accelerometer_features(
+#'   accelerometer_data,
+#'   time_filter = c(2,8))
 #' 
-#' data("accelerometer_data")
+#' accel_features <- accelerometer_features(
+#'   accelerometer_data,
+#'   detrend = T)
 #' 
-#' accel_ftrs <- accelerometer_features(accelerometer_data)
+#' accel_features <- accelerometer_features(
+#'   accelerometer_data,
+#'   frequency_filter = c(0.5, 25))
 #' 
-#' accel_ftrs <- accelerometer_features(accelerometer_data, time_filter = c(2,8))
+#' accel_features <- accelerometer_features(accelerometer_data, IMF = 3)
 #' 
-#' accel_ftrs <- accelerometer_features(accelerometer_data, detrend = T)
+#' accel_features <- accelerometer_features(
+#'   accelerometer_data,
+#'   window_length = 512,
+#'   window_overlap = 0.9)
 #' 
-#' accel_ftrs <- accelerometer_features(accelerometer_data, frequency_filter = c(0.5, 25))
+#' accel_features <- accelerometer_features(
+#'   accelerometer_data,
+#'   derived_kinematics = T)
 #' 
-#' accel_ftrs <- accelerometer_features(accelerometer_data, IMF = 3)
-#' 
-#' accel_ftrs <- accelerometer_features(accelerometer_data, window_length = 512, window_overlap = 0.9)
-#' 
-#' accel_ftrs <- accelerometer_features(accelerometer_data, derived_kinematics = F)
-#' 
-#' accel_ftrs <- accelerometer_features(accelerometer_data, funs = list(time_domain_summary))
+#' accel_features <- accelerometer_features(
+#'   accelerometer_data,
+#'   time_filter = c(1, 9),
+#'   detrend = T,
+#'   frequency_filter = c(1, 25),
+#'   window_length = 256,
+#'   window_overlap = 0.5,
+#'   funs = time_domain_summary)
 #' 
 #' @importFrom magrittr "%>%"
 accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
@@ -214,20 +219,13 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
 
 #' Extract gyroscope features
 #' 
-#' @description \code{gyroscope_features()} is a wrapper functionality to extract
-#' interpretable features from triaxial gyroscope data collected through smartphones.
-#' 
-#' @usage 
-#' gyroscope_feature(gyroscope_data)
-#' 
-#' gyroscope_features(sensor_data, time_filter = NULL, detrend = F, frequency_filter = NULL, 
-#'    IMF = 1, window_length = NULL, window_overlap = NULL, derived_kinematics = F, funs = NULL,
-#'    models = NULL)
+#' A convenience wrapper function for extracting interpretable features
+#' from triaxial gyroscope data collected through smartphones.
 #' 
 #' @param sensor_data An \code{n} x 4 data frame with column names \code{t}, \code{x},
-#' \code{y}, \code{z} containing accelerometer measurements. Here \code{n} is the
+#' \code{y}, \code{z} containing gyroscope measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
-#' \code{x}, \code{y} and \code{z} are angular velocity measurements. 
+#' \code{x}, \code{y} and \code{z} are linear velocity measurements. 
 #' @param time_filter A length 2 numeric vector specifying the time range 
 #' of measurements to use during preprocessing and feature extraction after
 #' normalizing the first timestamp to 0. A \code{NULL} value means do not 
@@ -247,8 +245,8 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
 #' Both \code{window_length} and \code{window_overlap} must be set for the
 #' windowing transformation to be applied.
 #' @param derived_kinematics A logical value specifying whether to add derived 
-#' kinematic features like \code{displacement}, and \code{acceleration} from
-#' raw \code{gyroscope_data}.
+#' kinematic features like \code{displacement}, \code{velocity}, and \code{jerk} 
+#' from raw \code{gyroscope_data}.
 #' @param funs A function or list of feature extraction functions that each
 #' accept a single numeric vector as input. Each function should return a 
 #' dataframe of features (normally a single-row datafame). The input vectors
@@ -265,29 +263,41 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
 #' be stored under \code{$extracted_features} and the output from \code{models}
 #' will be stored under \code{$model_features}. If there is an error during
 #' extraction, the returned result will be stored under \code{$error}.
-#' 
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
-#' library(mhealthtools)
+#' gyro_features <- gyroscope_features(gyroscope_data)
+#' gyro_features <- gyroscope_features(
+#'   gyroscope_data,
+#'   time_filter = c(2,8))
 #' 
-#' data("gyroscope_data")
+#' gyro_features <- gyroscope_features(
+#'   gyroscope_data,
+#'   detrend = T)
 #' 
-#' gyro_ftrs <- gyroscope_features(gyroscope_data)
+#' gyro_features <- gyroscope_features(
+#'   gyroscope_data,
+#'   frequency_filter = c(0.5, 25))
 #' 
-#' gyro_ftrs <- gyroscope_features(gyroscope_data, time_filter = c(2,8))
+#' gyro_features <- gyroscope_features(gyroscope_data, IMF = 3)
 #' 
-#' gyro_ftrs <- gyroscope_features(gyroscope_data, detrend = T)
+#' gyro_features <- gyroscope_features(
+#'   gyroscope_data,
+#'   window_length = 512,
+#'   window_overlap = 0.9)
 #' 
-#' gyro_ftrs <- gyroscope_features(gyroscope_data, frequency_filter = c(0.5, 25))
+#' gyro_features <- gyroscope_features(
+#'   gyroscope_data,
+#'   derived_kinematics = T)
 #' 
-#' gyro_ftrs <- gyroscope_features(gyroscope_data, IMF = 3)
-#' 
-#' gyro_ftrs <- gyroscope_features(gyroscope_data, window_length = 512, window_overlap = 0.9)
-#' 
-#' gyro_ftrs <- gyroscope_features(gyroscope_data, derived_kinematics = F)
-#' 
-#' gyro_ftrs <- gyroscope_features(gyroscope_data, funs = list(time_domain_summary))
+#' gyro_features <- gyroscope_features(
+#'   gyroscope_data,
+#'   time_filter = c(1, 9),
+#'   detrend = T,
+#'   frequency_filter = c(1, 25),
+#'   window_length = 256,
+#'   window_overlap = 0.5,
+#'   funs = time_domain_summary)
 #' 
 #' @importFrom magrittr "%>%"
 gyroscope_features <- function(sensor_data, time_filter = NULL, detrend = F,
@@ -374,7 +384,7 @@ kinematic_sensor_argument_validator <- function(
   if (!is.null(time_filter) && !all(is.numeric(time_filter),
                                     length(time_filter) == 2,
                                     time_filter[1] >= 0,
-                                    time_filter[2] > 0, 
+                                    time_filter[2] > 0,
                                     time_filter[2] > time_filter[1],
                                     all(time_filter <= 50))) {
     stop(paste("If time_filter is set to a non-NULL value, it must be numeric,",
@@ -387,7 +397,7 @@ kinematic_sensor_argument_validator <- function(
   if (!is.null(frequency_filter) && !all(is.numeric(frequency_filter),
                                          length(frequency_filter) == 2,
                                          frequency_filter[1] >= 0,
-                                         frequency_filter[2] > 0, 
+                                         frequency_filter[2] > 0,
                                          frequency_filter[2] > frequency_filter[1])) {
     stop(paste("If frequency_filter is set to a non-NULL value, it must be numeric,",
                "have length two, the first value must be greater or equal to 0,",
@@ -418,7 +428,7 @@ kinematic_sensor_argument_validator <- function(
   }
   if (!is.null(funs) && !is.function(funs)) {
     if (!all(is.list(funs), all(unlist(purrr::map(funs, is.function))))) {
-      stop(paste("If funs is set to a non-NULL value, it must be a function", 
+      stop(paste("If funs is set to a non-NULL value, it must be a function",
                  "or a list of functions"))
     }
   }
@@ -527,7 +537,7 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
  
   transform <- list(tidy_sensor_data)
   if (!is.null(time_filter)) {
-    transform[[length(transform) + 1]] <- 
+    transform[[length(transform) + 1]] <-
       purrr::partial(filter_time, t1 = time_filter[[1]], t2 = time_filter[[2]])
   }
   if (detrend) {
@@ -547,7 +557,7 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
   }
   
   if (IMF == 1 && !is.null(window_length) && !is.null(window_overlap)) {
-    transform[[length(transform) + 1]] <- 
+    transform[[length(transform) + 1]] <-
       transformation_window(
         window_length = window_length,
         window_overlap = window_overlap)
@@ -566,7 +576,7 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
       }
   }
   transform[[length(transform) + 1]] <- function(transformed_sensor_data) {
-    transformed_sensor_data <- transformed_sensor_data %>% 
+    transformed_sensor_data <- transformed_sensor_data %>%
       dplyr::rename(!!metric := value)
     return(transformed_sensor_data)
   }
@@ -578,7 +588,7 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
         mutate_integral(sampling_rate = sampling_rate,
                         col = "acceleration", derived_col = "velocity") %>%
         mutate_integral(sampling_rate = sampling_rate,
-                        col = "velocity", derived_col = "displacement") %>% 
+                        col = "velocity", derived_col = "displacement") %>%
         mutate_acf(col = "acceleration", lag_max = dplyr::group_size(.))
       return(transformed_sensor_data)
     }
@@ -606,7 +616,7 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
     extract_on <- c("acceleration", "velocity", "displacement", "acf")
   } else {
     extract_on <- metric
-  } 
+  }
   
   args <- list(transform = transform,
                extract = funs,

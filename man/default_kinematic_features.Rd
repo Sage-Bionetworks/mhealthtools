@@ -2,7 +2,7 @@
 % Please edit documentation in R/sensors.R
 \name{default_kinematic_features}
 \alias{default_kinematic_features}
-\title{Default feature extraction sub-functions for accelerometer and gyroscope data.}
+\title{Default feature extraction functions for accelerometer and gyroscope data.}
 \usage{
 default_kinematic_features(sampling_rate)
 }
@@ -15,14 +15,10 @@ with this package that can be passed to the \code{funs} parameter
 in \code{*_features} functions.
 }
 \description{
-\code{default_kinematic_features} is a convinient function that returns 
-list of all default feature extraction sub-functions for accelerometer and gyroscope 
-data in mhealthtools
+Default feature extraction functions for accelerometer and gyroscope data.
 }
 \examples{
-library(mhealthtools)
-
-fn.list = default_kinematic_features(100)
+funs = default_kinematic_features(100)
 }
 \author{
 Phil Snyder

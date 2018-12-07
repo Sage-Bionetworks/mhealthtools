@@ -4,10 +4,9 @@
 \alias{accelerometer_features}
 \title{Extract accelerometer features}
 \usage{
-accelerometer_feature(accelerometer_data)
-
-accelerometer_features(sensor_data, time_filter = NULL, detrend = F, frequency_filter = NULL, 
-  IMF = 1, window_length = NULL, window_overlap = NULL, derived_kinematics = F, funs = NULL,
+accelerometer_features(sensor_data, time_filter = NULL, detrend = F,
+  frequency_filter = NULL, IMF = 1, window_length = NULL,
+  window_overlap = NULL, derived_kinematics = F, funs = NULL,
   models = NULL)
 }
 \arguments{
@@ -65,29 +64,42 @@ will be stored under \code{$model_features}. If there is an error during
 extraction, the returned result will be stored under \code{$error}.
 }
 \description{
-\code{accelerometer_features()} is a wrapper functionality to extract
-interpretable features from triaxial accelerometer data collected through smartphones.
+A convenience wrapper function for extracting interpretable features
+from triaxial accelerometer data collected through smartphones.
 }
 \examples{
-library(mhealthtools)
+accel_features <- accelerometer_features(accelerometer_data)
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  time_filter = c(2,8))
 
-data("accelerometer_data")
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  detrend = T)
 
-accel_ftrs <- accelerometer_features(accelerometer_data)
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  frequency_filter = c(0.5, 25))
 
-accel_ftrs <- accelerometer_features(accelerometer_data, time_filter = c(2,8))
+accel_features <- accelerometer_features(accelerometer_data, IMF = 3)
 
-accel_ftrs <- accelerometer_features(accelerometer_data, detrend = T)
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  window_length = 512,
+  window_overlap = 0.9)
 
-accel_ftrs <- accelerometer_features(accelerometer_data, frequency_filter = c(0.5, 25))
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  derived_kinematics = T)
 
-accel_ftrs <- accelerometer_features(accelerometer_data, IMF = 3)
-
-accel_ftrs <- accelerometer_features(accelerometer_data, window_length = 512, window_overlap = 0.9)
-
-accel_ftrs <- accelerometer_features(accelerometer_data, derived_kinematics = F)
-
-accel_ftrs <- accelerometer_features(accelerometer_data, funs = list(time_domain_summary))
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  time_filter = c(1, 9),
+  detrend = T,
+  frequency_filter = c(1, 25),
+  window_length = 256,
+  window_overlap = 0.5,
+  funs = time_domain_summary)
 
 }
 \author{

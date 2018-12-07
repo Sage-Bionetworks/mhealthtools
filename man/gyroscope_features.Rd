@@ -4,17 +4,16 @@
 \alias{gyroscope_features}
 \title{Extract gyroscope features}
 \usage{
-gyroscope_feature(gyroscope_data)
-
-gyroscope_features(sensor_data, time_filter = NULL, detrend = F, frequency_filter = NULL, 
-   IMF = 1, window_length = NULL, window_overlap = NULL, derived_kinematics = F, funs = NULL,
-   models = NULL)
+gyroscope_features(sensor_data, time_filter = NULL, detrend = F,
+  frequency_filter = NULL, IMF = 1, window_length = NULL,
+  window_overlap = NULL, derived_kinematics = F, funs = NULL,
+  models = NULL)
 }
 \arguments{
 \item{sensor_data}{An \code{n} x 4 data frame with column names \code{t}, \code{x},
-\code{y}, \code{z} containing accelerometer measurements. Here \code{n} is the
+\code{y}, \code{z} containing gyroscope measurements. Here \code{n} is the
 total number of measurements, \code{t} is the timestamp of each measurement, and
-\code{x}, \code{y} and \code{z} are angular velocity measurements.}
+\code{x}, \code{y} and \code{z} are linear velocity measurements.}
 
 \item{time_filter}{A length 2 numeric vector specifying the time range 
 of measurements to use during preprocessing and feature extraction after
@@ -41,8 +40,8 @@ Both \code{window_length} and \code{window_overlap} must be set for the
 windowing transformation to be applied.}
 
 \item{derived_kinematics}{A logical value specifying whether to add derived 
-kinematic features like \code{displacement}, and \code{acceleration} from
-raw \code{gyroscope_data}.}
+kinematic features like \code{displacement}, \code{velocity}, and \code{jerk} 
+from raw \code{gyroscope_data}.}
 
 \item{funs}{A function or list of feature extraction functions that each
 accept a single numeric vector as input. Each function should return a 
@@ -65,29 +64,42 @@ will be stored under \code{$model_features}. If there is an error during
 extraction, the returned result will be stored under \code{$error}.
 }
 \description{
-\code{gyroscope_features()} is a wrapper functionality to extract
-interpretable features from triaxial gyroscope data collected through smartphones.
+A convenience wrapper function for extracting interpretable features
+from triaxial gyroscope data collected through smartphones.
 }
 \examples{
-library(mhealthtools)
+gyro_features <- gyroscope_features(gyroscope_data)
+gyro_features <- gyroscope_features(
+  gyroscope_data,
+  time_filter = c(2,8))
 
-data("gyroscope_data")
+gyro_features <- gyroscope_features(
+  gyroscope_data,
+  detrend = T)
 
-gyro_ftrs <- gyroscope_features(gyroscope_data)
+gyro_features <- gyroscope_features(
+  gyroscope_data,
+  frequency_filter = c(0.5, 25))
 
-gyro_ftrs <- gyroscope_features(gyroscope_data, time_filter = c(2,8))
+gyro_features <- gyroscope_features(gyroscope_data, IMF = 3)
 
-gyro_ftrs <- gyroscope_features(gyroscope_data, detrend = T)
+gyro_features <- gyroscope_features(
+  gyroscope_data,
+  window_length = 512,
+  window_overlap = 0.9)
 
-gyro_ftrs <- gyroscope_features(gyroscope_data, frequency_filter = c(0.5, 25))
+gyro_features <- gyroscope_features(
+  gyroscope_data,
+  derived_kinematics = T)
 
-gyro_ftrs <- gyroscope_features(gyroscope_data, IMF = 3)
-
-gyro_ftrs <- gyroscope_features(gyroscope_data, window_length = 512, window_overlap = 0.9)
-
-gyro_ftrs <- gyroscope_features(gyroscope_data, derived_kinematics = F)
-
-gyro_ftrs <- gyroscope_features(gyroscope_data, funs = list(time_domain_summary))
+gyro_features <- gyroscope_features(
+  gyroscope_data,
+  time_filter = c(1, 9),
+  detrend = T,
+  frequency_filter = c(1, 25),
+  window_length = 256,
+  window_overlap = 0.5,
+  funs = time_domain_summary)
 
 }
 \author{
