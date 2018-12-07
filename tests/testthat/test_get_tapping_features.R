@@ -4,19 +4,6 @@
 # email: meghasyam@sagebase.org
 ####################################################
 
-### Require mHealthTools
-# require(mhealthtools)
-
-### Required Libraries
-# library(testthat)
-# library(jsonlite)
-# library(dplyr)
-# library(data.table)
-# library(signal)
-# library(seewave)
-# library(stringr)
-# library(purrr)
-
 ### Load data file
 testthat::context('Load Required Data Files')
 dat <- mhealthtools::tap_data
@@ -25,9 +12,7 @@ dat <- mhealthtools::tap_data
 testthat::context('Extract tapping features')
 testthat::test_that('Wrapper to extract tapping features',{
   # actual function in get_tapping_features.R: get_tapping_features
-  
-  
-  testthat::expect_is(mhealthtools::get_tapping_features(tap_data = dat),
+  testthat::expect_is(get_tapping_features(tap_data = dat),
                       'data.frame') # Is output in the correct format
   
   tempDat <- 'not a dataframe' 

@@ -2,30 +2,44 @@
 % Please edit documentation in R/get_tapping_features.R
 \name{get_tapping_features}
 \alias{get_tapping_features}
-\title{Extract tapping features from raw tapping data.}
+\title{Preprocess and extract interpretable features from screen tapping data.}
 \usage{
-get_tapping_features(tap_data, depress_threshold = 20,
-  remove_duplicates = TRUE)
+get_tapping_features(tap_data)
+
+get_tapping_features(tap_data, depress_threshold = 20, remove_duplicates = TRUE)
 }
 \arguments{
-\item{tap_data}{A data frame with columns t, x, y, buttonid containing 
-tapping measurements. buttonid can be from 
-c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
-indicating a tap that has been classified as to the left, right 
-or neither of those places on the screen}
+\item{tap_data}{A n x 4 data frame with column names as t, x, y, buttonid containing 
+tapping measurements. Here n is the total number of tapping measurements, t is the time 
+of measurement when the screen press was recorded, x and y are the coordinates of the screen 
+touch in the smartphone, and buttonid can be one of the following values c('TappedButtonLeft',
+'TappedButtonRight','TappedButtonNone') indicating a tap that has been classified as to the left,
+right or neither of those places on the screen}
 
-\item{depress_threshold}{A numeric value indicating the threshold between 
-taps}
+\item{depress_threshold}{A numeric value indicating the threshold between two successive taps}
 
-\item{remove_duplicates}{A logical value indicating whether duplicates in taps
-considered as None (i.e buttonid is neither left nor right) need to be removed.}
+\item{remove_duplicates}{A logical value indicating if duplicates in taps considered as None 
+(i.e buttonid is neither left nor right) need to be removed or not}
 }
 \value{
-Tapping features
+A 1 x 43 data frame consisting of tapping features and an error message, if any
+See https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md for
+feature definitions
 }
 \description{
-Extract tapping features from raw tapping data.
+\code{get_tapping_features()} is a convinient wrapper to extract interpretable 
+features from the screen tapping data.
+}
+\examples{
+library(mhealthtools)
+data("tap_data")
+
+tap_features = get_tapping_features(tap_data)
+
+tap_features = get_tapping_features(tap_data, depress_threshold = 120)
+
+tap_features = get_tapping_features(tap_data, remove_duplicates = F)
 }
 \author{
-Elias Chaibub Neto, Meghasyam Tummalacherla, Phil Snyder
+Elias Chaibub Neto, Meghasyam Tummalacherla, Phil Snyder, Thanneer M Perumal
 }

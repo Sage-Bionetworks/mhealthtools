@@ -4,9 +4,10 @@
 \alias{accelerometer_features}
 \title{Extract accelerometer features}
 \usage{
-accelerometer_features(sensor_data, time_filter = NULL, detrend = F,
-  frequency_filter = NULL, IMF = 1, window_length = NULL,
-  window_overlap = NULL, derived_kinematics = F, funs = NULL,
+accelerometer_feature(accelerometer_data)
+
+accelerometer_features(sensor_data, time_filter = NULL, detrend = F, frequency_filter = NULL, 
+  IMF = 1, window_length = NULL, window_overlap = NULL, derived_kinematics = F, funs = NULL,
   models = NULL)
 }
 \arguments{
@@ -20,25 +21,28 @@ of measurements to use during preprocessing and feature extraction after
 normalizing the first timestamp to 0. A \code{NULL} value means do not 
 filter any measurements.}
 
-\item{detrend}{Whether to detrend the signal.}
+\item{detrend}{A logical value indicating whether to detrend the signal. 
+By default the value is FALSE.}
 
 \item{frequency_filter}{A length 2 numeric vector specifying the frequency range
 of the signal (in hertz) to use during preprocessing and feature extraction.
 A \code{NULL} value means do not filter frequencies.}
 
-\item{IMF}{The number of IMFs used during an empirical mode decomposition
+\item{IMF}{The number of IMFs used during an empirical mode decomposition (EMD)
 transformation. The default value of 1 means do not apply EMD to the signal.}
 
-\item{window_length}{Length of the sliding window used during the windowing 
-transformation. Both \code{window_length} and \code{window_overlap} must be
-set for the windowing transformation to be applied.}
+\item{window_length}{A numerical value representing the length of the sliding 
+window used during the windowing transformation. Both \code{window_length} and
+ \code{window_overlap} must be set for the windowing transformation to be applied.}
 
-\item{window_overlap}{Window overlap used during the windowing transformation.
+\item{window_overlap}{Fraction between (0, 1) specifying the window overlap used 
+during the windowing transformation. Note, 1 represents no overlap.
 Both \code{window_length} and \code{window_overlap} must be set for the
 windowing transformation to be applied.}
 
-\item{derived_kinematics}{Whether to add columns for \code{jerk}, \code{velocity},
-and \code{displacement} before extracting features.}
+\item{derived_kinematics}{A logical value specifying whether to add derived 
+kinematic features like \code{displacement}, \code{velocity}, and \code{jerk} 
+from raw \code{accelerometer_data}.}
 
 \item{funs}{A function or list of feature extraction functions that each
 accept a single numeric vector as input. Each function should return a 
@@ -61,5 +65,31 @@ will be stored under \code{$model_features}. If there is an error during
 extraction, the returned result will be stored under \code{$error}.
 }
 \description{
-Extract accelerometer features
+\code{accelerometer_features()} is a wrapper functionality to extract
+interpretable features from triaxial accelerometer data collected through smartphones.
+}
+\examples{
+library(mhealthtools)
+
+data("accelerometer_data")
+
+accel_ftrs <- accelerometer_features(accelerometer_data)
+
+accel_ftrs <- accelerometer_features(accelerometer_data, time_filter = c(2,8))
+
+accel_ftrs <- accelerometer_features(accelerometer_data, detrend = T)
+
+accel_ftrs <- accelerometer_features(accelerometer_data, frequency_filter = c(0.5, 25))
+
+accel_ftrs <- accelerometer_features(accelerometer_data, IMF = 3)
+
+accel_ftrs <- accelerometer_features(accelerometer_data, window_length = 512, window_overlap = 0.9)
+
+accel_ftrs <- accelerometer_features(accelerometer_data, derived_kinematics = F)
+
+accel_ftrs <- accelerometer_features(accelerometer_data, funs = list(time_domain_summary))
+
+}
+\author{
+Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 }

@@ -1,5 +1,17 @@
-#' Extract walk features from raw accelerometer and gyroscope data.
-#'
+#' Preprocess and extract interpretable features from walk assay.
+#' 
+#' @description \code{get_walk_features()} is a convinient wrapper to extract 
+#' interpretable features from the walk assay measured using smartphone raw 
+#' accelerometer and gyroscope sensors.
+#' 
+#' @usage 
+#' get_walk_features(accelerometer_data, gyroscope_data)
+#' 
+#' get_walk_features <- function(accelerometer_data = NULL, gyroscope_data = NULL, 
+#'    gravity_data = NULL, time_filter = NULL, detrend = F, frequency_filter = NULL, 
+#'    IMF = 2, window_length = NULL, window_overlap = NULL, derived_kinematics = F,
+#'    funs = NULL, models = NULL)
+#' 
 #' @param accelerometer_data A data frame with columns t, x, y, z containing 
 #' accelerometer measurements. 
 #' @param gyroscope_data A data frame with columns t, x, y, z containing 
@@ -10,20 +22,24 @@
 #' of measurements to use during preprocessing and feature extraction after
 #' normalizing the first timestamp to 0. A \code{NULL} value means do not 
 #' filter any measurements.
-#' @param detrend Whether to detrend the signal.
+#' @param detrend A logical value indicating whether to detrend the signal. 
+#' By default the value is FALSE.
 #' @param frequency_filter A length 2 numeric vector specifying the frequency range
 #' of the signal (in hertz) to use during preprocessing and feature extraction.
 #' A \code{NULL} value means do not filter frequencies.
-#' @param IMF The number of IMFs used during an empirical mode decomposition
+#' @param IMF The number of IMFs used during an empirical mode decomposition (EMD)
 #' transformation. The default value of 1 means do not apply EMD to the signal.
-#' @param window_length Length of the sliding window used during the windowing 
-#' transformation. Both \code{window_length} and \code{window_overlap} must be
-#' set for the windowing transformation to be applied.
-#' @param window_overlap Window overlap used during the windowing transformation.
+#' @param window_length A numerical value representing the length of the sliding 
+#' window used during the windowing transformation. Both \code{window_length} and
+#'  \code{window_overlap} must be set for the windowing transformation to be applied.
+#' @param window_overlap Fraction between (0, 1) specifying the window overlap used 
+#' during the windowing transformation. Note, 1 represents no overlap.
 #' Both \code{window_length} and \code{window_overlap} must be set for the
 #' windowing transformation to be applied.
-#' @param derived_kinematics Whether to add columns for \code{jerk}, \code{velocity},
-#' and \code{displacement} before extracting features.
+#' @param derived_kinematics A logical value specifying whether to add derived 
+#' kinematic features like \code{displacement}, \code{velocity}, \code{acceleration},
+#' and \code{jerk} from raw \code{accelerometer_data} and 
+#' \code{gyroscope_data}.
 #' @param funs A function or list of feature extraction functions that each
 #' accept a single numeric vector as input. Each function should return a 
 #' dataframe of features (normally a single-row datafame). The input vectors
@@ -36,6 +52,7 @@
 #' \code{sensor_data} after the chosen preprocessing and transformation
 #' steps have been applied and return features. Useful for models which compute
 #' individual statistics using multiple input variables.
+#' 
 #' @return A list. The outputs from \code{funs} will
 #' be stored under \code{$extracted_features} and the outputs from \code{models}
 #' will be stored under \code{$model_features}. If there is an error 
@@ -45,13 +62,37 @@
 #' under \code{$outlier_windows}.
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
+#' @examples 
+#' library(mhealthtools)
+#' 
+#' data("walk_data")
+#' 
+#' accelerometer_data = cbind(t = walk_data$timestamp, walk_data$userAcceleration)
+#' gyroscope_data = cbind(t = walk_data$timestamp, walk_data$rotationRate)
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data)
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, time_filter = c(2,8))
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, detrend = T)
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, frequency_filter = c(0.5, 25))
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, IMF = 3)
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, window_length = 512, window_overlap = 0.9)
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, derived_kinematics = F)
+#' 
+#' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, 
+#'                                funs = list(time_domain_summary))
 #' @importFrom magrittr "%>%"
 get_walk_features <- function(
   accelerometer_data = NULL, gyroscope_data = NULL, gravity_data = NULL,
-  time_filter = NULL, detrend = F, frequency_filter = NULL, IMF = 1,
+  time_filter = NULL, detrend = F, frequency_filter = NULL, IMF = 2,
   window_length = NULL, window_overlap = NULL, derived_kinematics = F,
   funs = NULL, models = NULL) {
-  
+
   features <- list(extracted_features = NULL,
                    model_features = NULL,
                    error = NULL,

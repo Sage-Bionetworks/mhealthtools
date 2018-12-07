@@ -7,14 +7,19 @@
 tapping_features(tap_data, depress_threshold = 20)
 }
 \arguments{
-\item{tap_data}{A data frame with columns t, x, y, buttonid containing 
-tapping measurements. buttonid can be from c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
-indicating a tap that has been classified as to the left, right or neither of those places on the screen}
+\item{tap_data}{A n x 4 data frame with column names as t, x, y, buttonid containing 
+tapping measurements. Here n is the total number of tapping measurements, t is the time 
+of measurement when the screen press was recorded, x and y are the coordinates of the screen 
+touch in the smartphone, and buttonid can be one of the following values c('TappedButtonLeft',
+'TappedButtonRight','TappedButtonNone') indicating a tap that has been classified as to the left,
+right or neither of those places on the screen}
 
-\item{depress_threshold}{A numerical threshold for intertap distance in x axis}
+\item{depress_threshold}{A numeric value indicating the threshold between two successive taps}
 }
 \value{
-A dataframe of features.
+A 1 x 43 data frame consisting of tapping features and an error message, if any
+See https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md for
+feature definitions
 }
 \description{
 Extract tapping (screen sensor) features
