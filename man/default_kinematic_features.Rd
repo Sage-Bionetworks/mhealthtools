@@ -2,19 +2,28 @@
 % Please edit documentation in R/sensors.R
 \name{default_kinematic_features}
 \alias{default_kinematic_features}
-\title{Get list of default feature extraction functions}
+\title{Default feature extraction sub-functions for accelerometer and gyroscope data.}
 \usage{
 default_kinematic_features(sampling_rate)
 }
 \arguments{
-\item{sampling_rate}{Sampling rate of the data these functions will be
-applied to.}
+\item{sampling_rate}{Sampling rate of the data in Hz.}
 }
 \value{
 A list of closures for three feature extraction functions supplied
-with this package that can be passed to the \code{extract} parameter
+with this package that can be passed to the \code{funs} parameter
 in \code{*_features} functions.
 }
 \description{
-Get list of default feature extraction functions
+\code{default_kinematic_features} is a convinient function that returns 
+list of all default feature extraction sub-functions for accelerometer and gyroscope 
+data in mhealthtools
+}
+\examples{
+library(mhealthtools)
+
+fn.list = default_kinematic_features(100)
+}
+\author{
+Phil Snyder
 }

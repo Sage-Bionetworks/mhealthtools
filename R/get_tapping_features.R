@@ -1,5 +1,13 @@
-#' Wrapper functionality to preprocess and extract interpretable features from screen tapping data.
-#'
+#' Preprocess and extract interpretable features from screen tapping data.
+#' 
+#' @description \code{get_tapping_features()} is a convinient wrapper to extract interpretable 
+#' features from the screen tapping data.
+#' 
+#' @usage 
+#' get_tapping_features(tap_data)
+#' 
+#' get_tapping_features(tap_data, depress_threshold = 20, remove_duplicates = TRUE)
+#' 
 #' @param tap_data A n x 4 data frame with column names as t, x, y, buttonid containing 
 #' tapping measurements. Here n is the total number of tapping measurements, t is the time 
 #' of measurement when the screen press was recorded, x and y are the coordinates of the screen 
@@ -15,6 +23,7 @@
 #' @examples 
 #' library(mhealthtools)
 #' data("tap_data")
+#' 
 #' tap_features = get_tapping_features(tap_data)
 #' 
 #' tap_features = get_tapping_features(tap_data, depress_threshold = 120)

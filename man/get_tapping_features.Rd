@@ -2,10 +2,11 @@
 % Please edit documentation in R/get_tapping_features.R
 \name{get_tapping_features}
 \alias{get_tapping_features}
-\title{Wrapper functionality to preprocess and extract interpretable features from screen tapping data.}
+\title{Preprocess and extract interpretable features from screen tapping data.}
 \usage{
-get_tapping_features(tap_data, depress_threshold = 20,
-  remove_duplicates = TRUE)
+get_tapping_features(tap_data)
+
+get_tapping_features(tap_data, depress_threshold = 20, remove_duplicates = TRUE)
 }
 \arguments{
 \item{tap_data}{A n x 4 data frame with column names as t, x, y, buttonid containing 
@@ -26,16 +27,18 @@ See https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefiniti
 feature definitions
 }
 \description{
-Wrapper functionality to preprocess and extract interpretable features from screen tapping data.
+\code{get_tapping_features()} is a convinient wrapper to extract interpretable 
+features from the screen tapping data.
 }
 \examples{
 library(mhealthtools)
 data("tap_data")
-tap_features <- get_tapping_features(tap_data)
 
-tap_features <- get_tapping_features(tap_data, depress_threshold = 120)
+tap_features = get_tapping_features(tap_data)
 
-tap_features <- get_tapping_features(tap_data, depress_threshold = 120, remove_duplicates = F)
+tap_features = get_tapping_features(tap_data, depress_threshold = 120)
+
+tap_features = get_tapping_features(tap_data, remove_duplicates = F)
 }
 \author{
 Elias Chaibub Neto, Meghasyam Tummalacherla, Phil Snyder, Thanneer M Perumal

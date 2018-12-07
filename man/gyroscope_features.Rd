@@ -4,41 +4,45 @@
 \alias{gyroscope_features}
 \title{Extract gyroscope features}
 \usage{
-gyroscope_features(sensor_data, time_filter = NULL, detrend = F,
-  frequency_filter = NULL, IMF = 1, window_length = NULL,
-  window_overlap = NULL, derived_kinematics = F, funs = NULL,
-  models = NULL)
+gyroscope_feature(gyroscope_data)
+
+gyroscope_features(sensor_data, time_filter = NULL, detrend = F, frequency_filter = NULL, 
+   IMF = 1, window_length = NULL, window_overlap = NULL, derived_kinematics = F, funs = NULL,
+   models = NULL)
 }
 \arguments{
 \item{sensor_data}{An \code{n} x 4 data frame with column names \code{t}, \code{x},
-\code{y}, \code{z} containing gyroscope measurements. Here \code{n} is the
+\code{y}, \code{z} containing accelerometer measurements. Here \code{n} is the
 total number of measurements, \code{t} is the timestamp of each measurement, and
-\code{x}, \code{y} and \code{z} are linear velocity measurements.}
+\code{x}, \code{y} and \code{z} are angular velocity measurements.}
 
 \item{time_filter}{A length 2 numeric vector specifying the time range 
 of measurements to use during preprocessing and feature extraction after
 normalizing the first timestamp to 0. A \code{NULL} value means do not 
 filter any measurements.}
 
-\item{detrend}{Whether to detrend the signal.}
+\item{detrend}{A logical value indicating whether to detrend the signal. 
+By default the value is FALSE.}
 
 \item{frequency_filter}{A length 2 numeric vector specifying the frequency range
 of the signal (in hertz) to use during preprocessing and feature extraction.
 A \code{NULL} value means do not filter frequencies.}
 
-\item{IMF}{The number of IMFs used during an empirical mode decomposition
+\item{IMF}{The number of IMFs used during an empirical mode decomposition (EMD)
 transformation. The default value of 1 means do not apply EMD to the signal.}
 
-\item{window_length}{Length of the sliding window used during the windowing 
-transformation. Both \code{window_length} and \code{window_overlap} must be
-set for the windowing transformation to be applied.}
+\item{window_length}{A numerical value representing the length of the sliding 
+window used during the windowing transformation. Both \code{window_length} and
+ \code{window_overlap} must be set for the windowing transformation to be applied.}
 
-\item{window_overlap}{Window overlap used during the windowing transformation.
+\item{window_overlap}{Fraction between (0, 1) specifying the window overlap used 
+during the windowing transformation. Note, 1 represents no overlap.
 Both \code{window_length} and \code{window_overlap} must be set for the
 windowing transformation to be applied.}
 
-\item{derived_kinematics}{Whether to add columns for \code{jerk}, \code{velocity},
-and \code{displacement} before extracting features.}
+\item{derived_kinematics}{A logical value specifying whether to add derived 
+kinematic features like \code{displacement}, and \code{acceleration} from
+raw \code{gyroscope_data}.}
 
 \item{funs}{A function or list of feature extraction functions that each
 accept a single numeric vector as input. Each function should return a 
@@ -61,5 +65,31 @@ will be stored under \code{$model_features}. If there is an error during
 extraction, the returned result will be stored under \code{$error}.
 }
 \description{
-Extract gyroscope features
+\code{gyroscope_features()} is a wrapper functionality to extract
+interpretable features from triaxial gyroscope data collected through smartphones.
+}
+\examples{
+library(mhealthtools)
+
+data("gyroscope_data")
+
+gyro_ftrs <- gyroscope_features(gyroscope_data)
+
+gyro_ftrs <- gyroscope_features(gyroscope_data, time_filter = c(2,8))
+
+gyro_ftrs <- gyroscope_features(gyroscope_data, detrend = T)
+
+gyro_ftrs <- gyroscope_features(gyroscope_data, frequency_filter = c(0.5, 25))
+
+gyro_ftrs <- gyroscope_features(gyroscope_data, IMF = 3)
+
+gyro_ftrs <- gyroscope_features(gyroscope_data, window_length = 512, window_overlap = 0.9)
+
+gyro_ftrs <- gyroscope_features(gyroscope_data, derived_kinematics = F)
+
+gyro_ftrs <- gyroscope_features(gyroscope_data, funs = list(time_domain_summary))
+
+}
+\author{
+Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 }

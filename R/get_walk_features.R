@@ -1,6 +1,17 @@
-#' Wrapper functionality to preprocess and extract interprettable features from 
-#' walk assay measured using smartphone raw accelerometer and gyroscpe sensors.
-#'
+#' Preprocess and extract interpretable features from walk assay.
+#' 
+#' @description \code{get_walk_features()} is a convinient wrapper to extract 
+#' interpretable features from the walk assay measured using smartphone raw 
+#' accelerometer and gyroscope sensors.
+#' 
+#' @usage 
+#' get_walk_features(accelerometer_data, gyroscope_data)
+#' 
+#' get_walk_features <- function(accelerometer_data = NULL, gyroscope_data = NULL, 
+#'    gravity_data = NULL, time_filter = NULL, detrend = F, frequency_filter = NULL, 
+#'    IMF = 2, window_length = NULL, window_overlap = NULL, derived_kinematics = F,
+#'    funs = NULL, models = NULL)
+#' 
 #' @param accelerometer_data A data frame with columns t, x, y, z containing 
 #' accelerometer measurements. 
 #' @param gyroscope_data A data frame with columns t, x, y, z containing 
@@ -41,6 +52,7 @@
 #' \code{sensor_data} after the chosen preprocessing and transformation
 #' steps have been applied and return features. Useful for models which compute
 #' individual statistics using multiple input variables.
+#' 
 #' @return A list. The outputs from \code{funs} will
 #' be stored under \code{$extracted_features} and the outputs from \code{models}
 #' will be stored under \code{$model_features}. If there is an error 
@@ -52,8 +64,12 @@
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
 #' library(mhealthtools)
-#' data("accelerometer_data")
-#' data(gyroscope_data)
+#' 
+#' data("walk_data")
+#' 
+#' accelerometer_data = cbind(t = walk_data$timestamp, walk_data$userAcceleration)
+#' gyroscope_data = cbind(t = walk_data$timestamp, walk_data$rotationRate)
+#' 
 #' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data)
 #' 
 #' walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, time_filter = c(2,8))
@@ -73,7 +89,7 @@
 #' @importFrom magrittr "%>%"
 get_walk_features <- function(
   accelerometer_data = NULL, gyroscope_data = NULL, gravity_data = NULL,
-  time_filter = NULL, detrend = F, frequency_filter = NULL, IMF = 1,
+  time_filter = NULL, detrend = F, frequency_filter = NULL, IMF = 2,
   window_length = NULL, window_overlap = NULL, derived_kinematics = F,
   funs = NULL, models = NULL) {
 
