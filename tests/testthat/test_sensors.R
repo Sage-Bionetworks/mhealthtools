@@ -47,41 +47,6 @@ test_that(
       "list")
 })
 
-test_that("Extract kinematic sensor features", {
-  expect_is(
-    kinematic_sensor_features(
-      sensor_data = mini_accelerometer_data,
-      preprocess = NULL,
-      transformation = NULL,
-      extract = NULL,
-      extract_on = NULL,
-      models = NULL,
-      acf_col = NULL),
-    "list")
-  expect_is(
-    kinematic_sensor_features(
-      sensor_data = mini_accelerometer_data,
-      preprocess = mutate_detrend,
-      transformation = NULL,
-      extract = NULL,
-      extract_on = NULL,
-      models = NULL,
-      acf_col = NULL),
-    "list")
-  expect_is(
-    kinematic_sensor_features(
-      sensor_data = mini_accelerometer_data,
-      preprocess = list(purrr::partial(filter_time, t1 = 0.5, t2 = 1.9),
-                        mutate_detrend),
-      transformation = NULL,
-      extract = NULL,
-      extract_on = NULL,
-      models = NULL,
-      acf_col = NULL),
-    "list")
-})
-
-
 test_that("Extract sensor features", {
   expect_is(sensor_features(sensor_data = mini_accelerometer_data), "list")
 })
