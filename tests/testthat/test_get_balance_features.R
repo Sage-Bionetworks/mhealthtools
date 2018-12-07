@@ -1,7 +1,7 @@
-context("get_rest_features")
+context("get_balance_features")
 
 test_that("No arguments", {
-  expect_equal(get_rest_features(),
+  expect_equal(get_balance_features(),
                list(extracted_features = NULL,
                     model_features = NULL,
                     error = NULL,
@@ -9,14 +9,14 @@ test_that("No arguments", {
 })
   
 test_that("Accelerometer data only", {
-  features_accel_only <- get_rest_features(
+  features_accel_only <- get_balance_features(
     accelerometer_data = mini_accelerometer_data)
   expect_is(features_accel_only, "list")
   expect_is(features_accel_only$extracted_features, "data.frame")
 })
 # the test case is symmetrical for gyroscope data only, skipping
 test_that("Both accelerometer and gyroscope data", {
-  features_both <- get_rest_features(
+  features_both <- get_balance_features(
       accelerometer_data = mini_accelerometer_data,
       gyroscope_data = mini_gyroscope_data)
   expect_is(features_both, "list")
@@ -24,7 +24,7 @@ test_that("Both accelerometer and gyroscope data", {
 })
   
 test_that("Gravity data", {
-  features_with_gravity <- get_rest_features(
+  features_with_gravity <- get_balance_features(
     accelerometer_data = mini_accelerometer_data,
     gravity_data = mini_gravity_data,
     window_length = 64,
@@ -39,7 +39,7 @@ test_that("Passing a model", {
     feature <- feature %>%  unlist() %>%  as.numeric()
     return(data.frame(f1 = mean(feature, na.rm = T)))
   }
-  features_with_model <- get_rest_features(
+  features_with_model <- get_balance_features(
       accelerometer_data = mini_accelerometer_data,
       gyroscope_data = mini_gyroscope_data,
       models = custom_model)
@@ -53,7 +53,7 @@ test_that("Passing a model", {
   
 test_that("Input data contains NA", {
   expect_equal(is_error_dataframe(
-    get_rest_features(accelerometer_data = NA)), T)
+    get_balance_features(accelerometer_data = NA)), T)
   expect_equal(is_error_dataframe(
-    get_rest_features(gyroscope_data = NA)), T)
+    get_balance_features(gyroscope_data = NA)), T)
 })

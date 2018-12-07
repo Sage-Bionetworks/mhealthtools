@@ -219,10 +219,9 @@ testthat::test_that("Detrend the given sensor data",{
   # HC - Hard Coded example
   testDat <- datAccelTidy %>% dplyr::filter(t < 1)
   testthat::expect_equal(
-    mhealthtools:::mutate_detrend(sensor_data = testDat),
-    mhealthtools:::test_mutate_detrend
+    mhealthtools:::mutate_detrend(sensor_data = testDat) %>% dplyr::arrange(t,axis),
+    mhealthtools:::test_mutate_detrend %>% dplyr::arrange(t,axis)
   )
-  
 })
 
 testthat::context('Bandpass and filtering by time ')
@@ -297,8 +296,10 @@ testthat::test_that('Bandpass the tidy sensor data', {
       sensor_data = testDat,
       window_length = 50,
       sampling_rate = 100,
-      frequency_range = c(4,20)),
-    mhealthtools:::test_mutate_bandpass
+      frequency_range = c(4,20)) %>% 
+      dplyr::arrange(t,axis),
+    mhealthtools:::test_mutate_bandpass %>% 
+      dplyr::arrange(t,axis)
   )
   
 })

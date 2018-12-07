@@ -111,7 +111,7 @@ Please read the function documentation `?get_walk_features` for more info.
 
 In this task, the participant is asked to keep hold the phone in his/her hand in their lap so that their resting tremor can be measured. For someone with Parkinson's we expect to see some effects of the characteristic pill rolling tremor. 
 
-The features extracted from `get_rest_features` do capture to some extent the effects of those symptoms. 
+The features extracted from `get_balance_features` do capture to some extent the effects of those symptoms. 
 
 `mhealthtools` comes with preloaded rest tremor data from one of the mpower participants. Let's take a look at the data before we proceed to analyze it.
 
@@ -139,7 +139,7 @@ a <- tidyr::gather(a, 'axis' , 'val', -t)
 ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
 ```
 
-As you can see the accelerometer data in `rest_tremor_data` is missing the `t` column, and it is referenced as `rest_tremor_data$timestamp`, so let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_rest_features`. Similarly for the gyroscope data
+As you can see the accelerometer data in `rest_tremor_data` is missing the `t` column, and it is referenced as `rest_tremor_data$timestamp`, so let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_balance_features`. Similarly for the gyroscope data
 
 ```{r}
 # Getting walk acceleromter and gyroscope data into mhealthtools' tidy format
@@ -153,7 +153,7 @@ rest_tremor_gyroscope_data$t <- rest_tremor_data$timestamp
 Now let's get the rest tremor features using the tidy data
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
-rest_tremor_features <- get_rest_features(
+rest_tremor_features <- get_balance_features(
   accelerometer_data = rest_tremor_accelerometer_data,
   gyroscope_data = rest_tremor_gyroscope_data)
 # Using the default settings
@@ -161,16 +161,16 @@ rest_tremor_features <- get_rest_features(
 dplyr::glimpse(rest_tremor_features)
 ```
 
-As with most of the functions in `mhealthtools`, `get_rest_features` also comes with many options for input parameters for versatile data analysis
+As with most of the functions in `mhealthtools`, `get_balance_features` also comes with many options for input parameters for versatile data analysis
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
-rest_tremor_features <- get_rest_features(
+rest_tremor_features <- get_balance_features(
   accelerometer_data = rest_tremor_accelerometer_data,
   gyroscope_data = rest_tremor_gyroscope_data,
   frequency_filter = c(3,15))
 ```
 
-Please read the function documentation `?get_rest_features` for more info.
+Please read the function documentation `?get_balance_features` for more info.
 
 ##### Kinetic tremor (Action tremor)
 

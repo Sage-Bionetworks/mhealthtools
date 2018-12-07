@@ -2,11 +2,9 @@
 % Please edit documentation in R/get_heartrate.R
 \name{get_heartrate}
 \alias{get_heartrate}
-\title{Extract heart rate for each color band from avg pixel value per
-frame of video (processed hr)}
+\title{Preprocess and extract heart rate from smartphone video recordings.}
 \usage{
-get_heartrate(heartrate_data, window_length = 10,
-  frequency_range = c(1, 25), bandpass_order = 128)
+get_heartrate(heartrate_data)
 }
 \arguments{
 \item{heartrate_data}{A data frame with columns t, red, green and blue}
@@ -23,8 +21,18 @@ list containing heart rate and confidence of the estimate for
 each color (red, green, blue)
 }
 \description{
-Extract heart rate for each color band from avg pixel value per
-frame of video (processed hr)
+\code{get_heartrate()} is a convinient wrapper to extract 
+heart rate for each color band from average pixel value per frame of video 
+(processed hr) captured using smartphone cameras.
+}
+\examples{
+library(mhealthtools)
+
+data('heartrate_data')
+
+heartrate_data = heartrate_data[,c('timestamp', 'red', 'green', 'blue')]
+heartrate_ftrs = get_heartrate(heartrate_data)
+ 
 }
 \author{
 Meghasyam Tummalacherla, Phil Snyder
