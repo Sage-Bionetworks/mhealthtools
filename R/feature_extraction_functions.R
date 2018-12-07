@@ -1,28 +1,20 @@
 #' Returns statistical summary of the time series
 #' 
-#' @description \code{time_domain_summary()} is a convinient feature 
-#' extraction function that characterises a given time series in to 
-#' statistical features in the time domain.
-#' 
-#' @usage time_domain_summary(values, samplig_rate)
+#' A convenience feature extraction function which characterises a given
+#' time series in to statistical features in the time domain.
 #' 
 #' @param values A numeric vector.
 #' @param sampling_rate Sampling_rate of \code{values}. If NA it uses default 
 #' sampling rate of 100Hz.
-#' 
-#' @return A features data frame of dimension 1 x 20. See 
-#' https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md
-#' for feature definitions.
-#' 
+#' @return A features data frame of dimension 1 x 20. See the
+#' \href{https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md}{feature definitions}
+#' document.
 #' @author Thanneer Malai Perumal, Phil Snyder
 #' @export
 #' @examples 
-#' library(mhealthtools)
-#' 
-#' data(accelerometer_data)
-#' 
-#' tm.ftrs = time_domain_summary(accelerometer_data$x, sampling_rate = 100.122)
-#' 
+#' time_features = time_domain_summary(
+#'   accelerometer_data$x,
+#'   sampling_rate = 100.122)
 time_domain_summary <- function(values, sampling_rate=NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
@@ -58,30 +50,25 @@ time_domain_summary <- function(values, sampling_rate=NA) {
 
 #' Returns statistical summary of the frequency spectrum
 #' 
-#' @description \code{frequency_domain_summary()} is a convinient feature 
-#' extraction function that characterises the frequency spectrum of a given time series
-#' in to statistical features in the frequency domain.
-#' 
-#' @usage frequency_domain_summary(values, samplig_rate, npeaks)
+#' A convenience feature extraction function that characterises the
+#' frequency spectrum of a given time series in to statistical features
+#' in the frequency domain.
 #' 
 #' @param values A numeric vector from a time series measurement.
 #' @param sampling_rate Sampling_rate of \code{values}. If NA it uses default 
 #' sampling rate of 100Hz.
 #' @param npeaks Number of peaks to be computed in emprical wavelet transformation (EWT).
 #' If NA it uses the default value of 3.
-#' 
-#' @return A features data frame of dimension 1 x 19. See 
-#' https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md
-#' for feature definitions.
-#' 
+#' @return A features data frame of dimension 1 x 19. See the
+#' \href{https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md}{feature definitions}
+#' document.
 #' @author Thanneer Malai Perumal, Phil Snyder
 #' @export
 #' @examples 
-#' library(mhealthtools)
-#' 
-#' data(accelerometer_data)
-#' 
-#' fr.ftrs = frequency_domain_summary(accelerometer_data$x, sampling_rate = 100.122, npeaks = 4)
+#' frequency_features = frequency_domain_summary(
+#'   accelerometer_data$x,
+#'   sampling_rate = 100.122,
+#'   npeaks = 4)
 frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
@@ -116,7 +103,7 @@ frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
     sh = seewave::sh(pdf))
   
   # Get EWT spectrum
-  ewt_spectrum <- data.frame(freq = freq, pdf = pdf) %>% 
+  ewt_spectrum <- data.frame(freq = freq, pdf = pdf) %>%
     get_ewt_spectrum(sampling_rate = sampling_rate, npeaks = npeaks)
   
   # Compute normalised point energies of each EW spctrum
@@ -141,27 +128,23 @@ frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
 
 #' Returns energy for each 0.5Hz band in the frequency spectrum.
 #' 
-#' @description \code{frequency_domain_energy()} is a convinient feature 
-#' extraction function that converts a given time series in to frequency spectrum
-#' and computes energy in each 0.5Hz band from 0 to 25 Hz.
-#' 
-#' @usage frequency_domain_energy(values, samplig_rate)
+#' A convenience feature extraction function that converts a given
+#' time series in to frequency spectrum and computes energy in each
+#' 0.5Hz band from 0 to 25 Hz.
 #' 
 #' @param values A numeric vector.
 #' @param sampling_rate Sampling_rate of \code{values}. If NA it uses default 
 #' sampling rate of 100Hz.
-#' 
 #' @return A features data frame of dimension 1 x 48, each representing energy within 
-#' a 0.5Hz band.
-#' 
+#' a 0.5Hz band. See the
+#' \href{https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md}{feature definitions}
+#' document.
 #' @author Thanneer Malai Perumal, Phil Snyder
 #' @export
 #' @examples 
-#' library(mhealthtools)
-#' 
-#' data(accelerometer_data)
-#' 
-#' fr.ftrs = frequency_domain_energy(accelerometer_data$x, sampling_rate = 100.122)
+#' frequency_energy_features = frequency_domain_energy(
+#'   accelerometer_data$x,
+#'   sampling_rate = 100.122)
 frequency_domain_energy <- function(values, sampling_rate=NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for frequency_domain_energy")

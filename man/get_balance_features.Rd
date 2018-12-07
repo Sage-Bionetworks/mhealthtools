@@ -4,12 +4,11 @@
 \alias{get_balance_features}
 \title{Preprocess and extract interpretable features from balance assay.}
 \usage{
-get_balance_features(accelerometer_data, gyroscope_data)
-
-get_balance_features(accelerometer_data = NULL, gyroscope_data = NULL, 
-   gravity_data = NULL, time_filter = NULL, detrend = F, frequency_filter = NULL, 
-   IMF = 1, window_length = NULL, window_overlap = NULL, derived_kinematics = F,
-   funs = NULL, models = NULL)
+get_balance_features(accelerometer_data = NULL, gyroscope_data = NULL,
+  gravity_data = NULL, time_filter = NULL, detrend = F,
+  frequency_filter = NULL, IMF = 1, window_length = NULL,
+  window_overlap = NULL, derived_kinematics = F, funs = NULL,
+  models = NULL)
 }
 \arguments{
 \item{accelerometer_data}{A data frame with columns t, x, y, z containing 
@@ -74,7 +73,7 @@ window_overlap are set, phone rotation information will be stored
 under \code{$outlier_windows}.
 }
 \description{
-\code{get_balance_features()} is a convinient wrapper to extract 
+A convenience wrapper to extract 
 interpretable features from the balance assay measured using smartphone raw 
 accelerometer and gyroscope sensors.
 }
