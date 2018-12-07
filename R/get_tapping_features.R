@@ -15,11 +15,11 @@
 #' @examples 
 #' library(mhealthtools)
 #' data("tap_data")
-#' tap_features <- get_tapping_features(tap_data)
+#' tap_features = get_tapping_features(tap_data)
 #' 
-#' tap_features <- get_tapping_features(tap_data, depress_threshold = 120)
+#' tap_features = get_tapping_features(tap_data, depress_threshold = 120)
 #' 
-#' tap_features <- get_tapping_features(tap_data, depress_threshold = 120, remove_duplicates = F)
+#' tap_features = get_tapping_features(tap_data, remove_duplicates = F)
 #' @export
 #' @author Elias Chaibub Neto, Meghasyam Tummalacherla, Phil Snyder, Thanneer M Perumal
 get_tapping_features <- function(tap_data, 
@@ -58,6 +58,7 @@ get_tapping_features <- function(tap_data,
 #' 'TappedButtonRight','TappedButtonNone') indicating a tap that has been classified as to the left,
 #' right or neither of those places on the screen
 #' @return A dataframe with duplicates corresponding to buttonid == 'TappedButtonNone' removed
+
 clean_tapped_button_none <- function(tap_data) {
   # Get separate dataframes for taps on left, right buttons, and None
   tap_left_right <- tap_data %>%
@@ -65,7 +66,7 @@ clean_tapped_button_none <- function(tap_data) {
   tap_none <- tap_data %>%
     dplyr::filter(buttonid == "TappedButtonNone")
   
-  # we only want to drop TappedButtonNone duplications
+  # We only want to drop TappedButtonNone duplications
   duplicated_none <- duplicated(tap_none %>% dplyr::select(x, y))
   tap_none <- tap_none[which(!duplicated_none),]
   
