@@ -73,28 +73,53 @@ window_overlap are set, phone rotation information will be stored
 under \code{$outlier_windows}.
 }
 \description{
-A convenience wrapper to extract 
+A convenience wrapper for extracting
 interpretable features from the balance assay measured using smartphone raw 
 accelerometer and gyroscope sensors.
 }
 \examples{
-accelerometer_data = cbind(t = walk_data$timestamp, walk_data$userAcceleration)
-gyroscope_data = cbind(t = walk_data$timestamp, walk_data$rotationRate)
+accelerometer_data = cbind(
+  t = balance_data$timestamp,
+  balance_data$userAcceleration)
+gyroscope_data = cbind(
+  t = balance_data$timestamp,
+  balance_data$rotationRate)
 
 balance_features <- get_balance_features(accelerometer_data, gyroscope_data)
 
-balance_features <- get_balance_features(accelerometer_data, gyroscope_data, time_filter = c(2,8))
+balance_features <- get_balance_features(
+  accelerometer_data,
+  gyroscope_data,
+  time_filter = c(2,8))
 
-balance_features <- get_balance_features(accelerometer_data, gyroscope_data, detrend = T)
+balance_features <- get_balance_features(
+  accelerometer_data,
+  gyroscope_data,
+  detrend = T)
 
-balance_features <- get_balance_features(accelerometer_data, gyroscope_data, frequency_filter = c(0.5, 25))
+balance_features <- get_balance_features(
+  accelerometer_data,
+  gyroscope_data,
+  frequency_filter = c(0.5, 25))
 
-balance_features <- get_balance_features(accelerometer_data, gyroscope_data, window_length = 512, window_overlap = 0.9)
+balance_features <- get_balance_features(
+  accelerometer_data,
+  gyroscope_data,
+  window_length = 512,
+  window_overlap = 0.9)
 
-balance_features <- get_balance_features(accelerometer_data, gyroscope_data, derived_kinematics = F)
+balance_features <- get_balance_features(
+  accelerometer_data,
+  gyroscope_data,
+  derived_kinematics = F)
 
-balance_features <- get_balance_features(accelerometer_data, gyroscope_data, 
-                                     funs = list(time_domain_summary))
+balance_features <- get_balance_features(
+  accelerometer_data,
+  gyroscope_data, 
+  detrend = T,
+  frequency_filter = c(1, 25),
+  funs = list(time_domain_summary))
+  
 }
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder

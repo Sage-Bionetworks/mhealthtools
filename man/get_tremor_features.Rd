@@ -4,12 +4,11 @@
 \alias{get_tremor_features}
 \title{Preprocess and extract interpretable features from resting and postural tremor assays.}
 \usage{
-get_tremor_features(accelerometer_data, gyroscope_data)
-
-get_tremor_features(accelerometer_data = NULL, gyroscope_data = NULL, 
-   gravity_data = NULL, time_filter = NULL, detrend = F, frequency_filter = NULL, 
-   IMF = 1, window_length = NULL, window_overlap = NULL, derived_kinematics = F,
-   funs = NULL, models = NULL)
+get_tremor_features(accelerometer_data = NULL, gyroscope_data = NULL,
+  gravity_data = NULL, time_filter = NULL, detrend = F,
+  frequency_filter = NULL, IMF = 1, window_length = NULL,
+  window_overlap = NULL, derived_kinematics = F, funs = NULL,
+  models = NULL)
 }
 \arguments{
 \item{accelerometer_data}{A data frame with columns t, x, y, z containing 
@@ -74,31 +73,53 @@ window_overlap are set, phone rotation information will be stored
 under \code{$outlier_windows}.
 }
 \description{
-\code{get_tremor_features()} is a convinient wrapper to extract 
-interpretable features from the resting and postural tremor assays measured using 
-smartphone raw accelerometer and gyroscope sensors.
+A convenience wrapper for extracting interpretable features from the resting
+and postural tremor assays measured using smartphone raw accelerometer
+and gyroscope sensors.
 }
 \examples{
-library(mhealthtools)
-data("rest_tremor_data")
+accelerometer_data = cbind(
+  t = rest_tremor_data$timestamp,
+  rest_tremor_data$userAcceleration)
+gyroscope_data = cbind(
+  t = rest_tremor_data$timestamp,
+  rest_tremor_data$rotationRate)
 
-accelerometer_data = cbind(t = rest_tremor_data$timestamp, rest_tremor_data$userAcceleration)
-gyroscope_data = cbind(t = rest_tremor_data$timestamp, rest_tremor_data$rotationRate)
+tremor_features <- get_tremor_features(accelerometer_data, gyroscope_data)
 
-tremor_ftrs <- get_tremor_features(accelerometer_data, gyroscope_data)
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data,
+  time_filter = c(2,8))
 
-tremor_ftrs <- get_tremor_features(accelerometer_data, gyroscope_data, time_filter = c(2,8))
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data,
+  detrend = T)
 
-tremor_ftrs <- get_tremor_features(accelerometer_data, gyroscope_data, detrend = T)
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data,
+  frequency_filter = c(0.5, 25))
 
-tremor_ftrs <- get_tremor_features(accelerometer_data, gyroscope_data, frequency_filter = c(0.5, 25))
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data,
+  window_length = 512,
+  window_overlap = 0.9)
 
-tremor_ftrs <- get_tremor_features(accelerometer_data, gyroscope_data, window_length = 512, window_overlap = 0.9)
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data,
+  derived_kinematics = F)
 
-tremor_ftrs <- get_tremor_features(accelerometer_data, gyroscope_data, derived_kinematics = F)
-
-tremor_ftrs <- get_tremor_features(accelerometer_data, gyroscope_data, 
-                                   funs = list(time_domain_summary))
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data, 
+  detrend = T,
+  frequency_filter = c(1, 25),
+  funs = list(time_domain_summary))
+  
 }
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder

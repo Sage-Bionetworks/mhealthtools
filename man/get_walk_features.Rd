@@ -4,12 +4,11 @@
 \alias{get_walk_features}
 \title{Preprocess and extract interpretable features from walk assay.}
 \usage{
-get_walk_features(accelerometer_data, gyroscope_data)
-
-get_walk_features <- function(accelerometer_data = NULL, gyroscope_data = NULL, 
-   gravity_data = NULL, time_filter = NULL, detrend = F, frequency_filter = NULL, 
-   IMF = 2, window_length = NULL, window_overlap = NULL, derived_kinematics = F,
-   funs = NULL, models = NULL)
+get_walk_features(accelerometer_data = NULL, gyroscope_data = NULL,
+  gravity_data = NULL, time_filter = NULL, detrend = F,
+  frequency_filter = NULL, IMF = 2, window_length = NULL,
+  window_overlap = NULL, derived_kinematics = F, funs = NULL,
+  models = NULL)
 }
 \arguments{
 \item{accelerometer_data}{A data frame with columns t, x, y, z containing 
@@ -74,34 +73,54 @@ window_overlap are set, phone rotation information will be stored
 under \code{$outlier_windows}.
 }
 \description{
-\code{get_walk_features()} is a convinient wrapper to extract 
-interpretable features from the walk assay measured using smartphone raw 
-accelerometer and gyroscope sensors.
+A convenience wrapper for extracting interpretable features from the
+walk assay measured using smartphone raw accelerometer and gyroscope sensors.
 }
 \examples{
-library(mhealthtools)
+accelerometer_data = cbind(
+  t = walk_data$timestamp,
+  walk_data$userAcceleration)
+gyroscope_data = cbind(
+  t = walk_data$timestamp,
+  walk_data$rotationRate)
 
-data("walk_data")
+walk_features <- get_walk_features(
+  accelerometer_data,
+  gyroscope_data)
 
-accelerometer_data = cbind(t = walk_data$timestamp, walk_data$userAcceleration)
-gyroscope_data = cbind(t = walk_data$timestamp, walk_data$rotationRate)
+walk_features <- get_walk_features(
+  accelerometer_data,
+  gyroscope_data,
+  time_filter = c(2,8))
 
-walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data)
+walk_features <- get_walk_features(
+  accelerometer_data,
+  gyroscope_data,
+  detrend = T)
 
-walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, time_filter = c(2,8))
+walk_features <- get_walk_features(
+  accelerometer_data,
+  gyroscope_data,
+  frequency_filter = c(0.5, 25))
 
-walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, detrend = T)
+walk_features <- get_walk_features(
+  accelerometer_data,
+  gyroscope_data,
+  window_length = 512,
+  window_overlap = 0.9)
 
-walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, frequency_filter = c(0.5, 25))
+walk_features <- get_walk_features(
+  accelerometer_data,
+  gyroscope_data,
+  derived_kinematics = F)
 
-walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, IMF = 3)
-
-walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, window_length = 512, window_overlap = 0.9)
-
-walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, derived_kinematics = F)
-
-walk_ftrs <- get_walk_features(accelerometer_data, gyroscope_data, 
-                               funs = list(time_domain_summary))
+walk_features <- get_walk_features(
+  accelerometer_data,
+  gyroscope_data, 
+  detrend = T,
+  frequency_filter = c(1, 25),
+  funs = list(time_domain_summary))
+  
 }
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
