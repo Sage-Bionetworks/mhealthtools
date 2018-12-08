@@ -2,18 +2,20 @@
 % Please edit documentation in R/utils.R
 \name{get_left_right_events_and_tap_intervals}
 \alias{get_left_right_events_and_tap_intervals}
-\title{Curate the raw tapping data to get Left and Right events, after applying the threshold}
+\title{Curate the raw tapping data to get Left and Right events,
+after applying the threshold.}
 \usage{
-get_left_right_events_and_tap_intervals(tapData, depressThr = 20)
+get_left_right_events_and_tap_intervals(tap_data, depress_threshold = 20)
 }
 \arguments{
-\item{tapData}{A dataframe with t,x,y and buttonid columns}
+\item{tap_data}{A dataframe with t,x,y and buttonid columns}
 
-\item{depressThr}{The threshold for intertap distance}
+\item{depress_threshold}{The threshold for intertap distance}
 }
 \value{
 A dataframe with feature values and the appropriate error message
 }
 \description{
-Curate the raw tapping data to get Left and Right events, after applying the threshold
+Curate the raw tapping data to get Left and Right events,
+after applying the threshold.
 }

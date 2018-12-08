@@ -2,7 +2,7 @@
 % Please edit documentation in R/sensors.R
 \name{sensor_features}
 \alias{sensor_features}
-\title{Extract features from sensor data}
+\title{Extract sensor features}
 \usage{
 sensor_features(sensor_data, transform = NULL, extract = NULL,
   extract_on = NULL, models = NULL)
@@ -10,23 +10,27 @@ sensor_features(sensor_data, transform = NULL, extract = NULL,
 \arguments{
 \item{sensor_data}{A dataframe.}
 
-\item{transform}{A function which accepts \code{sensor_data} as input
-and outputs a dataframe.}
+\item{transform}{A function or list of functions to be applied sequentially
+to \code{sensor_data}.}
 
-\item{extract}{A list of functions to be applied to each of the columns
-in \code{extract_on} from the output of \code{transform}. Each function
-should return a dataframe of features (normally a single-row datafame).}
+\item{extract}{A function or list of functions to be applied to each of the
+columns in \code{extract_on} from the output of \code{transform}. Each function
+should return a single-row dataframe of features. If the output of
+\code{transform} has incidental columns (columns not contained in either the
+grouping columns of \code{transform} nor \code{extract_on}, they will be
+preserved in the outputted features.}
 
-\item{extract_on}{A list of column names to compute statistics on.}
+\item{extract_on}{A string or list of column names to compute features from.
+If \code{NULL}, features will be extracted from all non-grouped columns.}
 
-\item{models}{A list of functions which accept the output from
-\code{transform} as input and output a dataframe.}
+\item{models}{A function or list of functions which accept the output from
+\code{transform} as input and output features.}
 }
 \value{
-A list of feature dataframes. The output from \code{extract} will
+A list of features. The output from \code{extract} will
 be stored under \code{$extracted_features} and the output from \code{models}
-will be stored under \code{$model_features}. If \code{transform} returns
-an error dataframe (see \code{has_error}), the error dataframe is stored
+will be stored under \code{$model_features}. If \code{transform}
+returns an error dataframe (see \code{has_error}), the error dataframe is stored
 under \code{$error}.
 }
 \description{
@@ -36,9 +40,9 @@ is not normally called directly.
 \details{
 The feature extraction paradigm is implemented as such:
 
-Input: raw feature data
+Input: raw sensor data
 Transform: into a format suitable for calculating statistics upon
-Extract: features by computing statistics upon individual, grouped columns --
-         or with a model.
-Return: A list of feature dataframes
+Extract: features by computing statistics upon individual columns 
+         within grouped rows -- or by using a model
+Return: A list of features
 }

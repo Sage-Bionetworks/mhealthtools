@@ -4,43 +4,104 @@
 \alias{accelerometer_features}
 \title{Extract accelerometer features}
 \usage{
-accelerometer_features(sensor_data, transformation = NULL, funs = NULL,
-  models = NULL, window_length = 256, time_range = c(1, 9),
-  frequency_range = c(1, 25))
+accelerometer_features(sensor_data, time_filter = NULL, detrend = F,
+  frequency_filter = NULL, IMF = 1, window_length = NULL,
+  window_overlap = NULL, derived_kinematics = F, funs = NULL,
+  models = NULL)
 }
 \arguments{
-\item{sensor_data}{A data frame with columns t, x, y, z containing 
-accelerometer measurements.}
+\item{sensor_data}{An \code{n} x 4 data frame with column names \code{t}, \code{x},
+\code{y}, \code{z} containing accelerometer measurements. Here \code{n} is the
+total number of measurements, \code{t} is the timestamp of each measurement, and
+\code{x}, \code{y} and \code{z} are linear acceleration measurements.}
 
-\item{transformation}{A function which accepts a tidy version of \code{sensor_data},
-with columns t, axis, value, as input and outputs a dataframe suitable for 
-feature extraction. By default, the tidy sensor data is windowed before feature
-extraction. This is a more user-friendly version of the \code{transform} 
-parameter required for more generic functions like \code{sensor_features}. Namely,
-its input will already be "cleaned" by detrending, bandpassing, etc. And 
-its output will have columns for jerk, velocity, and displacement computed 
-from the cleaned measurements. See \code{preprocess_sensor_data} for all the
-cleaning steps performed.}
+\item{time_filter}{A length 2 numeric vector specifying the time range 
+of measurements to use during preprocessing and feature extraction after
+normalizing the first timestamp to 0. A \code{NULL} value means do not 
+filter any measurements.}
 
-\item{funs}{A list of feature extraction functions that each accept
-a single numeric vector as input. Each function should return a 
-dataframe of features (normally a single-row datafame).}
+\item{detrend}{A logical value indicating whether to detrend the signal. 
+By default the value is FALSE.}
 
-\item{models}{A function which accepts as input \code{sensor_data} and
-outputs features. Useful for models which compute individual statistics
-using multiple input variables.}
+\item{frequency_filter}{A length 2 numeric vector specifying the frequency range
+of the signal (in hertz) to use during preprocessing and feature extraction.
+A \code{NULL} value means do not filter frequencies.}
 
-\item{window_length}{Length of sliding windows during bandpass filtering.}
+\item{IMF}{The number of IMFs used during an empirical mode decomposition (EMD)
+transformation. The default value of 1 means do not apply EMD to the signal.}
 
-\item{time_range}{Timestamp range to use.}
+\item{window_length}{A numerical value representing the length of the sliding 
+window used during the windowing transformation. Both \code{window_length} and
+ \code{window_overlap} must be set for the windowing transformation to be applied.}
 
-\item{frequency_range}{Frequency range for the bandpass filter.}
+\item{window_overlap}{Fraction between (0, 1) specifying the window overlap used 
+during the windowing transformation. Note, 1 represents no overlap.
+Both \code{window_length} and \code{window_overlap} must be set for the
+windowing transformation to be applied.}
+
+\item{derived_kinematics}{A logical value specifying whether to add derived 
+kinematic features like \code{displacement}, \code{velocity}, and \code{jerk} 
+from raw \code{accelerometer_data}.}
+
+\item{funs}{A function or list of feature extraction functions that each
+accept a single numeric vector as input. Each function should return a 
+dataframe of features (normally a single-row datafame). The input vectors
+will be the axial measurements from \code{sensor_data} after the transform
+defined by the above parameters has been applied. If no argument
+is supplied to either \code{funs} or \code{models}, a default set
+of feature extraction functions (as described in \code{default_kinematic_features})
+will be supplied for this parameter.}
+
+\item{models}{A list of functions, each of which accepts
+\code{sensor_data} as input after the transform defined by the above 
+parameters has been applied and returns features. Useful for models
+which compute individual features using multiple input variables.}
 }
 \value{
 A list of accelerometer features. The output from \code{funs} will
 be stored under \code{$extracted_features} and the output from \code{models}
-will be stored under \code{$model_features}.
+will be stored under \code{$model_features}. If there is an error during
+extraction, the returned result will be stored under \code{$error}.
 }
 \description{
-Extract features from accelerometer measurements.
+A convenience wrapper function for extracting interpretable features
+from triaxial accelerometer data collected through smartphones.
+}
+\examples{
+accel_features <- accelerometer_features(accelerometer_data)
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  time_filter = c(2,8))
+
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  detrend = TRUE)
+
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  frequency_filter = c(0.5, 25))
+
+accel_features <- accelerometer_features(accelerometer_data, IMF = 3)
+
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  window_length = 512,
+  window_overlap = 0.9)
+
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  derived_kinematics = TRUE)
+
+accel_features <- accelerometer_features(
+  accelerometer_data,
+  time_filter = c(1, 9),
+  detrend = TRUE,
+  frequency_filter = c(1, 25),
+  window_length = 256,
+  window_overlap = 0.5,
+  funs = time_domain_summary)
+
+}
+\author{
+Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 }

@@ -7,12 +7,13 @@
 tidy_sensor_data(sensor_data)
 }
 \arguments{
-\item{sensor_data}{A data frame with a time column, \code{t}.}
+\item{sensor_data}{A data frame with a time column \code{t},
+and at least one additional axial column.}
 }
 \value{
 Sensor data in tidy format.
 }
 \description{
-Gathers x, y, and z columns into a single \code{axis} column and
+Gather x, y, and z columns into a single \code{axis} column and
 normalize the \code{t} column to begin at \code{t} = 0.
 }

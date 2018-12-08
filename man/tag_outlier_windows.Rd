@@ -4,14 +4,14 @@
 \alias{tag_outlier_windows}
 \title{Identify abnormal device rotations}
 \usage{
-tag_outlier_windows(gravity, window_length, overlap)
+tag_outlier_windows(gravity, window_length, window_overlap)
 }
 \arguments{
 \item{gravity}{A dataframe with gravity vectors for columns}
 
 \item{window_length}{Length of the filter.}
 
-\item{overlap}{Window overlap.}
+\item{window_overlap}{Window overlap.}
 }
 \value{
 Rotations errors for each window.

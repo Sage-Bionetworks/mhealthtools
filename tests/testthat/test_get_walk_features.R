@@ -1,69 +1,59 @@
-####################################################
-# File to test get_walk_features.R of the mHealthTools package
-# Author: Meghasyam Tummalacherla
-# email: meghasyam@sagebase.org
-####################################################
+context("get_walk_features")
 
-# When I input gravity sensor data into the function get_walk_features, the whole error column is like
-# 'Phone rotated within window' for all the windows. Is this normal, or is this happening because of the test data (I don't think so)
-# This needs to be checked.
-# Go to Line 55 to see code to emulate this situation
-
-### Require mHealthTools
-require(mhealthtools)
-
-### Data file from a test user in Synapse
-# Sample accelerometer data was taken from a control, test user with the recordId 5cf10e77-793f-49ab-ae96-38028aeefc28, from the table
-# syn5734657, for his hand to nose left test - 'data/phone_data_test.json'
-
-### Required Libraries
-library(testthat)
-library(jsonlite)
-library(dplyr)
-library(data.table)
-library(signal)
-library(seewave)
-library(stringr)
-library(purrr)
-
-### Load data file
-data("sensor_data")
-dat <- sensor_data
-
-### flatten data to the format needed for mHealthTools
-flatten_data <- function(dat, metric) {
-  dat <- dat %>% 
-    select(timestamp, metric) %>% 
-    jsonlite::flatten()
-  names(dat) <- c("t", "x", "y", "z")
-  return(as_tibble(dat))
-}
-
-### Get the formatted accelerometer and gyroscope data to use in testing below
-datAccel <- flatten_data(dat,'userAcceleration')
-datGyro  <- flatten_data(dat,'rotationRate')
-datGravity <- flatten_data(dat, 'gravity')
-
-### Individual test functions
-context('Get Walk Features')
-test_that('Get accelerometer, gyroscope features',{
-  # actual function in get_walk_features.R: get_walk_features
-  testTibble <- dplyr::tibble(Window = NA, error = NA)
+test_that("No arguments", {
+  expect_equal(get_walk_features(),
+               list(extracted_features = NULL,
+                    model_features = NULL,
+                    error = NULL,
+                    outlier_windows = NULL))
+})
   
-  expect_is(mhealthtools::get_walk_features(accelerometer_data = datAccel, gyroscope_data = datGyro), 'data.frame') 
-  # Give both Accelerometer and Gyroscope data and expect a dataframe, with rest of the inputs being default
-  expect_is(mhealthtools::get_walk_features(accelerometer_data = datAccel, gyroscope_data = datGyro, gravity_data = datGravity), 'data.frame') 
-  # Similar test to previous one except also included gravity data
+test_that("Accelerometer data only", {
+  features_accel_only <- get_walk_features(
+    accelerometer_data = mini_accelerometer_data)
+  expect_is(features_accel_only, "list")
+  expect_is(features_accel_only$extracted_features, "data.frame")
+})
+# the test case is symmetrical for gyroscope data only, skipping
+test_that("Both accelerometer and gyroscope data", {
+  features_both <- get_walk_features(
+      accelerometer_data = mini_accelerometer_data,
+      gyroscope_data = mini_gyroscope_data)
+  expect_is(features_both, "list")
+  expect_is(features_both$extracted_features, "data.frame")
+})
   
-  testTibble$error <- 'Malformed accelerometer data'
-  expect_equal(mhealthtools:::get_walk_features(accelerometer_data = NA, gyroscope_data = datGyro), testTibble)
-  # Give error tibble if accelerometer data has any NAs
+test_that("Gravity data", {
+  features_with_gravity <- get_walk_features(
+    accelerometer_data = mini_accelerometer_data,
+    gravity_data = mini_gravity_data,
+    window_length = 64,
+    window_overlap = 0.5)
+  expect_is(features_with_gravity, "list")
+  expect_is(features_with_gravity$outlier_windows, "data.frame")
+})
   
-  testTibble$error <- 'Malformed gyroscope data'
-  expect_equal(mhealthtools:::get_walk_features(accelerometer_data = datAccel, gyroscope_data = NA), testTibble)
-  # Give error tibble if gyroscope data has any NAs  
+test_that("Passing a model", {
+  custom_model <- function(dat) {
+    feature <- dat[, 2]
+    feature <- feature %>%  unlist() %>%  as.numeric()
+    return(data.frame(f1 = mean(feature, na.rm = T)))
+  }
+  features_with_model <- get_walk_features(
+      accelerometer_data = mini_accelerometer_data,
+      gyroscope_data = mini_gyroscope_data,
+      models = custom_model)
+  expect_is(features_with_model, "list")
+  expect_is(features_with_model$model_features, "list")
+  expect_is(features_with_model$model_features$accelerometer[[1]],
+            "data.frame")
+  expect_is(features_with_model$model_features$gyroscope[[1]],
+            "data.frame")
+})
   
-  # The processing errors for acceleromter_features and gyroscope_features have been handled in test_sensors.R
-  # tag_outlier_windows was also handled in test_utils.R
-  
+test_that("Input data contains NA", {
+  expect_equal(is_error_dataframe(
+    get_walk_features(accelerometer_data = NA)), T)
+  expect_equal(is_error_dataframe(
+    get_walk_features(gyroscope_data = NA)), T)
 })

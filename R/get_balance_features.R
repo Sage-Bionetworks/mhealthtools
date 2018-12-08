@@ -1,8 +1,8 @@
-#' Preprocess and extract interpretable features from resting and postural tremor assays.
+#' Preprocess and extract interpretable features from balance assay.
 #' 
-#' A convenience wrapper for extracting interpretable features from the resting
-#' and postural tremor assays measured using smartphone raw accelerometer
-#' and gyroscope sensors.
+#' A convenience wrapper for extracting
+#' interpretable features from the balance assay measured using smartphone raw 
+#' accelerometer and gyroscope sensors.
 #' 
 #' @param accelerometer_data A data frame with columns t, x, y, z containing 
 #' accelerometer measurements. 
@@ -56,41 +56,41 @@
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
 #' accelerometer_data = cbind(
-#'   t = rest_tremor_data$timestamp,
-#'   rest_tremor_data$userAcceleration)
+#'   t = balance_data$timestamp,
+#'   balance_data$userAcceleration)
 #' gyroscope_data = cbind(
-#'   t = rest_tremor_data$timestamp,
-#'   rest_tremor_data$rotationRate)
+#'   t = balance_data$timestamp,
+#'   balance_data$rotationRate)
 #' 
-#' tremor_features <- get_tremor_features(accelerometer_data, gyroscope_data)
+#' balance_features <- get_balance_features(accelerometer_data, gyroscope_data)
 #' 
-#' tremor_features <- get_tremor_features(
+#' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
 #'   time_filter = c(2,8))
 #' 
-#' tremor_features <- get_tremor_features(
+#' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
 #'   detrend = TRUE)
 #' 
-#' tremor_features <- get_tremor_features(
+#' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
 #'   frequency_filter = c(0.5, 25))
 #' 
-#' tremor_features <- get_tremor_features(
+#' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
 #'   window_length = 512,
 #'   window_overlap = 0.9)
 #' 
-#' tremor_features <- get_tremor_features(
+#' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
 #'   derived_kinematics = TRUE)
 #' 
-#' tremor_features <- get_tremor_features(
+#' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data, 
 #'   detrend = TRUE,
@@ -98,7 +98,7 @@
 #'   funs = list(time_domain_summary))
 #'   
 #' @importFrom magrittr "%>%"
-get_tremor_features <- function(
+get_balance_features <- function(
   accelerometer_data = NULL, gyroscope_data = NULL, gravity_data = NULL,
   time_filter = NULL, detrend = F, frequency_filter = NULL, IMF = 1,
   window_length = NULL, window_overlap = NULL, derived_kinematics = F,

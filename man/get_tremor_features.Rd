@@ -2,11 +2,13 @@
 % Please edit documentation in R/get_tremor_features.R
 \name{get_tremor_features}
 \alias{get_tremor_features}
-\title{Extract tremor features from raw accelerometer and gyroscope data.}
+\title{Preprocess and extract interpretable features from resting and postural tremor assays.}
 \usage{
-get_tremor_features(accelerometer_data, gyroscope_data, gravity_data = NULL,
-  funs = NULL, models = NULL, window_length = 256, time_range = c(1, 9),
-  frequency_range = c(1, 25), overlap = 0.5)
+get_tremor_features(accelerometer_data = NULL, gyroscope_data = NULL,
+  gravity_data = NULL, time_filter = NULL, detrend = F,
+  frequency_filter = NULL, IMF = 1, window_length = NULL,
+  window_overlap = NULL, derived_kinematics = F, funs = NULL,
+  models = NULL)
 }
 \arguments{
 \item{accelerometer_data}{A data frame with columns t, x, y, z containing 
@@ -18,30 +20,106 @@ gyroscope measurements.}
 \item{gravity_data}{A data frame with columns t, x, y, z containing 
 gravity sensor measurements.}
 
-\item{funs}{A list of feature extraction functions that accept a single
-numeric vector as input.}
+\item{time_filter}{A length 2 numeric vector specifying the time range 
+of measurements to use during preprocessing and feature extraction after
+normalizing the first timestamp to 0. A \code{NULL} value means do not 
+filter any measurements.}
 
-\item{models}{A function which accepts as input a dataframe with columns
-axis, Window, jerk, acceleration, velocity, displacement and
-outputs features. Useful for models which compute individual statistics
-using multiple input variables.}
+\item{detrend}{A logical value indicating whether to detrend the signal. 
+By default the value is FALSE.}
 
-\item{window_length}{Length of sliding windows for bandpass filter
-and windowing transformation.}
+\item{frequency_filter}{A length 2 numeric vector specifying the frequency range
+of the signal (in hertz) to use during preprocessing and feature extraction.
+A \code{NULL} value means do not filter frequencies.}
 
-\item{time_range}{Timestamp range to use.}
+\item{IMF}{The number of IMFs used during an empirical mode decomposition (EMD)
+transformation. The default value of 1 means do not apply EMD to the signal.}
 
-\item{frequency_range}{Frequency range for the bandpass filter.}
+\item{window_length}{A numerical value representing the length of the sliding 
+window used during the windowing transformation. Both \code{window_length} and
+ \code{window_overlap} must be set for the windowing transformation to be applied.}
 
-\item{overlap}{Window overlap for the windowing transformation.}
+\item{window_overlap}{Fraction between (0, 1) specifying the window overlap used 
+during the windowing transformation. Note, 1 represents no overlap.
+Both \code{window_length} and \code{window_overlap} must be set for the
+windowing transformation to be applied.}
+
+\item{derived_kinematics}{A logical value specifying whether to add derived 
+kinematic features like \code{displacement}, \code{velocity}, \code{acceleration},
+and \code{jerk} from raw \code{accelerometer_data} and 
+\code{gyroscope_data}.}
+
+\item{funs}{A function or list of feature extraction functions that each
+accept a single numeric vector as input. Each function should return a 
+dataframe of features (normally a single-row datafame). The input vectors
+will be the axial measurements from \code{sensor_data} after the transform
+defined by the above parameters has been applied. If no argument
+is supplied to either \code{funs} or \code{models}, a default set
+of feature extraction functions (as described in \code{default_kinematic_features})
+will be supplied for this parameter.}
+
+\item{models}{A list of functions, each of which accepts
+\code{sensor_data} as input after the transform defined by the above 
+parameters has been applied and returns features. Useful for models
+which compute individual features using multiple input variables.}
 }
 \value{
-A list of feature dataframes. The outputs from \code{funs} will
+A list. The outputs from \code{funs} will
 be stored under \code{$extracted_features} and the outputs from \code{models}
-will be stored under \code{$model_features}.'
+will be stored under \code{$model_features}. If there is an error 
+during the transform process, an error dataframe will be stored under
+\code{$error}. If gravity_data is passed and window_length and 
+window_overlap are set, phone rotation information will be stored
+under \code{$outlier_windows}.
 }
 \description{
-Extract tremor features from raw accelerometer and gyroscope data.
+A convenience wrapper for extracting interpretable features from the resting
+and postural tremor assays measured using smartphone raw accelerometer
+and gyroscope sensors.
+}
+\examples{
+accelerometer_data = cbind(
+  t = rest_tremor_data$timestamp,
+  rest_tremor_data$userAcceleration)
+gyroscope_data = cbind(
+  t = rest_tremor_data$timestamp,
+  rest_tremor_data$rotationRate)
+
+tremor_features <- get_tremor_features(accelerometer_data, gyroscope_data)
+
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data,
+  time_filter = c(2,8))
+
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data,
+  detrend = TRUE)
+
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data,
+  frequency_filter = c(0.5, 25))
+
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data,
+  window_length = 512,
+  window_overlap = 0.9)
+
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data,
+  derived_kinematics = TRUE)
+
+tremor_features <- get_tremor_features(
+  accelerometer_data,
+  gyroscope_data, 
+  detrend = TRUE,
+  frequency_filter = c(1, 25),
+  funs = list(time_domain_summary))
+  
 }
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder

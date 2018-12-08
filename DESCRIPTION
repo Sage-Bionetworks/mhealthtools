@@ -1,41 +1,43 @@
 Package: mhealthtools
 Type: Package
 Title: mhealthtools - Package for processing mobile sensor data and to extract meaningful features
-Version: 0.1.1
+Version: 0.2.0
 Description: mHealthTools package processes data from various mobile sensors such as accelerometer, gyroscope,
     pedometer, screen touches, and microphones. Though this package is specifically designed around mHealth 
     applications developed by Sage Bionetwokrs, it works in general with any mobile sensors, provided the data 
     is supplied in a said format.
-Author@R: c(
-    person("Thanneer", "Perumal", email = "thanneer.perumal@sagebase.org", role = c("aut", "cre"))
-    person("Phil", "Snyder", email = "phil.snyder@sagebase.org", role = c("aut", "cre"))
-    person("Meghasyam", "Tummalacherla", email = "meghasyam@sagebase.org", role = c("aut", "ctb"))
-    person("Abhishek", "Pratap", email = "apratap@sagebase.org", role = c("aut", "ctb"))
-    person("Elias", "Chaibub Neto", email = "elias.chaibub.neto@sagebase.org", role = c("ctb"))
-    )
+Authors@R: c(
+    person("Phil", "Snyder", email = "phil.snyder@sagebase.org", role = c("aut", "cre")),
+    person("Thanneer", "Perumal", email = "thanneer.perumal@sagebase.org", role = c("aut")),
+    person("Meghasyam", "Tummalacherla", email = "meghasyam@sagebase.org", role = c("aut", "ctb")),
+    person("Abhishek", "Pratap", email = "apratap@sagebase.org", role = c("ctb")),
+    person("Elias", "Chaibub Neto", email = "elias.chaibub.neto@sagebase.org", role = c("ctb")))
 License: GPL-3
 LazyData: TRUE
 Imports:
     seewave,
-    dplyr,
     data.table,
+    dplyr,
     purrr,
     tibble,
     tidyr,
     signal,
     e1071,
-    stringr,
     stats,
     EMD,
-    e1071,
     pracma,
     rlang,
-    tibble
-Remotes: url::http://download.r-forge.r-project.org/src/contrib/statcomp_0.0.1.1000.tar.gz
+    magrittr,
+    keras,
+    fractal,
+    statcomp
+Remotes: cran/statcomp
 URL: https://github.com/Sage-Bionetworks/mHealthTools
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
+Encoding: UTF-8
 Suggests:
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    ggplot2
 VignetteBuilder: knitr

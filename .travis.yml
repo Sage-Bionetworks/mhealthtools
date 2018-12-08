@@ -1,0 +1,21 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: R
+sudo: false
+cache: packages
+warnings_are_errors: false
+before_install:
+  - R -e 'install.packages("devtools"); devtools::install_github("rstudio/keras"); keras::install_keras()'
+r_packages:
+  - ggplot2
+addons:
+  apt:
+    update: true
+    packages: 
+      - libfftw3-3
+      - libfftw3-dev
+      - libsndfile1
+      - libsndfile1-dev
+env:
+  global:
+  - R_REMOTES_NO_ERRORS_FROM_WARNINGS=true
