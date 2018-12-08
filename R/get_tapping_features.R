@@ -1,12 +1,7 @@
 #' Preprocess and extract interpretable features from screen tapping data.
 #' 
-#' @description \code{get_tapping_features()} is a convinient wrapper to extract interpretable 
-#' features from the screen tapping data.
-#' 
-#' @usage 
-#' get_tapping_features(tap_data)
-#' 
-#' get_tapping_features(tap_data, depress_threshold = 20, remove_duplicates = TRUE)
+#' A convenience wrapper for extracting interpretable features from 
+#' screen tapping data.
 #' 
 #' @param tap_data A n x 4 data frame with column names as t, x, y, buttonid containing 
 #' tapping measurements. Here n is the total number of tapping measurements, t is the time 
@@ -17,18 +12,17 @@
 #' @param depress_threshold A numeric value indicating the threshold between two successive taps
 #' @param remove_duplicates A logical value indicating if duplicates in taps considered as None 
 #' (i.e buttonid is neither left nor right) need to be removed or not
+#' 
 #' @return A 1 x 43 data frame consisting of tapping features and an error message, if any
 #' See https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md for
 #' feature definitions
 #' @examples 
-#' library(mhealthtools)
-#' data("tap_data")
-#' 
 #' tap_features = get_tapping_features(tap_data)
 #' 
 #' tap_features = get_tapping_features(tap_data, depress_threshold = 120)
 #' 
-#' tap_features = get_tapping_features(tap_data, remove_duplicates = F)
+#' tap_features = get_tapping_features(tap_data, remove_duplicates = FALSE)
+#' 
 #' @export
 #' @author Elias Chaibub Neto, Meghasyam Tummalacherla, Phil Snyder, Thanneer M Perumal
 get_tapping_features <- function(tap_data, 
@@ -37,9 +31,9 @@ get_tapping_features <- function(tap_data,
   if (!is.data.frame(tap_data)) {
     tap_features <- dplyr::tibble(error = "sensor data should be a dataframe")
   } else  if (nrow(tap_data) < 5) {
-    tapFeatures <- dplyr::tibble(error = "tapping data has less than 5 rows")
+    tap_features <- dplyr::tibble(error = "tapping data has less than 5 rows")
   } else if (ncol(tap_data) != 4){
-    tapFeatures <- dplyr::tibble(error = "tapping data has not equal to 4 columns")
+    tap_features <- dplyr::tibble(error = "tapping data has not equal to 4 columns")
   } else {
     # remove duplicate data points // if selected
     if (remove_duplicates) { 

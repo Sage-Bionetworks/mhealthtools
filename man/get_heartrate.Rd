@@ -4,7 +4,8 @@
 \alias{get_heartrate}
 \title{Preprocess and extract heart rate from smartphone video recordings.}
 \usage{
-get_heartrate(heartrate_data)
+get_heartrate(heartrate_data, window_length = 10,
+  frequency_range = c(1, 25), bandpass_order = 128)
 }
 \arguments{
 \item{heartrate_data}{A data frame with columns t, red, green and blue}
@@ -21,15 +22,11 @@ list containing heart rate and confidence of the estimate for
 each color (red, green, blue)
 }
 \description{
-\code{get_heartrate()} is a convinient wrapper to extract 
-heart rate for each color band from average pixel value per frame of video 
-(processed hr) captured using smartphone cameras.
+A convenience wrapper for extracting heart rate features for each color
+band from average pixel value per frame of video (processed hr) captured
+using smartphone cameras.
 }
 \examples{
-library(mhealthtools)
-
-data('heartrate_data')
-
 heartrate_data = heartrate_data[,c('timestamp', 'red', 'green', 'blue')]
 heartrate_ftrs = get_heartrate(heartrate_data)
  

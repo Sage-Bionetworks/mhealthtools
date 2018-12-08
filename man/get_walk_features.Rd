@@ -96,7 +96,7 @@ walk_features <- get_walk_features(
 walk_features <- get_walk_features(
   accelerometer_data,
   gyroscope_data,
-  detrend = T)
+  detrend = TRUE)
 
 walk_features <- get_walk_features(
   accelerometer_data,
@@ -112,12 +112,12 @@ walk_features <- get_walk_features(
 walk_features <- get_walk_features(
   accelerometer_data,
   gyroscope_data,
-  derived_kinematics = F)
+  derived_kinematics = TRUE)
 
 walk_features <- get_walk_features(
   accelerometer_data,
   gyroscope_data, 
-  detrend = T,
+  detrend = TRUE,
   frequency_filter = c(1, 25),
   funs = list(time_domain_summary))
   

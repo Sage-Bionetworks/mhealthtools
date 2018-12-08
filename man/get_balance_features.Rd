@@ -95,7 +95,7 @@ balance_features <- get_balance_features(
 balance_features <- get_balance_features(
   accelerometer_data,
   gyroscope_data,
-  detrend = T)
+  detrend = TRUE)
 
 balance_features <- get_balance_features(
   accelerometer_data,
@@ -111,12 +111,12 @@ balance_features <- get_balance_features(
 balance_features <- get_balance_features(
   accelerometer_data,
   gyroscope_data,
-  derived_kinematics = F)
+  derived_kinematics = TRUE)
 
 balance_features <- get_balance_features(
   accelerometer_data,
   gyroscope_data, 
-  detrend = T,
+  detrend = TRUE,
   frequency_filter = c(1, 25),
   funs = list(time_domain_summary))
   

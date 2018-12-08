@@ -75,7 +75,7 @@ accel_features <- accelerometer_features(
 
 accel_features <- accelerometer_features(
   accelerometer_data,
-  detrend = T)
+  detrend = TRUE)
 
 accel_features <- accelerometer_features(
   accelerometer_data,
@@ -90,12 +90,12 @@ accel_features <- accelerometer_features(
 
 accel_features <- accelerometer_features(
   accelerometer_data,
-  derived_kinematics = T)
+  derived_kinematics = TRUE)
 
 accel_features <- accelerometer_features(
   accelerometer_data,
   time_filter = c(1, 9),
-  detrend = T,
+  detrend = TRUE,
   frequency_filter = c(1, 25),
   window_length = 256,
   window_overlap = 0.5,
