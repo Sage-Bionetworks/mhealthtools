@@ -72,7 +72,7 @@
 #' tremor_features <- get_tremor_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   detrend = T)
+#'   detrend = TRUE)
 #' 
 #' tremor_features <- get_tremor_features(
 #'   accelerometer_data,
@@ -88,12 +88,12 @@
 #' tremor_features <- get_tremor_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   derived_kinematics = F)
+#'   derived_kinematics = TRUE)
 #' 
 #' tremor_features <- get_tremor_features(
 #'   accelerometer_data,
 #'   gyroscope_data, 
-#'   detrend = T,
+#'   detrend = TRUE,
 #'   frequency_filter = c(1, 25),
 #'   funs = list(time_domain_summary))
 #'   
