@@ -215,13 +215,6 @@ testthat::test_that("Detrend the given sensor data",{
   # Given wrong format of data, the function should throw an error
   testthat::expect_equal(is_error_dataframe(
     mhealthtools:::mutate_detrend(sensor_data = datAccel)), T)
-  
-  # HC - Hard Coded example
-  testDat <- datAccelTidy %>% dplyr::filter(t < 1)
-  testthat::expect_equal(
-    mhealthtools:::mutate_detrend(sensor_data = testDat) %>% dplyr::arrange(t,axis),
-    mhealthtools:::test_mutate_detrend %>% dplyr::arrange(t,axis)
-  )
 })
 
 testthat::context('Bandpass and filtering by time ')
@@ -288,20 +281,6 @@ testthat::test_that('Bandpass the tidy sensor data', {
       sampling_rate = 100,
       frequency_range = c(1,51))), T) 
   # Error if freq ranges of bandpass filter violate Nyquist criterion
-  
-  # HC - Hard Coded example
-  testDat <- datAccelTidy %>% dplyr::filter(t < 1)
-  testthat::expect_equal(
-    mhealthtools:::mutate_bandpass(
-      sensor_data = testDat,
-      window_length = 50,
-      sampling_rate = 100,
-      frequency_range = c(4,20)) %>% 
-      dplyr::arrange(t,axis),
-    mhealthtools:::test_mutate_bandpass %>% 
-      dplyr::arrange(t,axis)
-  )
-  
 })
 
 testthat::test_that(
@@ -411,16 +390,6 @@ testthat::test_that('Windowing the sensor data by axis',{
       window_length = 256,
       window_overlap = 0.5)), T)
   # throw an error if Input is not in correct format
-  
-  # HC - Hard Coded example
-  testDat <- datAccelTidy %>% dplyr::filter(t<1)
-  testthat::expect_equal(
-    mhealthtools:::window(
-      sensor_data = testDat,
-      window_length = 60,
-      window_overlap = 0.5),
-    mhealthtools:::test_window
-  )
 })
 
 testthat::test_that('Compute start and stop timestamp for each window',{
@@ -436,18 +405,6 @@ testthat::test_that('Compute start and stop timestamp for each window',{
     window_length = NA,
     window_overlap = 0.5))
   # Throw a data error if any parameter doesn't confirm to norms
-  
-  
-  # HC - Hard Coded example
-  testDat <- datAccel$t[1:40]
-  testthat::expect_equal(
-    mhealthtools:::window_start_end_times(
-      t = testDat,
-      window_length = 10,
-      window_overlap = 0.5),
-    mhealthtools:::test_window_start_end_times
-  )
-  
 })
 
 testthat::context('Derivative Calculation')
@@ -552,21 +509,11 @@ testthat::test_that(
     
   })
 
-testthat::context('ACF calculation')
-testthat::test_that(
-  'Construct a dataframe with ACF values given tidy sensor data',{
-    # actual function in utils: calculate_acf  
-    testthat::expect_is(
-      mhealthtools:::calculate_acf(sensor_data = datAccelTidy)
-      ,'data.frame') 
-    # Check if output is in correct format
-    testthat::expect_equal(is_error_dataframe( 
-      # Throw an error if input is not in correct format
-      mhealthtools:::calculate_acf(
-        sensor_data = datAccel)), T) 
-    
-    ## HC EXAMPLE TO BE WRITTEN AFTER FUNCTION CHANGES
-  })
+test_that("Construct a dataframe with ACF values given tidy sensor data", {
+    expect_is(mutate_acf(sensor_data = datAccelTidy, col = "value") , "data.frame") 
+    expect_equal(is_error_dataframe(
+      mutate_acf(sensor_data = datAccel, col = "value")), T) 
+})
 
 testthat::context('Tag and Identify outlier windows based on device rotation
                   (using gravity)')

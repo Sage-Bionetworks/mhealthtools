@@ -44,16 +44,16 @@ and \code{displacement} before extracting features.}
 \item{funs}{A function or list of feature extraction functions that each
 accept a single numeric vector as input. Each function should return a 
 dataframe of features (normally a single-row datafame). The input vectors
-will be the axial measurements from \code{sensor_data} after the chosen
-preprocessing and transformation steps have been applied. If no argument
+will be the axial measurements from \code{sensor_data} after the transform
+defined by the above parameters has been applied. If no argument
 is supplied to either \code{funs} or \code{models}, a default set
 of feature extraction functions (as described in \code{default_kinematic_features})
 will be supplied for this parameter.}
 
-\item{models}{A list of functions, each of which accept as input 
-\code{sensor_data} after the chosen preprocessing and transformation
-steps have been applied and return features. Useful for models which compute
-individual statistics using multiple input variables.}
+\item{models}{A list of functions, each of which accepts
+\code{sensor_data} as input after the transform defined by the above 
+parameters has been applied and returns features. Useful for models
+which compute individual features using multiple input variables.}
 }
 \value{
 A list of gyroscope features. The output from \code{funs} will

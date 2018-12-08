@@ -368,27 +368,15 @@ mutate_integral <- function(sensor_data, sampling_rate, col, derived_col) {
 
 #' Construct a dataframe with ACF values
 #' 
-#' Estimate the ACF for windowed sensor data.
-#' 
-#' @param sensor_data A data frame with columns
-#' \code{axis}, \code{window}, and \code{col}.
+#' @param sensor_data A data frame with column \code{col}.
 #' @param col Name of column to calculate acf of.
-#' @return A tibble with columns axis, window, acf
-calculate_acf <- function(sensor_data, col) {
+#' @param lag_max See \code{\link[stats]{acf}}
+#' @return A data frame with an acf column.
+mutate_acf <- function(sensor_data, col, lag_max = NULL) {
   if (has_error(sensor_data)) return(sensor_data)
   acf_data <- tryCatch({
-    groups <- dplyr::group_vars(sensor_data)
-    acf_data <- sensor_data %>%
-      tidyr::nest(col) %>%
-      dplyr::mutate(data = purrr::map(data, function(d) {
-        acf(d[, col], plot = F)$acf
-      })) %>%
-      tidyr::unnest(data) %>%
-      dplyr::rename(acf = data)
-    if (length(groups)) { # restore groups if originally grouped
-      acf_data <- acf_data %>% dplyr::group_by_at(.vars = groups)
-    }
-    return(acf_data)
+    sensor_data %>%
+      dplyr::mutate(acf = acf(.[[col]], plot = F, lag.max = lag_max)$acf[-1])
   }, error = function(e) {
     dplyr::tibble(error = "Error calculating ACF")
   })

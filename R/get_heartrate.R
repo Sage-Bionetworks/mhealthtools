@@ -1,25 +1,20 @@
 #' Preprocess and extract heart rate from smartphone video recordings.
 #' 
-#' @description \code{get_heartrate()} is a convinient wrapper to extract 
-#' heart rate for each color band from average pixel value per frame of video 
-#' (processed hr) captured using smartphone cameras.
-#' 
-#' @usage get_heartrate(heartrate_data)
+#' A convenience wrapper for extracting heart rate features for each color
+#' band from average pixel value per frame of video (processed hr) captured
+#' using smartphone cameras.
 #' 
 #' @param heartrate_data A data frame with columns t, red, green and blue
 #' @param window_length Length of the time window in seconds, to be considered
 #' while calculating the heart rate for each channel
 #' @param frequency_range Frequency range in Hz for the bandpass filter parameters
 #' @param bandpass_order Order (length) of the bandpass filter to be used for filtering
+#' 
 #' @return list containing heart rate and confidence of the estimate for
 #' each color (red, green, blue)
 #' @export
 #' @author Meghasyam Tummalacherla, Phil Snyder 
 #' @examples 
-#' library(mhealthtools)
-#' 
-#' data('heartrate_data')
-#' 
 #' heartrate_data = heartrate_data[,c('timestamp', 'red', 'green', 'blue')]
 #' heartrate_ftrs = get_heartrate(heartrate_data)
 #'  

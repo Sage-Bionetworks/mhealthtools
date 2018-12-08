@@ -15,18 +15,21 @@ to \code{sensor_data}.}
 
 \item{extract}{A function or list of functions to be applied to each of the
 columns in \code{extract_on} from the output of \code{transform}. Each function
-should return a dataframe of features (normally a single-row datafame).}
+should return a single-row dataframe of features. If the output of
+\code{transform} has incidental columns (columns not contained in either the
+grouping columns of \code{transform} nor \code{extract_on}, they will be
+preserved in the outputted features.}
 
 \item{extract_on}{A string or list of column names to compute features from.
 If \code{NULL}, features will be extracted from all non-grouped columns.}
 
 \item{models}{A function or list of functions which accept the output from
-\code{transform} as input and output a dataframe.}
+\code{transform} as input and output features.}
 }
 \value{
 A list of features. The output from \code{extract} will
 be stored under \code{$extracted_features} and the output from \code{models}
-will be stored under \code{$model_features}. If \code{preprocess} or \code{transform}
+will be stored under \code{$model_features}. If \code{transform}
 returns an error dataframe (see \code{has_error}), the error dataframe is stored
 under \code{$error}.
 }
