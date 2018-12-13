@@ -286,12 +286,13 @@ window_start_end_times <- function(t, window_length, window_overlap) {
 #' @param window_length Length of the filter.
 #' @param window_overlap Window overlap.
 #' @return A matrix of window_length x nwindows
-window_signal <- function(values, window_length = 256, window_overlap = 0.5) {
+window_signal <- function(values, window_length = 256,
+                          window_overlap = 0.5, window_name = "hamming") {
   start_end_times <- window_start_end_times(
     values, window_length = window_length, window_overlap = window_overlap)
   nstart <- start_end_times$window_start_index
   nend <- start_end_times$window_end_index
-  wn <- seewave::hamming.w(window_length)
+  wn <- seewave::ftwindow(window_length, wn = window_name)
   a <- apply(cbind(nstart, nend), 1, function(x, a, wn) {
     a[seq(x[1], x[2], 1)] * wn
   }, values, wn)
