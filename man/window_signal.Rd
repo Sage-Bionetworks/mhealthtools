@@ -15,6 +15,9 @@ window_signal(values, window_length = 256, window_overlap = 0.5,
 \item{window_length}{Length of the filter.}
 
 \item{window_overlap}{Window overlap.}
+
+\item{window_name}{window name: bartlett, blackman, flattop, hamming,
+hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.}
 }
 \value{
 A matrix of window_length x nwindows
