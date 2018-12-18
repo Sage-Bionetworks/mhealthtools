@@ -218,8 +218,11 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @param sensor_data A data frame with columns t, axis, value.
 #' @param window_length Length of the filter
 #' @param window_overlap window overlap
+#' @param window_name window name: bartlett, blackman, flattop, hamming,
+#' hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.
 #' @return Windowed sensor data
-window <- function(sensor_data, window_length, window_overlap) {
+window <- function(sensor_data, window_length, window_overlap,
+                   window_name = "hamming") {
   if (has_error(sensor_data)) return(sensor_data)
   tryCatch({
     spread_sensor_data <- sensor_data %>%
@@ -227,7 +230,9 @@ window <- function(sensor_data, window_length, window_overlap) {
     windowed_sensor_data <- spread_sensor_data %>%
       dplyr::select(x, y, z) %>%
       purrr::map(window_signal,
-                 window_length = window_length, window_overlap = window_overlap)
+                 window_length = window_length,
+                 window_overlap = window_overlap,
+                 window_name = window_name)
     tidy_windowed_sensor_data <- lapply(
       windowed_sensor_data,
       function(windowed_matrix) {
@@ -279,24 +284,26 @@ window_start_end_times <- function(t, window_length, window_overlap) {
 
 #' Window a signal
 #'  
-#' Given a numeric vector, this function will return a windowed 
-#' signal with hamming window.
+#' Given a numeric vector, this function will return its windowed signal.
 #'  
 #' @param values Timeseries vector of length n.
 #' @param window_length Length of the filter.
 #' @param window_overlap Window overlap.
+#' @param window_name window name: bartlett, blackman, flattop, hamming,
+#' hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.
 #' @return A matrix of window_length x nwindows
-window_signal <- function(values, window_length = 256, window_overlap = 0.5) {
+window_signal <- function(values, window_length = 256,
+                          window_overlap = 0.5, window_name = "hamming") {
   start_end_times <- window_start_end_times(
     values, window_length = window_length, window_overlap = window_overlap)
   nstart <- start_end_times$window_start_index
   nend <- start_end_times$window_end_index
-  wn <- seewave::hamming.w(window_length)
-  a <- apply(cbind(nstart, nend), 1, function(x, a, wn) {
-    a[seq(x[1], x[2], 1)] * wn
-  }, values, wn)
-  colnames(a) <- 1:dim(a)[2]
-  return(a)
+  window <- seewave::ftwindow(window_length, wn = window_name)
+  windowed_signal <- purrr::map2(
+    nstart, nend, ~ values[seq(.x, .y)] * window) %>%
+    simplify2array()
+  colnames(windowed_signal) <- 1:dim(windowed_signal)[2]
+  return(windowed_signal)
 }
 
 #' Take the derivative of a vector v
