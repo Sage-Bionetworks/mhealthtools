@@ -4,10 +4,10 @@
 \alias{window_signal}
 \title{Window a signal
  
-Given a numeric vector, this function will return a windowed 
-signal with hamming window.}
+Given a numeric vector, this function will return its windowed signal.}
 \usage{
-window_signal(values, window_length = 256, window_overlap = 0.5)
+window_signal(values, window_length = 256, window_overlap = 0.5,
+  window_name = "hamming")
 }
 \arguments{
 \item{values}{Timeseries vector of length n.}
@@ -22,6 +22,5 @@ A matrix of window_length x nwindows
 \description{
 Window a signal
  
-Given a numeric vector, this function will return a windowed 
-signal with hamming window.
+Given a numeric vector, this function will return its windowed signal.
 }
