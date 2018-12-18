@@ -7,7 +7,7 @@
 extract_features(x, col, funs)
 }
 \arguments{
-\item{x}{A data frame with columns axis, window, and \code{col}.}
+\item{x}{A grouped data frame with column \code{col}.}
 
 \item{col}{The name of the column in \code{x} to pass to each 
 function in \code{funs}.}
@@ -15,11 +15,12 @@ function in \code{funs}.}
 \item{funs}{A list of functions that accept a single vector as input.}
 }
 \value{
-a data frame with columns axis, window, and other feature columns.
+a data frame with the original grouped columns and
+other feature columns.
 }
 \description{
 Apply each of the functions in \code{funs} to the column 
-\code{col} in data frame \code{x}. Each of the functions in 
+\code{col} in the grouped data frame \code{x}. Each of the functions in 
 \code{funs} must accept a single vector as input and output 
-a data frame with columns axis and window (and optionally others).
+a data frame.
 }

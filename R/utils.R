@@ -336,7 +336,7 @@ integral <- function(v) {
 #' 
 #' See function \code{derivative}.
 #' 
-#' @param sensor_data A data frame with columns t, axis, acceleration.
+#' @param sensor_data A data frame with column \code{col}.
 #' @param sampling_rate Sampling rate of \code{col}.
 #' @param col Name of column to differentiate.
 #' @param derived_col Name of new column which is the derivative of \code{col}.
@@ -357,7 +357,7 @@ mutate_derivative <- function(sensor_data, sampling_rate, col, derived_col) {
 #' 
 #' See function \code{integral}.
 #' 
-#' @param sensor_data A data frame with columns t, axis, acceleration.
+#' @param sensor_data A data frame with column \code{col}.
 #' @param sampling_rate Sampling rate of \code{col}.
 #' @param col Name of column to integrate.
 #' @param derived_col Name of new column which is the integral of \code{col}.
@@ -641,14 +641,16 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
 #' 
 #' A convenience function for mapping a function -- which accepts a 
 #' vector as input and outputs an atomic value -- to a single column
-#' of each group in a grouped tibble.
+#' of a dataframe. If the dataframe is grouped, the function will be
+#' applied within each group.
 #' 
 #' @param x A tibble
 #' @param col Column to pass as a vector to \code{f}.
-#' @param f Function to be mapped to \code{col} for each group.
+#' @param f Function to be mapped to \code{col}.
 #' @param ... Additional arguments to \code{f}.
-#' @return A tibble indexed by groups with an additional column containing
-#' the output of the mapped function.
+#' @return A dataframe with the original grouped columns (if \code{x} had
+#' originally been grouped) and a \code{data} column containing
+#' the output of the mapped function \code{f}.
 map_groups <- function(x, col, f, ...) {
   dots <- rlang::enquos(...) # can also use enexprs()
   x %>%
@@ -660,15 +662,16 @@ map_groups <- function(x, col, f, ...) {
 #' Extract features from a column
 #' 
 #' Apply each of the functions in \code{funs} to the column 
-#' \code{col} in data frame \code{x}. Each of the functions in 
+#' \code{col} in the grouped data frame \code{x}. Each of the functions in 
 #' \code{funs} must accept a single vector as input and output 
-#' a data frame with columns axis and window (and optionally others).
+#' a data frame.
 #' 
-#' @param x A data frame with columns axis, window, and \code{col}.
+#' @param x A grouped data frame with column \code{col}.
 #' @param col The name of the column in \code{x} to pass to each 
 #' function in \code{funs}.
 #' @param funs A list of functions that accept a single vector as input.
-#' @return a data frame with columns axis, window, and other feature columns.
+#' @return a data frame with the original grouped columns and
+#' other feature columns.
 extract_features <- function(x, col, funs) {
   groups <- dplyr::group_vars(x)
   funs_output <- purrr::map(

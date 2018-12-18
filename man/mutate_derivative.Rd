@@ -8,7 +8,7 @@ to a time-series dataframe.}
 mutate_derivative(sensor_data, sampling_rate, col, derived_col)
 }
 \arguments{
-\item{sensor_data}{A data frame with columns t, axis, acceleration.}
+\item{sensor_data}{A data frame with column \code{col}.}
 
 \item{sampling_rate}{Sampling rate of \code{col}.}
 
