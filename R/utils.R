@@ -400,7 +400,8 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, window_overlap) 
   if (!is.vector(gravity_vector)) stop("Input must be a numeric vector")
   gravity_summary <- gravity_vector %>%
     window_signal(window_length = window_length,
-                  window_overlap = window_overlap) %>%
+                  window_overlap = window_overlap,
+                  window_name = "rectangle") %>%
     dplyr::as_tibble() %>%
     tidyr::gather(window, value) %>%
     dplyr::group_by(window) %>%
