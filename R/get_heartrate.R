@@ -18,30 +18,22 @@
 #' heartrate_data = heartrate_data[,c('timestamp', 'red', 'green', 'blue')]
 #' heartrate_ftrs = get_heartrate(heartrate_data)
 #'  
-get_heartrate <- function(heartrate_data, window_length = 10,
-                          frequency_range = c(1, 25), bandpass_order = 128) {
-  heartrate_data1 <- data.frame(red = NA, green = NA, blue = NA,
+get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0.5) {
+  heartrate_error_frame <- data.frame(red = NA, green = NA, blue = NA,
                             error = NA, sampling_rate = NA)
   sampling_rate <- get_sampling_rate(heartrate_data)
   if (is.infinite(sampling_rate) || is.na(sampling_rate)) {
-    heartrate_data1$error <- paste("Sampling Rate calculated from timestamp is Inf",
+    heartrate_error_frame$error <- paste("Sampling Rate calculated from timestamp is Inf",
                                "or NaN / timestamp not found in json")
-    return(heartrate_data1)
+    return(heartrate_error_frame)
   }
-  if (sampling_rate < 55) {
-    if (sampling_rate > 22) {
-      bandpass_order <- 64
-    } else{
-      bandpass_order <- 32
-    }
-  }
-  
+
   # Convert window length from seconds to samples
   window_length <- round(sampling_rate * window_length)
   
   # Apply pre processing filter signal between frequency_range
   # order for the running mean based filter
-  mforder <- 2 * round(60 * sampling_rate / 220) + 1
+  mforder <- 65 # (Based on 60 and 30 fps)
   
   # Split each color into segments based on window_length
   heartrate_data <- tryCatch({

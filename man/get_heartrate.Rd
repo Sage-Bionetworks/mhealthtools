@@ -4,8 +4,7 @@
 \alias{get_heartrate}
 \title{Preprocess and extract heart rate from smartphone video recordings.}
 \usage{
-get_heartrate(heartrate_data, window_length = 10,
-  frequency_range = c(1, 25), bandpass_order = 128)
+get_heartrate(heartrate_data, window_length = 10, window_overlap = 0.5)
 }
 \arguments{
 \item{heartrate_data}{A data frame with columns t, red, green and blue}
