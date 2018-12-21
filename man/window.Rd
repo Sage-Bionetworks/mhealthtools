@@ -4,7 +4,8 @@
 \alias{window}
 \title{Window the value vector of sensor data for each axis}
 \usage{
-window(sensor_data, window_length, window_overlap)
+window(sensor_data, window_length, window_overlap,
+  window_name = "hamming")
 }
 \arguments{
 \item{sensor_data}{A data frame with columns t, axis, value.}
@@ -12,6 +13,9 @@ window(sensor_data, window_length, window_overlap)
 \item{window_length}{Length of the filter}
 
 \item{window_overlap}{window overlap}
+
+\item{window_name}{window name: bartlett, blackman, flattop, hamming,
+hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.}
 }
 \value{
 Windowed sensor data

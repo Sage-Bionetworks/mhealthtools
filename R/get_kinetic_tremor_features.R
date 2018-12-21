@@ -1,16 +1,8 @@
 #' Preprocess and extract interpretable features from kinetic tremor assay.
 #' 
-#' @description \code{get_kinetic_tremor_features()} is a convinient wrapper to 
-#' extract interpretable features from the kinetic tremor assay measured using 
-#' smartphone raw accelerometer and gyroscope sensors.
-#' 
-#' @usage 
-#' get_kinetic_tremor_features(accelerometer_data, gyroscope_data)
-#' 
-#' get_kinetic_tremor_features(accelerometer_data = NULL, gyroscope_data = NULL, 
-#'   gravity_data = NULL, time_filter = NULL, detrend = F, frequency_filter = NULL, 
-#'   IMF = 2, window_length = NULL, window_overlap = NULL, derived_kinematics = F,
-#'   funs = NULL, models = NULL)
+#' A convenience wrapper for extracting interpretable features from the
+#' kinetic tremor assay measured using smartphone raw accelerometer
+#' and gyroscope sensors.
 #' 
 #' @param accelerometer_data A data frame with columns t, x, y, z containing 
 #' accelerometer measurements. 
@@ -43,15 +35,16 @@
 #' @param funs A function or list of feature extraction functions that each
 #' accept a single numeric vector as input. Each function should return a 
 #' dataframe of features (normally a single-row datafame). The input vectors
-#' will be the axial measurements from \code{sensor_data} after the chosen
-#' preprocessing and transformation steps have been applied. If no argument
+#' will be the axial measurements from \code{sensor_data} after the transform
+#' defined by the above parameters has been applied. If no argument
 #' is supplied to either \code{funs} or \code{models}, a default set
 #' of feature extraction functions (as described in \code{default_kinematic_features})
 #' will be supplied for this parameter.
-#' @param models A list of functions, each of which accept as input 
-#' \code{sensor_data} after the chosen preprocessing and transformation
-#' steps have been applied and return features. Useful for models which compute
-#' individual statistics using multiple input variables.
+#' @param models A list of functions, each of which accepts
+#' \code{sensor_data} as input after the transform defined by the above 
+#' parameters has been applied and returns features. Useful for models
+#' which compute individual features using multiple input variables.
+#' 
 #' @return A list. The outputs from \code{funs} will
 #' be stored under \code{$extracted_features} and the outputs from \code{models}
 #' will be stored under \code{$model_features}. If there is an error 
@@ -62,27 +55,50 @@
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
-#' library(mhealthtools)
-#' data("kinetic_tremor_data")
+#' accelerometer_data = cbind(
+#'   t = kinetic_tremor_data$timestamp,
+#'   kinetic_tremor_data$userAcceleration)
+#' gyroscope_data = cbind(
+#'   t = kinetic_tremor_data$timestamp,
+#'   kinetic_tremor_data$rotationRate)
 #' 
-#' accelerometer_data = cbind(t = kinetic_tremor_data$timestamp, kinetic_tremor_data$userAcceleration)
-#' gyroscope_data = cbind(t = kinetic_tremor_data$timestamp, kinetic_tremor_data$rotationRate)
+#' kinetic_tremor_features <- get_kinetic_tremor_features(
+#'   accelerometer_data,
+#'   gyroscope_data)
 #' 
-#' kinetic_tremor_ftrs <- get_kinetic_tremor_features(accelerometer_data, gyroscope_data)
+#' kinetic_tremor_features <- get_kinetic_tremor_features(
+#'   accelerometer_data,
+#'   gyroscope_data,
+#'   time_filter = c(2,8))
 #' 
-#' kinetic_tremor_ftrs <- get_kinetic_tremor_features(accelerometer_data, gyroscope_data, time_filter = c(2,8))
+#' kinetic_tremor_features <- get_kinetic_tremor_features(
+#'   accelerometer_data,
+#'   gyroscope_data,
+#'   detrend = TRUE)
 #' 
-#' kinetic_tremor_ftrs <- get_kinetic_tremor_features(accelerometer_data, gyroscope_data, detrend = T)
+#' kinetic_tremor_features <- get_kinetic_tremor_features(
+#'   accelerometer_data,
+#'   gyroscope_data,
+#'   frequency_filter = c(0.5, 25))
 #' 
-#' kinetic_tremor_ftrs <- get_kinetic_tremor_features(accelerometer_data, gyroscope_data, frequency_filter = c(0.5, 25))
+#' kinetic_tremor_features <- get_kinetic_tremor_features(
+#'   accelerometer_data,
+#'   gyroscope_data,
+#'   window_length = 512,
+#'   window_overlap = 0.9)
 #' 
-#' #' kinetic_tremor_ftrs <- get_kinetic_tremor_features(accelerometer_data, gyroscope_data, IMF = 4)
+#' kinetic_tremor_features <- get_kinetic_tremor_features(
+#'   accelerometer_data,
+#'   gyroscope_data,
+#'   derived_kinematics = TRUE)
 #' 
-#' kinetic_tremor_ftrs <- get_kinetic_tremor_features(accelerometer_data, gyroscope_data, window_length = 512, window_overlap = 0.9)
-#' 
-#' kinetic_tremor_ftrs <- get_kinetic_tremor_features(accelerometer_data, gyroscope_data, derived_kinematics = F)
-#' 
-#' kinetic_tremor_ftrs <- get_kinetic_tremor_features(accelerometer_data, gyroscope_data, funs = list(time_domain_summary))
+#' kinetic_tremor_features <- get_kinetic_tremor_features(
+#'   accelerometer_data,
+#'   gyroscope_data, 
+#'   detrend = TRUE,
+#'   frequency_filter = c(1, 25),
+#'   funs = list(time_domain_summary))
+#'   
 #' @importFrom magrittr "%>%"
 get_kinetic_tremor_features <- function(
   accelerometer_data = NULL, gyroscope_data = NULL, gravity_data = NULL,
