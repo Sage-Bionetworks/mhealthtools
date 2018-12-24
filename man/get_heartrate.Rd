@@ -4,7 +4,8 @@
 \alias{get_heartrate}
 \title{Preprocess and extract heart rate from smartphone video recordings.}
 \usage{
-get_heartrate(heartrate_data, window_length = 10, window_overlap = 0.5)
+get_heartrate(heartrate_data, window_length = 10, window_overlap = 0.5,
+  method = "acf")
 }
 \arguments{
 \item{heartrate_data}{A data frame with columns t, red, green and blue}
@@ -12,9 +13,13 @@ get_heartrate(heartrate_data, window_length = 10, window_overlap = 0.5)
 \item{window_length}{Length of the time window in seconds, to be considered
 while calculating the heart rate for each channel}
 
-\item{frequency_range}{Frequency range in Hz for the bandpass filter parameters}
+\item{window_overlap}{The overlap between consecutive windows, i.e how fine the
+resolution of the heartrate output needs to be}
 
-\item{bandpass_order}{Order (length) of the bandpass filter to be used for filtering}
+\item{method}{The algorithm used to calculate the heartrate, current methods
+include ('acf','psd') which stand for autocorrelation function, and power
+spectral density respectively. We will be adding support for peak picking 
+algorithms, and wavelet methods later.}
 }
 \value{
 list containing heart rate and confidence of the estimate for
