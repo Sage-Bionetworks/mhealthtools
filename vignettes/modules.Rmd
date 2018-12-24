@@ -316,9 +316,9 @@ dplyr::glimpse(hr_values)
 As with most of the functions in `mhealthtools`, `get_heartrate` also comes with many options for input parameters for versatile data analysis. 
 
 ```{r,  warning=FALSE, error=FALSE, prompt=FALSE}
-hr_values <- get_heartrate(heartrate_data, window_length = 8, frequency_range = c(2,20), bandpass_order = 64)
-# Using 8s windows, frequencies from 2-20Hz and a bandpass filter of order 64
-# Defaults are 10s windows, 1-25Hz frequency range and a bandpass filter of order 128
+hr_values <- get_heartrate(heartrate_data, window_length = 8, window_overlap = 0.5, method = 'acf')
+# Using 8s windows, with a 50% overlap, and uses the autocorrelation method to find HR 
+# Defaults are 10s windows, 50% overlap and acf method
 ```
 
 Please read the function documentation `?get_heartrate` for more info.
