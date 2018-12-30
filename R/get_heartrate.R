@@ -28,20 +28,20 @@ get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0
   ## keep this in mind
   
   heartrate_error_frame <- data.frame(red = NA, green = NA, blue = NA,
-                            error = NA, sampling_rate = NA)
+                                      error = NA, sampling_rate = NA)
   sampling_rate <- mhealthtools:::get_sampling_rate(heartrate_data)
   if (is.infinite(sampling_rate) || is.na(sampling_rate)) {
     heartrate_error_frame$error <- paste("Sampling Rate calculated from timestamp is Inf",
-                               "or NaN / timestamp not found in json")
+                                         "or NaN / timestamp not found in json")
     return(heartrate_error_frame)
   }
-
+  
   # Convert window length from seconds to samples
   window_length <- round(sampling_rate * window_length)
   mean_filter_order <- 65
   
   ##  Apply pre-processing filter to all heartrate data
-
+  
   # We do so as we are using an IIR (running filter), so we do not need
   # to filter each window, as for a running filter the effects are local
   # ARMA filter's output depends only on the y_i's and x_i's used
@@ -67,7 +67,7 @@ get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0
       dplyr::select(red, green, blue) %>%
       na.omit() %>%
       lapply(mhealthtools:::window_signal, window_length, window_overlap, 'rectangle')
-    }, error = function(e) { NA })
+  }, error = function(e) { NA })
   if (all(is.na(heartrate_data))) {
     heartrate_error_frame$error <- "red, green, blue cannot be read from JSON"
     return(heartrate_error_frame)
@@ -82,9 +82,9 @@ get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0
       dfl <- as.data.frame(t(dfl))
       colnames(dfl) <- c("hr", "confidence")
       return(dfl)
-  })
+    })
   heartrate_data$error <- "none"
-
+  
   if (sampling_rate < 55) {
     heartrate_data$error <- "Low sampling rate, at least 55FPS needed"
   }
@@ -108,13 +108,13 @@ get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method
   ## We chose an Elliptic IIR, since it is an equi-ripple filter
   #################
   if(sampling_rate > 20){
-  
-  bandpass_params <- signal::ellipord(Wp = c(0.5/30,10/30), 
-                                      Ws = c(0.3/30, 12/30),
-                                      Rp = 0.001,
-                                      Rs = 0.001)
+    
+    bandpass_params <- signal::ellipord(Wp = c(0.5/30,10/30), 
+                                        Ws = c(0.3/30, 12/30),
+                                        Rp = 0.001,
+                                        Rs = 0.001)
   }else{
-  bandpass_params <- signal::ellipord(Wp = c(0.5/15,10/15), 
+    bandpass_params <- signal::ellipord(Wp = c(0.5/15,10/15), 
                                         Ws = c(0.3/15, 12/15),
                                         Rp = 0.001,
                                         Rs = 0.001)
@@ -142,19 +142,24 @@ get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method
   ## Mean centering filter design (For 60Hz Sampling Rate)
   ## The purpose of this is to make sure the waveform is uniform in range
   #################
-  if(method == 'acf' || method == 'psd'){
-  y <- 0 * x
-  sequence_limits <- seq((mean_filter_order + 1) / 2,
-                         length(x) - (mean_filter_order - 1) / 2, 1)
-  for (i in sequence_limits) {
-    temp_sequence <- x[seq(i - (mean_filter_order - 1) / 2,
-                           (i + (mean_filter_order - 1) / 2),1)]
-    
-    y[i] <- (((x[i] - max(temp_sequence) - min(temp_sequence)) -
-              (sum(temp_sequence) - max(temp_sequence)) / (mean_filter_order - 1)) /
-               (max(temp_sequence) - min(temp_sequence) + 0.0000001))
-  }
-  y <- y[sequence_limits]
+  if(method == 'acf' || method == 'psd' || method == 'peak'){
+    y <- 0 * x
+    sequence_limits <- seq((mean_filter_order + 1) / 2,
+                           length(x) - (mean_filter_order - 1) / 2, 1)
+    for (i in sequence_limits) {
+      temp_sequence <- x[seq(i - (mean_filter_order - 1) / 2,
+                             (i + (mean_filter_order - 1) / 2),1)]
+      
+      y[i] <- (((x[i] - max(temp_sequence) - min(temp_sequence)) -
+                  (sum(temp_sequence) - max(temp_sequence)) / (mean_filter_order - 1)) /
+                 (max(temp_sequence) - min(temp_sequence) + 0.0000001))
+      if(method == 'peak'){
+        y[i] = (y[i]*(sign(y[i])+1)/2)
+        y[i] = (y[i])^0.15
+        y[i] = exp(y[i])^0.75
+      }
+    }
+    y <- y[sequence_limits]
   }
   return(y)
 }
@@ -175,17 +180,29 @@ get_hr_from_time_series <- function(x, sampling_rate, method = 'acf', min_hr = 4
     y <- 0 * x
     y[seq(round(60 * sampling_rate / max_hr), round(60 * sampling_rate / min_hr))] <-
       x[seq(round(60 * sampling_rate / max_hr), round(60 * sampling_rate / min_hr))]
-    confidence <- max(y) / max(x)
     hr <- 60 * sampling_rate / (which.max(y) - 1)
+    confidence <- max(y) / max(x)
   }
   
   if(method == 'psd'){
     x_spec <- mhealthtools:::get_spectrum(
       x, sampling_rate,nfreq = 2^round(log(length(x))/log(2))
-      ) %>% dplyr::filter(freq>0.6, freq< 3.3)
+    ) %>% dplyr::filter(freq>0.6, freq< 3.3)
     # 0.6Hz = 36BPM, 3.3HZ = 198BPM
     hr <- 60*x_spec$freq[which.max(x_spec$pdf)]
     confidence <- 'NAN-PSD'
+  }
+  
+  if(method == 'peak'){
+    x_peaks <- pracma::findpeaks(x, minpeakdistance = 60 * sampling_rate / max_hr)
+    
+    # peak cleaning to be done
+    
+    # sort peaks by time when they occur not by amplitude
+    x_peaks <- x_peaks[order(x_peaks[,2]),]
+    peak_dist <- diff(x_peaks[,2])
+    hr <- 60 * sampling_rate / (mean(peak_dist))
+    confidence <- 'NAN-PEAK'
   }
   
   # If hr or condidence is NaN, then return hr = 0 and confidence = 0
