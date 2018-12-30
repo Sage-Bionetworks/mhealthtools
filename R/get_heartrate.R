@@ -195,7 +195,10 @@ get_hr_from_time_series <- function(x, sampling_rate, method = 'acf', min_hr = 4
   }
   
   if(method == 'peak'){
-    x_peaks <- pracma::findpeaks(x, minpeakdistance = 60 * sampling_rate / max_hr)
+    
+    x_max <- max(x)
+    x_peaks <- pracma::findpeaks(x, minpeakdistance = 60 * sampling_rate / max_hr,
+                                 minpeakheight = 0.85*x_max)
     
     # peak cleaning to be done
     
