@@ -107,34 +107,17 @@ get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method
   ## Elliptic IIR filter design (For 60Hz Sampling Rate)
   ## We chose an Elliptic IIR, since it is an equi-ripple filter
   #################
-  if(method == 'acf' || method == 'psd'){
-    if(sampling_rate > 20){
-      
-      bandpass_params <- signal::ellipord(Wp = c(0.5/30,10/30), 
-                                          Ws = c(0.3/30, 12/30),
-                                          Rp = 0.001,
-                                          Rs = 0.001)
-    }else{
-      bandpass_params <- signal::ellipord(Wp = c(0.5/15,10/15), 
-                                          Ws = c(0.3/15, 12/15),
-                                          Rp = 0.001,
-                                          Rs = 0.001)
-    }
+  if(sampling_rate > 20){
     
-  if(method == 'psd'){
-    if(sampling_rate > 20){
-      
-      bandpass_params <- signal::ellipord(Wp = c(0.5/30,5/30), 
-                                          Ws = c(0.3/30, 5.5/30),
-                                          Rp = 0.001,
-                                          Rs = 0.001)
-    }else{
-      bandpass_params <- signal::ellipord(Wp = c(0.5/15,10/15), 
-                                          Ws = c(0.3/15, 12/15),
-                                          Rp = 0.001,
-                                          Rs = 0.001)
-  }
-  
+    bandpass_params <- signal::ellipord(Wp = c(0.5/30,10/30), 
+                                        Ws = c(0.3/30, 12/30),
+                                        Rp = 0.001,
+                                        Rs = 0.001)
+  }else{
+    bandpass_params <- signal::ellipord(Wp = c(0.5/15,10/15), 
+                                        Ws = c(0.3/15, 12/15),
+                                        Rp = 0.001,
+                                        Rs = 0.001)
   }
   # If this doesn't work, use the one below
   # bandpass_params <- signal::ellipord(Wp = c(0.5/30,4/30),
