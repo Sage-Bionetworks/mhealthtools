@@ -137,6 +137,7 @@ get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method
   
   x <- signal::filter(bandpass_filter, x)
   x <- x[180:length(x)] # 180 samples is 3s @ 60Hz
+  y <- x
   
   #################
   ## Mean centering filter design (For 60Hz Sampling Rate)
