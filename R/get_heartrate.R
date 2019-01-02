@@ -143,7 +143,7 @@ get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method
   ## Mean centering filter design (For 60Hz Sampling Rate)
   ## The purpose of this is to make sure the waveform is uniform in range
   #################
-  if(method == 'acf' || method == 'peak'){
+  if(method == 'acf' || method == 'psd'|| method == 'peak'){
     y <- 0 * x
     sequence_limits <- seq((mean_filter_order + 1) / 2,
                            length(x) - (mean_filter_order - 1) / 2, 1)
@@ -156,7 +156,7 @@ get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method
                  (max(temp_sequence) - min(temp_sequence) + 0.0000001))
       if(method == 'peak'){
         y[i] = (y[i]*(sign(y[i])+1)/2)
-        y[i] = (y[i])^0.15
+        y[i] = (y[i])^0.05
         y[i] = exp(y[i])^0.75
       }
     }
