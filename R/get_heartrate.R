@@ -156,7 +156,7 @@ get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method
                  (max(temp_sequence) - min(temp_sequence) + 0.0000001))
       if(method == 'peak'){
         y[i] = (y[i]*(sign(y[i])+1)/2)
-        y[i] = (y[i])^0.05
+        y[i] = (y[i])^0.15
         y[i] = exp(y[i])^0.75
       }
     }
