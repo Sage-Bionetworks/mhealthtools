@@ -321,19 +321,21 @@ testthat::test_that('Windowing the sensor data by axis',{
   # throw an error if Input is not in correct format
 })
 
-testthat::test_that('Compute start and stop timestamp for each window',{
-  # actual function in utils: window_start_end_times
-  testthat::expect_is(
-    mhealthtools:::window_start_end_times(t = datAccel$t,
-                                          window_length = 10,
-                                          window_overlap = 0.5), 'data.frame')
-  # Check output format
-  
-  testthat::expect_error(mhealthtools:::window_start_end_times(
-    t = datAccel$t, 
-    window_length = NA,
-    window_overlap = 0.5))
-  # Throw a data error if any parameter doesn't confirm to norms
+test_that('Compute start and stop timestamp for each window', {
+  expect_is(window_start_end_times(t = mini_accelerometer_data$t,
+                                   window_length = 64,
+                                   window_overlap = 1), 'data.frame')
+  expect_error(window_start_end_times(t = mini_accelerometer_data$t,
+                                      window_length = NA,
+                                      window_overlap = 0.5))
+  start_end_times <- window_start_end_times(t = mini_accelerometer_data$t,
+                                            window_length = 64,
+                                            window_overlap = 0.65)
+  expect_equal(is_integer(start_end_times$window), TRUE)
+  expect_equal(is.numeric(start_end_times$window_start_time), TRUE)
+  expect_equal(is.numeric(start_end_times$window_end_time), TRUE)
+  expect_equal(is_integer(start_end_times$window_start_index), TRUE)
+  expect_equal(is_integer(start_end_times$window_end_index), TRUE)
 })
 
 testthat::context('Derivative Calculation')

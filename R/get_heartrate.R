@@ -127,13 +127,11 @@ get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method
   # The reason is if we can't find a good signal in 0.7 to 10Hz,
   # we will try to find one in 0.7 to 4Hz, because of the noise/heartrate
   # (higher HR => more higher freq components/noise)
-  options(warn=-1) # Turn off warnings
   # The reason we get a lot of warnings here is for the given bandpass params abovem
   # We will run into NA/Inf values for the maximum positive value while calculating the
   # filter co-efficients, so they will be replaced by value calculated using
   # machine double eps
-  bandpass_filter <- signal::ellip(bandpass_params)
-  options(warn=0) # Turn on warnings
+  bandpass_filter <- suppressWarnings(signal::ellip(bandpass_params))
   
   x <- signal::filter(bandpass_filter, x)
   x <- x[180:length(x)] # 180 samples is 3s @ 60Hz

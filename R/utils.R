@@ -268,8 +268,15 @@ window_start_end_times <- function(t, window_length, window_overlap) {
     window_length <- seq_length
     window_overlap <- 1
   }
-  start_indices <- seq(1, seq_length, window_length * window_overlap)
-  end_indices <- seq(window_length, seq_length, window_length * window_overlap)
+  if (window_overlap == 1) {
+    start_indices <- 1
+    end_indices <- window_length
+  } else {
+    start_indices <- floor(
+      seq(1, seq_length, window_length * (1 - window_overlap)))
+    end_indices <- floor(
+      seq(window_length, seq_length, window_length * (1 - window_overlap)))
+  }
   start_indices <- start_indices[1:length(end_indices)]
   start_times <- t[start_indices]
   end_times <- t[end_indices]
