@@ -218,8 +218,11 @@ filter_time <- function(sensor_data, t1, t2) {
 #' @param sensor_data A data frame with columns t, axis, value.
 #' @param window_length Length of the filter
 #' @param window_overlap window overlap
+#' @param window_name window name: bartlett, blackman, flattop, hamming,
+#' hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.
 #' @return Windowed sensor data
-window <- function(sensor_data, window_length, window_overlap) {
+window <- function(sensor_data, window_length, window_overlap,
+                   window_name = "hamming") {
   if (has_error(sensor_data)) return(sensor_data)
   tryCatch({
     spread_sensor_data <- sensor_data %>%
@@ -227,7 +230,9 @@ window <- function(sensor_data, window_length, window_overlap) {
     windowed_sensor_data <- spread_sensor_data %>%
       dplyr::select(x, y, z) %>%
       purrr::map(window_signal,
-                 window_length = window_length, window_overlap = window_overlap)
+                 window_length = window_length,
+                 window_overlap = window_overlap,
+                 window_name = window_name)
     tidy_windowed_sensor_data <- lapply(
       windowed_sensor_data,
       function(windowed_matrix) {
@@ -263,8 +268,14 @@ window_start_end_times <- function(t, window_length, window_overlap) {
     window_length <- seq_length
     window_overlap <- 1
   }
-  start_indices <- seq(1, seq_length, window_length * window_overlap)
-  end_indices <- seq(window_length, seq_length, window_length * window_overlap)
+  if (window_overlap == 1) {
+    start_indices <- 1
+    end_indices <- window_length
+  } else {
+    window_step <- round(window_length * (1 - window_overlap))
+    start_indices <- seq(1, seq_length, window_step)
+    end_indices <- seq(window_length, seq_length, window_step)
+  }
   start_indices <- start_indices[1:length(end_indices)]
   start_times <- t[start_indices]
   end_times <- t[end_indices]
@@ -279,24 +290,26 @@ window_start_end_times <- function(t, window_length, window_overlap) {
 
 #' Window a signal
 #'  
-#' Given a numeric vector, this function will return a windowed 
-#' signal with hamming window.
+#' Given a numeric vector, this function will return its windowed signal.
 #'  
 #' @param values Timeseries vector of length n.
 #' @param window_length Length of the filter.
 #' @param window_overlap Window overlap.
+#' @param window_name window name: bartlett, blackman, flattop, hamming,
+#' hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.
 #' @return A matrix of window_length x nwindows
-window_signal <- function(values, window_length = 256, window_overlap = 0.5) {
+window_signal <- function(values, window_length = 256,
+                          window_overlap = 0.5, window_name = "hamming") {
   start_end_times <- window_start_end_times(
     values, window_length = window_length, window_overlap = window_overlap)
   nstart <- start_end_times$window_start_index
   nend <- start_end_times$window_end_index
-  wn <- seewave::hamming.w(window_length)
-  a <- apply(cbind(nstart, nend), 1, function(x, a, wn) {
-    a[seq(x[1], x[2], 1)] * wn
-  }, values, wn)
-  colnames(a) <- 1:dim(a)[2]
-  return(a)
+  window <- seewave::ftwindow(window_length, wn = window_name)
+  windowed_signal <- purrr::map2(
+    nstart, nend, ~ values[seq(.x, .y)] * window) %>%
+    simplify2array()
+  colnames(windowed_signal) <- 1:dim(windowed_signal)[2]
+  return(windowed_signal)
 }
 
 #' Take the derivative of a vector v
@@ -329,7 +342,7 @@ integral <- function(v) {
 #' 
 #' See function \code{derivative}.
 #' 
-#' @param sensor_data A data frame with columns t, axis, acceleration.
+#' @param sensor_data A data frame with column \code{col}.
 #' @param sampling_rate Sampling rate of \code{col}.
 #' @param col Name of column to differentiate.
 #' @param derived_col Name of new column which is the derivative of \code{col}.
@@ -350,7 +363,7 @@ mutate_derivative <- function(sensor_data, sampling_rate, col, derived_col) {
 #' 
 #' See function \code{integral}.
 #' 
-#' @param sensor_data A data frame with columns t, axis, acceleration.
+#' @param sensor_data A data frame with column \code{col}.
 #' @param sampling_rate Sampling rate of \code{col}.
 #' @param col Name of column to integrate.
 #' @param derived_col Name of new column which is the integral of \code{col}.
@@ -393,7 +406,8 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, window_overlap) 
   if (!is.vector(gravity_vector)) stop("Input must be a numeric vector")
   gravity_summary <- gravity_vector %>%
     window_signal(window_length = window_length,
-                  window_overlap = window_overlap) %>%
+                  window_overlap = window_overlap,
+                  window_name = "rectangle") %>%
     dplyr::as_tibble() %>%
     tidyr::gather(window, value) %>%
     dplyr::group_by(window) %>%
@@ -634,14 +648,16 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
 #' 
 #' A convenience function for mapping a function -- which accepts a 
 #' vector as input and outputs an atomic value -- to a single column
-#' of each group in a grouped tibble.
+#' of a dataframe. If the dataframe is grouped, the function will be
+#' applied within each group.
 #' 
 #' @param x A tibble
 #' @param col Column to pass as a vector to \code{f}.
-#' @param f Function to be mapped to \code{col} for each group.
+#' @param f Function to be mapped to \code{col}.
 #' @param ... Additional arguments to \code{f}.
-#' @return A tibble indexed by groups with an additional column containing
-#' the output of the mapped function.
+#' @return A dataframe with the original grouped columns (if \code{x} had
+#' originally been grouped) and a \code{data} column containing
+#' the output of the mapped function \code{f}.
 map_groups <- function(x, col, f, ...) {
   dots <- rlang::enquos(...) # can also use enexprs()
   x %>%
@@ -653,15 +669,16 @@ map_groups <- function(x, col, f, ...) {
 #' Extract features from a column
 #' 
 #' Apply each of the functions in \code{funs} to the column 
-#' \code{col} in data frame \code{x}. Each of the functions in 
+#' \code{col} in the grouped data frame \code{x}. Each of the functions in 
 #' \code{funs} must accept a single vector as input and output 
-#' a data frame with columns axis and window (and optionally others).
+#' a data frame.
 #' 
-#' @param x A data frame with columns axis, window, and \code{col}.
+#' @param x A grouped data frame with column \code{col}.
 #' @param col The name of the column in \code{x} to pass to each 
 #' function in \code{funs}.
 #' @param funs A list of functions that accept a single vector as input.
-#' @return a data frame with columns axis, window, and other feature columns.
+#' @return a data frame with the original grouped columns and
+#' other feature columns.
 extract_features <- function(x, col, funs) {
   groups <- dplyr::group_vars(x)
   funs_output <- purrr::map(
