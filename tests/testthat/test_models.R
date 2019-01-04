@@ -30,7 +30,7 @@
 
 ### Load data file
 testthat::context('Load Required Data Files')
-dat <- mhealthtools::sensor_data
+dat <- sensor_data
 
 ### flatten data to the format needed for mHealthTools
 flatten_data <- function(dat, metric) {
@@ -51,7 +51,7 @@ testthat::context('Setting up GuanLab Model')
 testthat::test_that('Generate GuanLab architechture',{
   # actual function in models.R: guanlab_nn_architecture
   
-  testthat::expect_is(mhealthtools:::guanlab_nn_architecture(),
+  testthat::expect_is(guanlab_nn_architecture(),
                       'keras.engine.sequential.Sequential')
   # Keras sequential model
   
@@ -62,7 +62,7 @@ MODELS <- NULL # placeholder for expensive function call below
 testthat::test_that('Load weights into GuanLab architechture',{
   # actual function in models.R: load_guanlab_model
   
-  models <- mhealthtools:::load_guanlab_model()
+  models <- load_guanlab_model()
   testthat::expect_is(models, "list")
   # output is a list of Keras sequential models
   MODELS <- models  
@@ -72,6 +72,6 @@ testthat::context("Run GuanLab Model")
 testthat::test_that("Extract features using GuanLab model", {
   # actual function in models.R: guanlab_model
   
-  testthat::expect_is(mhealthtools:::guanlab_model(
+  testthat::expect_is(guanlab_model(
     sensor_data = datAccel, models = MODELS), "data.frame")
 })
