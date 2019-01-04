@@ -29,7 +29,7 @@
 
 ### Load data file
 testthat::context('Load Required data Files')
-datHR <- mhealthtools::heartrate_data
+datHR <- heartrate_data
 
 ### Individual test functions
 testthat::context('Extract Heart rate')
@@ -37,14 +37,14 @@ testthat::test_that('Function to extract heart rate per channel(R,G,B)',{
   # actual function in get_heartrate: get_heartrate
   testthat::expect_equal(is_error_dataframe( 
     # Check output is in correct format
-    mhealthtools:::get_heartrate(heartrate_data = datHR)), T)
+    get_heartrate(heartrate_data = datHR)), T)
   
   tempDat <- data.table::copy(datHR)
   tempDat$t <- rep(1, length(datHR$t))
   
   # Error if sampling rate cannot be calculated from timestamp
   testthat::expect_equal(is_error_dataframe( 
-    mhealthtools:::get_heartrate(heartrate_data = tempDat)), T) 
+    get_heartrate(heartrate_data = tempDat)), T) 
   
   tempDat <- data.table::copy(datHR)
   tempDat <- tempDat %>%
@@ -52,7 +52,7 @@ testthat::test_that('Function to extract heart rate per channel(R,G,B)',{
   
   # Error if any channel red, green or blue is missing
   testthat::expect_equal(is_error_dataframe(
-    mhealthtools:::get_heartrate(heartrate_data = tempDat)), T)
+    get_heartrate(heartrate_data = tempDat)), T)
   
   tempDat <- data.table::copy(datHR)
   tempDat$red <- rep(NA, length(datHR$red))
@@ -62,19 +62,19 @@ testthat::test_that('Extract heart rate given a timeseries',{
   # actual function in get_heartRate: get_hr_from_time_series
   timeSeries <- datHR$red
   
-  testthat::expect_is(mhealthtools:::get_hr_from_time_series(
+  testthat::expect_is(get_hr_from_time_series(
     x = timeSeries, sampling_rate = 100), 'numeric') 
   # Check output is in correct format
   
   # NA's are handled as 0s, so even if the input has NA's (
   # not all of them we should get a numeric output)
   timeSeries[1:10] <- NA
-  testthat::expect_is(mhealthtools:::get_hr_from_time_series(
+  testthat::expect_is(get_hr_from_time_series(
     x = timeSeries, sampling_rate = 100), 'numeric') 
   # Check output is in correct format
   
   # If all the input is NA's then the output will be c(NA,NA)
-  testthat::expect_equal(mhealthtools:::get_hr_from_time_series(
+  testthat::expect_equal(get_hr_from_time_series(
     x = rep(NA,1000), sampling_rate = 100), c(NA, NA)) 
   # Check output is in correct format
 })
@@ -84,7 +84,7 @@ testthat::test_that('Bandpass filter the input signal',{
   # actual function in get_heartRate: get_filtered_signal
   timeSeries <- datHR$red
   
-  testthat::expect_is(mhealthtools:::get_filtered_signal(
+  testthat::expect_is(get_filtered_signal(
     x = timeSeries, sampling_rate = 60), 'numeric') 
   # Check output is in correct format
 })

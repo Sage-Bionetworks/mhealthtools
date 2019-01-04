@@ -6,7 +6,7 @@
 
 ### Load data file
 testthat::context('Load Required Data Files')
-dat <- mhealthtools::tap_data
+dat <- tap_data
 
 ### Individual test functions
 testthat::context('Extract tapping features')
@@ -18,23 +18,23 @@ testthat::test_that('Wrapper to extract tapping features',{
   tempDat <- 'not a dataframe' 
   # The input is not a data frame, we should expect the relevant error
   testthat::expect_equal(is_error_dataframe(
-    mhealthtools::get_tapping_features(tap_data = tempDat)), T)
+    get_tapping_features(tap_data = tempDat)), T)
   
   # Checking depress_threshold parameter
-  testthat::expect_is(mhealthtools::get_tapping_features(tap_data = dat,
+  testthat::expect_is(get_tapping_features(tap_data = dat,
                                                          depress_threshold = 20),
                       'data.frame')
   # For an invalid depress_threshold parameter we should get an error, e.g
   # if it is not a number (of it is a negative number, no problem as we will
   # be doing x > depress_threshold, so..)
   testthat::expect_equal(is_error_dataframe(
-    mhealthtools::get_tapping_features(tap_data = dat, depress_threshold = NA)), T)
+    get_tapping_features(tap_data = dat, depress_threshold = NA)), T)
   
   tempDat <- dat[1:2,] 
   # tempDat now has just 2 rows of observations, we should expect the
   # relevant error as this is less that the required 5
   testthat::expect_equal(is_error_dataframe(
-    mhealthtools::get_tapping_features(tap_data = tempDat)), T)
+    get_tapping_features(tap_data = tempDat)), T)
   
   tempDat <- dat[1:2,]
   tempDat$buttonid[1:2] <- 'TappedButtonNone'
@@ -46,7 +46,7 @@ testthat::test_that('Wrapper to extract tapping features',{
   # (we can only remove duplicates of buttonid 'TappedButtonNone'),
   # we should get an errow saying that the number of rows is less than 5
   testthat::expect_equal(is_error_dataframe(
-    mhealthtools::get_tapping_features(
+    get_tapping_features(
       tap_data = tempDat,
       remove_duplicates = TRUE)), T)
   
@@ -58,14 +58,14 @@ testthat::test_that('Remove TappedButtonNone duplicates',{
 
   tempDat <- dat[1:2,] # 2 Rows
   
-  testthat::expect_is(mhealthtools:::clean_tapped_button_none(
+  testthat::expect_is(clean_tapped_button_none(
     tap_data = tempDat),'data.frame') # Check if output is in correct format
   
   tempDat$buttonid[1:2] <- 'TappedButtonNone' 
   # Make the buttonid 'TappedButtonNone'
   tempDatDuplicated <- rbind(tempDat, tempDat, tempDat, tempDat, tempDat)
   # Duplicated dataframe with only 2 rows of actual data
-  testthat::expect_equal(mhealthtools:::clean_tapped_button_none(
+  testthat::expect_equal(clean_tapped_button_none(
     tap_data = tempDatDuplicated),tempDat) # Check if duplicates are removed
   
 })
