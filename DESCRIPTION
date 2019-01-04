@@ -2,6 +2,7 @@ Package: mhealthtools
 Type: Package
 Title: mhealthtools - Package for processing mobile sensor data and to extract meaningful features
 Version: 0.2.0
+Depends: R (>= 2.10)
 Description: mHealthTools package processes data from various mobile sensors such as accelerometer, gyroscope,
     pedometer, screen touches, and microphones. Though this package is specifically designed around mHealth 
     applications developed by Sage Bionetwokrs, it works in general with any mobile sensors, provided the data 
@@ -12,7 +13,7 @@ Authors@R: c(
     person("Meghasyam", "Tummalacherla", email = "meghasyam@sagebase.org", role = c("aut", "ctb")),
     person("Abhishek", "Pratap", email = "apratap@sagebase.org", role = c("ctb")),
     person("Elias", "Chaibub Neto", email = "elias.chaibub.neto@sagebase.org", role = c("ctb")))
-License: GPL-3
+License: file LICENSE
 LazyData: TRUE
 Imports:
     seewave,
