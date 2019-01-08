@@ -10,8 +10,11 @@ Biomarker DREAM Challenge, Subchallenge 1
 guanlab_model(sensor_data, models = load_guanlab_model)
 }
 \arguments{
-\item{sensor_data}{Kinematic sensor data containing columns
-t, x, y, z.}
+\item{sensor_data}{An \code{n} x 4 data frame with columns \code{t}, \code{x},
+\code{y}, \code{z} containing kinematic sensor (accelerometer or gyroscope)
+measurements. Here \code{n} is the
+total number of measurements, \code{t} is the timestamp of each measurement, and
+\code{x}, \code{y} and \code{z} are linear axial measurements.}
 
 \item{models}{A list of models to use for prediction.}
 }
