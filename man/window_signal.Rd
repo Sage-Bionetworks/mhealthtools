@@ -12,9 +12,10 @@ window_signal(values, window_length = 256, window_overlap = 0.5,
 \arguments{
 \item{values}{Timeseries vector of length n.}
 
-\item{window_length}{Length of the filter.}
+\item{window_length}{The number of samples per window.}
 
-\item{window_overlap}{Window overlap.}
+\item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
+window overlap.}
 
 \item{window_name}{window name: bartlett, blackman, flattop, hamming,
 hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.}

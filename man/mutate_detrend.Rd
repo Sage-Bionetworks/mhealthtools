@@ -7,7 +7,7 @@
 mutate_detrend(sensor_data)
 }
 \arguments{
-\item{sensor_data}{A data frame with columns t, value.}
+\item{sensor_data}{A data frame with columns \code{t}, \code{value}.}
 }
 \value{
 Sensor data with detrended values.

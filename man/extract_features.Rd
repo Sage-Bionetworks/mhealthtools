@@ -12,7 +12,7 @@ extract_features(x, col, funs)
 \item{col}{The name of the column in \code{x} to pass to each 
 function in \code{funs}.}
 
-\item{funs}{A list of functions that accept a single vector as input.}
+\item{funs}{A list of functions that each accept a single vector as input.}
 }
 \value{
 a data frame with the original grouped columns and

@@ -10,16 +10,17 @@ kinematic_sensor_argument_validator(sensor_data, time_filter, detrend,
 }
 \arguments{
 \item{sensor_data}{An \code{n} x 4 data frame with column names \code{t}, \code{x},
-\code{y}, \code{z} containing gyroscope measurements. Here \code{n} is the
+\code{y}, \code{z} containing kinematic sensor (accelerometer or gyroscope) 
+measurements. Here \code{n} is the
 total number of measurements, \code{t} is the timestamp of each measurement, and
-\code{x}, \code{y} and \code{z} are linear velocity measurements.}
+\code{x}, \code{y} and \code{z} are linear axial measurements.}
 
 \item{time_filter}{A length 2 numeric vector specifying the time range 
 of measurements to use during preprocessing and feature extraction after
 normalizing the first timestamp to 0. A \code{NULL} value means do not 
 filter any measurements.}
 
-\item{detrend}{Whether to detrend the signal.}
+\item{detrend}{A logical value indicating whether to detrend the signal.}
 
 \item{sampling_rate}{Sampling rate of \code{sensor_data}.}
 
@@ -30,29 +31,32 @@ A \code{NULL} value means do not filter frequencies.}
 \item{IMF}{The number of IMFs used during an empirical mode decomposition
 transformation. The default value of 1 means do not apply EMD to the signal.}
 
-\item{window_length}{Length of the sliding window used during the windowing 
-transformation. Both \code{window_length} and \code{window_overlap} must be
-set for the windowing transformation to be applied.}
+\item{window_length}{A numerical value representing the length (in number of samples)
+of the sliding window used during the windowing transformation. Both 
+\code{window_length} and \code{window_overlap} must be set for the windowing 
+transformation to be applied.}
 
-\item{window_overlap}{Window overlap used during the windowing transformation.
+\item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
+window overlap during a windowing transformation.
 Both \code{window_length} and \code{window_overlap} must be set for the
 windowing transformation to be applied.}
 
-\item{derived_kinematics}{Whether to add columns for \code{jerk}, \code{velocity},
-and \code{displacement} before extracting features.}
+\item{derived_kinematics}{A logical value specifying whether to add derived
+kinematic measurements to \code{sensor_data} after the transform defined by
+the above parameters has been applied to the raw sensor measurements.}
 
-\item{funs}{A function or list of feature extraction functions that each
-accept a single numeric vector as input. Each function should return a 
-dataframe of features (normally a single-row datafame). The input vectors
-will be the axial measurements from \code{sensor_data} after the transform
-defined by the above parameters has been applied. If no argument
-is supplied to either \code{funs} or \code{models}, a default set
+\item{funs}{A function or list of functions that each accept a single numeric
+vector as input. Each function should return a dataframe of features
+(normally a single-row datafame, with column names as feature names).
+The input vectors will be the axial measurements from \code{sensor_data}
+after the transform defined by the above parameters has been applied.
+If no argument is supplied to either \code{funs} or \code{models}, a default set
 of feature extraction functions (as described in \code{default_kinematic_features})
 will be supplied for this parameter.}
 
-\item{models}{A list of functions, each of which accepts
-\code{sensor_data} as input after the transform defined by the above 
-parameters has been applied and returns features. Useful for models
+\item{models}{A function or list of functions that each accept
+\code{sensor_data} as input after the transform defined by the above
+parameters has been applied and returns features. Useful for functions
 which compute individual features using multiple input variables.}
 }
 \value{

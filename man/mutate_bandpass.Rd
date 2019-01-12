@@ -7,9 +7,9 @@
 mutate_bandpass(sensor_data, window_length, sampling_rate, frequency_range)
 }
 \arguments{
-\item{sensor_data}{A data frame with column value.}
+\item{sensor_data}{A data frame with column \code{value}.}
 
-\item{window_length}{Length of the filter.}
+\item{window_length}{The number of samples per window during filtering.}
 
 \item{sampling_rate}{Sampling rate of the value column.}
 
