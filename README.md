@@ -1,10 +1,10 @@
 [![Travis-CI Build Status](https://travis-ci.org/Sage-Bionetworks/mhealthtools.svg?branch=master)](https://travis-ci.org/Sage-Bionetworks/mhealthtools)
 
 ## mhealthtools
-R package for extracting features from mobile sensor data.
+An R package for extracting features from mobile sensor data.
 
 ### Description
-mhealthtools package processes data from various mobile sensors such as accelerometer, gyroscope, pedometer, screen touches, and microphones. Though this package is specifically designed around mHealth applications developed by Sage Bionetworks, it works in general with any mobile sensors, provided the data is supplied in a said format.
+mhealthtools processes raw data from various mobile sensors -- such as accelerometer, gyroscope, screen touches, and camera -- and outputs interpretable feature sets. Included with the package are feature extraction functions designed for assays used in [mHealth applications developed by Sage Bionetworks](http://sagebionetworks.org/digital-health-studies/), as well as general use functions that work with any assay using mobile sensors.
 
 ### Installing
 
@@ -15,7 +15,7 @@ devtools::install_github("Sage-Bionetworks/mhealthtools")
 ```
 
 ### Known Installation Issues
-A common issue when installing one of the dependency r-package `seewave`  on Linux systems is to be missing the system dependencies `libfftw3` and ` libsndfile1`. In a shell, run:
+A common issue on Linux systems when installing the `seewave` dependency is to be missing the system dependencies `libfftw3` and ` libsndfile1`. In a shell, run:
 
 ```
 $ apt install libfftw3-3 libfftw3-dev libsndfile1 libsndfile1-dev
@@ -29,28 +29,70 @@ If you are still having issues installing `seewave`, it may be necessary to also
 $ apt install r-cran-rgl
 ```
 
-See the `seewave` installation page for more info: http://rug.mnhn.fr/seewave/inst.html
+See the `seewave` [installation page](http://rug.mnhn.fr/seewave/inst.html) for more info.
 
 ### Usage
 
+![Feature functions diagram](man/figures/feature_functions_diagram.jpeg)
 
-### Next Steps
+There are two broad types of _feature functions_ included with mhealthtools: assay-level and sensor-level feature functions.
 
+Assay-level feature functions, like `get_tremor_features` and `get_walk_features`, extract features from every sensor involved in that assay. For example, the two previously mentioned functions both return accelerometer and gyroscope features. These functions are useful for their convenience -- we can share parameters since the feature extraction process is nearly identical between accelerometer and gyroscope sensors.
 
+```
+get_tremor_features(accelerometer_data, gyroscope_data)
+```
+
+Underneath the hood of assay-level functions operate sensor-level feature functions. These feature functions are designed to extract features from a single mobile sensor. If you were to design a new assay, you could borrow the already implemented sensor-level feature functions to extract its features.
+
+```
+gyroscope_features(gyroscope_data)
+```
+
+Both assay-level and sensor-level feature functions allow you to include additional steps in the feature extraction pipeline by passing additional arguments to their respective functions. If passing only the input data, a default set of features will be extracted from the raw sensor measurements. But suppose you are working with accelerometer data and would like to detrend, filter frequencies from, and window the axial measurements, then compute measurements for jerk, velocity and displacement -- all before extracting features from each measurement.
+
+```
+accelerometer_features(
+  sensor_data = accelerometer_data,
+  detrend = TRUE,
+  frequency_filter = c(1, 25),
+  window_length = 256, # measured in number of samples
+  window_overlap = 0.2,
+  derived_kinematics = TRUE)
+```
+
+If you omit the `funs` and `models` arguments, a default set of features will be computed. But you can, of course, provide your own feature extraction functions.
+
+```
+my_features <- function(x) {
+  data.frame(
+    "mean" = mean(x),
+    "median" = median(x),
+    "sd" = sd(x))
+}
+
+gyroscope_features(
+  sensor_data = gyroscope_data,
+  window_length = 256,
+  window_overlap = 0.2,
+  funs = my_features)
+```
+
+At the moment, only accelerometer and gyroscope sensors have this powerful processing pipeline implemented. For sensors such as screen and camera, it is more complicated to provide a useful set of preprocessing and feature extraction functions that generalize well to varied assays. We provide two assay-level functions for these sensors (`get_heartrate` and `get_tapping_features`), but no functionality at the sensor level of granularity -- at least not yet.
+
+For more information on how to augment mhealthtools with your own functionality -- including not just your own feature extraction functions, but also your own preprocessing/data-cleaning steps -- we highly recommend reading the vignettes.
 
 ### Contributing
-To contribute, [fork](http://help.github.com/fork-a-repo/) the [main repo](https://github.com/Sage-Bionetworks/mHealthTools), branch off a [feature branch](https://www.google.com/search?q=git+feature+branches) from `master`, make your changes and [commit](http://git-scm.com/docs/git-commit) them, [push](http://git-scm.com/docs/git-push) to your fork and submit a [pull request](http://help.github.com/send-pull-requests/) for `Sage-Bionetworks/mHealthTools:develop`.
-
-
-### Acknowledgements
-
+To contribute, [fork](http://help.github.com/fork-a-repo/) the [main repo](https://github.com/Sage-Bionetworks/mHealthTools), branch off a [feature branch](https://www.google.com/search?q=git+feature+branches) from `develop`, [commit](http://git-scm.com/docs/git-commit) and [push](http://git-scm.com/docs/git-push) your changes to your fork and submit a [pull request](http://help.github.com/send-pull-requests/) for `Sage-Bionetworks/mhealthtools:develop`.
 
 ### Authors
-* Thanneer Perumal <thanneer.perumal@sagebase.org> [aut, cre]
 * Phil Snyder <phil.snyder@sagebase.org> [aut, cre]
 * Meghasyam Tummalacherla <meghasyam@sagebase.org> [aut, ctb]
-* Abhishek Pratap <apratap@sagebase.org> [aut, ctb]
+* Thanneer Perumal <thanneer.perumal@sagebase.org> [aut]
+* Abhishek Pratap <apratap@sagebase.org> [ctb]
 * Elias Chaibub Neto <elias.chaibub.neto@sagebase.org> [ctb]
 
 ### License
 
+Apache License
+Version 2.0, January 2004
