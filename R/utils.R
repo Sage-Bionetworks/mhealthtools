@@ -79,7 +79,7 @@ get_left_right_events_and_tap_intervals <- function(tap_data,
 
 #' Calculate the sampling rate.
 #' 
-#' @param sensor_data A data frame with column t
+#' @param sensor_data A data frame with a time column \code{t}
 #' @return The sampling rate (number of samples taken per second on average).
 get_sampling_rate <- function(sensor_data) {
   tryCatch({
@@ -134,7 +134,7 @@ detrend <- function(time, values) {
 
 #' Detrend sensor data
 #' 
-#' @param sensor_data A data frame with columns t, value.
+#' @param sensor_data A data frame with columns \code{t}, \code{value}.
 #' @return Sensor data with detrended values.
 mutate_detrend <- function(sensor_data) {
   if (has_error(sensor_data)) return(sensor_data)
@@ -150,7 +150,7 @@ mutate_detrend <- function(sensor_data) {
 #' Apply a pass-band filter to time series data
 #' 
 #' @param values Numeric vector.
-#' @param window_length Length of the filter.
+#' @param window_length The number of samples per window during filtering.
 #' @param sampling_rate Sampling rate of the values.
 #' @param frequency_range Bounds on frequency in Hz
 #' @return Filtered time series data
@@ -176,8 +176,8 @@ bandpass <- function(values, window_length, sampling_rate,
 
 #' Apply a pass-band filter to sensor data
 #' 
-#' @param sensor_data A data frame with column value.
-#' @param window_length Length of the filter.
+#' @param sensor_data A data frame with column \code{value}.
+#' @param window_length The number of samples per window during filtering.
 #' @param sampling_rate Sampling rate of the value column.
 #' @param frequency_range Bounds on frequency in Hz
 #' @return Filtered time series data
@@ -196,7 +196,7 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
 
 #' Select a specific time range from sensor data.
 #' 
-#' @param sensor_data A data frame with a \code{t} column.
+#' @param sensor_data A data frame with a time column \code{t}.
 #' @param t1 Start time.
 #' @param t2 End time.
 #' @return Sensor data between time t1 and t2 (inclusive)
@@ -215,9 +215,10 @@ filter_time <- function(sensor_data, t1, t2) {
 
 #' Window the value vector of sensor data for each axis
 #' 
-#' @param sensor_data A data frame with columns t, axis, value.
-#' @param window_length Length of the filter
-#' @param window_overlap window overlap
+#' @param sensor_data A data frame with columns \code{t}, \code{axis}, \code{value}.
+#' @param window_length The number of samples per window.
+#' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
+#' window overlap.
 #' @param window_name window name: bartlett, blackman, flattop, hamming,
 #' hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.
 #' @return Windowed sensor data
@@ -258,8 +259,9 @@ window <- function(sensor_data, window_length, window_overlap,
 #' Compute start/end timestamps for each window
 #' 
 #' @param t A numeric time vector
-#' @param window_length Length of the filter
-#' @param window_overlap Window overlap
+#' @param window_length The number of samples per window.
+#' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
+#' window overlap.
 #' @return A dataframe with columns window, window_start_time,
 #' window_end_time, window_start_index, window_end_index
 window_start_end_times <- function(t, window_length, window_overlap) {
@@ -293,8 +295,9 @@ window_start_end_times <- function(t, window_length, window_overlap) {
 #' Given a numeric vector, this function will return its windowed signal.
 #'  
 #' @param values Timeseries vector of length n.
-#' @param window_length Length of the filter.
-#' @param window_overlap Window overlap.
+#' @param window_length The number of samples per window.
+#' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
+#' window overlap.
 #' @param window_name window name: bartlett, blackman, flattop, hamming,
 #' hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.
 #' @return A matrix of window_length x nwindows
@@ -399,8 +402,9 @@ mutate_acf <- function(sensor_data, col, lag_max = NULL) {
 #' Get min and max gravity values for each window
 #' 
 #' @param gravity_vector A gravity vector
-#' @param window_length Length of the filter.
-#' @param window_overlap Window overlap.
+#' @param window_length The number of samples per window.
+#' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
+#' window overlap during the windowing transformation.
 #' @return Min and max values for each window.
 tag_outlier_windows_ <- function(gravity_vector, window_length, window_overlap) {
   if (!is.vector(gravity_vector)) stop("Input must be a numeric vector")
@@ -422,8 +426,9 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, window_overlap) 
 #' as indicated by a gravity vector
 #' 
 #' @param gravity A dataframe with gravity vectors for columns
-#' @param window_length Length of the filter.
-#' @param window_overlap Window overlap.
+#' @param window_length The number of samples per window.
+#' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
+#' window overlap during the windowing transformation.
 #' @return Rotations errors for each window.
 tag_outlier_windows <- function(gravity, window_length, window_overlap) {
   gr_error <- tryCatch({
@@ -676,7 +681,7 @@ map_groups <- function(x, col, f, ...) {
 #' @param x A grouped data frame with column \code{col}.
 #' @param col The name of the column in \code{x} to pass to each 
 #' function in \code{funs}.
-#' @param funs A list of functions that accept a single vector as input.
+#' @param funs A list of functions that each accept a single vector as input.
 #' @return a data frame with the original grouped columns and
 #' other feature columns.
 extract_features <- function(x, col, funs) {

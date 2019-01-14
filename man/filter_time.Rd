@@ -7,7 +7,7 @@
 filter_time(sensor_data, t1, t2)
 }
 \arguments{
-\item{sensor_data}{A data frame with a \code{t} column.}
+\item{sensor_data}{A data frame with a time column \code{t}.}
 
 \item{t1}{Start time.}
 

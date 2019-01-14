@@ -5,10 +5,10 @@
 #' using smartphone cameras.
 #' 
 #' @param heartrate_data A data frame with columns t, red, green and blue
-#' @param window_length Length of the time window in seconds, to be considered
-#' while calculating the heart rate for each channel
-#' @param window_overlap The overlap between consecutive windows, i.e how fine the
-#' resolution of the heartrate output needs to be
+#' @param window_length Length of the time window \emph{in seconds}, to be
+#' considered while calculating the heart rate for each channel.
+#' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
+#' window overlap.
 #' @param method The algorithm used to calculate the heartrate, current methods
 #' include ('acf','psd') which stand for autocorrelation function, and power
 #' spectral density respectively. We will be adding support for peak picking 
@@ -29,7 +29,7 @@ get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0
   
   heartrate_error_frame <- data.frame(red = NA, green = NA, blue = NA,
                                       error = NA, sampling_rate = NA)
-  sampling_rate <- mhealthtools:::get_sampling_rate(heartrate_data)
+  sampling_rate <- get_sampling_rate(heartrate_data)
   if (is.infinite(sampling_rate) || is.na(sampling_rate)) {
     heartrate_error_frame$error <- paste("Sampling Rate calculated from timestamp is Inf",
                                          "or NaN / timestamp not found in json")
@@ -66,7 +66,7 @@ get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0
     heartrate_data %>%
       dplyr::select(red, green, blue) %>%
       na.omit() %>%
-      lapply(mhealthtools:::window_signal, window_length, window_overlap, 'rectangle')
+      lapply(window_signal, window_length, window_overlap, 'rectangle')
   }, error = function(e) { NA })
   if (all(is.na(heartrate_data))) {
     heartrate_error_frame$error <- "red, green, blue cannot be read from JSON"
@@ -184,7 +184,7 @@ get_hr_from_time_series <- function(x, sampling_rate, method = 'acf', min_hr = 4
   }
   
   if(method == 'psd'){
-    x_spec <- mhealthtools:::get_spectrum(
+    x_spec <- get_spectrum(
       x, sampling_rate,nfreq = 2^round(log(length(x))/log(2))
     ) %>% dplyr::filter(freq>0.6, freq< 3.3)
     # 0.6Hz = 36BPM, 3.3HZ = 198BPM

@@ -10,11 +10,11 @@ get_heartrate(heartrate_data, window_length = 10, window_overlap = 0.5,
 \arguments{
 \item{heartrate_data}{A data frame with columns t, red, green and blue}
 
-\item{window_length}{Length of the time window in seconds, to be considered
-while calculating the heart rate for each channel}
+\item{window_length}{Length of the time window \emph{in seconds}, to be
+considered while calculating the heart rate for each channel.}
 
-\item{window_overlap}{The overlap between consecutive windows, i.e how fine the
-resolution of the heartrate output needs to be}
+\item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
+window overlap.}
 
 \item{method}{The algorithm used to calculate the heartrate, current methods
 include ('acf','psd') which stand for autocorrelation function, and power

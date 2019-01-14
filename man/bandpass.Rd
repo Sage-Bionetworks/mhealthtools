@@ -9,7 +9,7 @@ bandpass(values, window_length, sampling_rate, frequency_range)
 \arguments{
 \item{values}{Numeric vector.}
 
-\item{window_length}{Length of the filter.}
+\item{window_length}{The number of samples per window during filtering.}
 
 \item{sampling_rate}{Sampling rate of the values.}
 

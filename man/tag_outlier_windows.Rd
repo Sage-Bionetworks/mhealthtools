@@ -9,9 +9,10 @@ tag_outlier_windows(gravity, window_length, window_overlap)
 \arguments{
 \item{gravity}{A dataframe with gravity vectors for columns}
 
-\item{window_length}{Length of the filter.}
+\item{window_length}{The number of samples per window.}
 
-\item{window_overlap}{Window overlap.}
+\item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
+window overlap during the windowing transformation.}
 }
 \value{
 Rotations errors for each window.
