@@ -95,6 +95,13 @@ get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0
 #' Bandpass and sorted mean filter the given signal
 #'
 #' @param x A time series numeric data
+#' @param sampling_rate The sampling rate (fs) of the signal
+#' @param mean_filter_order The number of samples used in the sliding window
+#' for the mean filtering function
+#' @param method The algorithm used to estimate the heartrate, because the
+#' preprocessing steps are different for each. method can be any of 
+#' 'acf','psd' or 'peak' for algorithms based on autocorrelation, 
+#' power spectral density and peak picking respectively
 #' @return The filtered time series data
 get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method = 'acf') {
   
@@ -168,6 +175,10 @@ get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method
 #'
 #' @param x A time series numeric data
 #' @param sampling_rate The sampling rate (fs) of the time series data
+#' @param method The algorithm used to estimate the heartrate, because the
+#' preprocessing steps are different for each. method can be any of 
+#' 'acf','psd' or 'peak' for algorithms based on autocorrelation, 
+#' power spectral density and peak picking respectively
 #' @param min_hr Minimum expected heart rate
 #' @param max_hr Maximum expected heart rate
 #' @return A named vector containing heart rate and the confidence of the result 
