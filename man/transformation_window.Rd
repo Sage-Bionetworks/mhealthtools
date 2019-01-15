@@ -7,9 +7,10 @@
 transformation_window(window_length, window_overlap)
 }
 \arguments{
-\item{window_length}{Length of the sliding window}
+\item{window_length}{Length of the sliding window.}
 
-\item{window_overlap}{Window overlap}
+\item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
+window overlap.}
 }
 \value{
 A function that accepts as input a dataframe with columns 

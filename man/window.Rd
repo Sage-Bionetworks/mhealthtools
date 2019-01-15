@@ -8,11 +8,12 @@ window(sensor_data, window_length, window_overlap,
   window_name = "hamming")
 }
 \arguments{
-\item{sensor_data}{A data frame with columns t, axis, value.}
+\item{sensor_data}{A data frame with columns \code{t}, \code{axis}, \code{value}.}
 
-\item{window_length}{Length of the filter}
+\item{window_length}{The number of samples per window.}
 
-\item{window_overlap}{window overlap}
+\item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
+window overlap.}
 
 \item{window_name}{window name: bartlett, blackman, flattop, hamming,
 hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.}
