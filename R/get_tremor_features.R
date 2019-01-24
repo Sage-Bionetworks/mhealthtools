@@ -4,6 +4,15 @@
 #' and postural tremor assays measured using smartphone raw accelerometer
 #' and gyroscope sensors.
 #' 
+#' The resting tremor assay entails participants holding the mobile device
+#' in their hand (either right or left) while resting that hand in their lap
+#' for approximately 10 seconds.
+#' 
+#' The postural tremor assay entails participants holding the mobile device
+#' in their hand (either right or left) while keeping their arm extended --
+#' the arm parallel to the ground and perpindicular to the front of the body --
+#' for approximately 10 seconds.
+#' 
 #' @param accelerometer_data A data frame with columns t, x, y, z containing 
 #' accelerometer measurements. 
 #' @param gyroscope_data A data frame with columns t, x, y, z containing 

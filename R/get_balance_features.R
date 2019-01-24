@@ -1,8 +1,9 @@
 #' Preprocess and extract interpretable features from balance assay.
 #' 
-#' A convenience wrapper for extracting
-#' interpretable features from the balance assay measured using smartphone raw 
-#' accelerometer and gyroscope sensors.
+#' A convenience wrapper for extracting interpretable features from the
+#' balance assay measured using smartphone raw accelerometer and gyroscope
+#' sensors.The balance assay entails participants standing still for 30 seconds
+#' with the mobile device in their pocket or in a bag.
 #' 
 #' @param accelerometer_data A data frame with columns t, x, y, z containing 
 #' accelerometer measurements. 
