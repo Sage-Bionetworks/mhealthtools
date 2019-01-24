@@ -5,10 +5,10 @@
 #' using smartphone cameras.
 #' 
 #' @param heartrate_data A data frame with columns t, red, green and blue
-#' @param window_length Length of the time window in seconds, to be considered
-#' while calculating the heart rate for each channel
-#' @param window_overlap The overlap between consecutive windows, i.e how fine the
-#' resolution of the heartrate output needs to be
+#' @param window_length Length of the time window \emph{in seconds}, to be
+#' considered while calculating the heart rate for each channel.
+#' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
+#' window overlap.
 #' @param method The algorithm used to calculate the heartrate, current methods
 #' include ('acf','psd') which stand for autocorrelation function, and power
 #' spectral density respectively. We will be adding support for peak picking 

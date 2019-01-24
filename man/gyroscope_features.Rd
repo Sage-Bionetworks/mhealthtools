@@ -30,31 +30,33 @@ A \code{NULL} value means do not filter frequencies.}
 \item{IMF}{The number of IMFs used during an empirical mode decomposition (EMD)
 transformation. The default value of 1 means do not apply EMD to the signal.}
 
-\item{window_length}{A numerical value representing the length of the sliding 
-window used during the windowing transformation. Both \code{window_length} and
- \code{window_overlap} must be set for the windowing transformation to be applied.}
+\item{window_length}{A numerical value representing the length (in number of samples)
+of the sliding window used during the windowing transformation. Both 
+\code{window_length} and \code{window_overlap} must be set for the windowing 
+transformation to be applied.}
 
-\item{window_overlap}{Fraction between (0, 1) specifying the window overlap used 
-during the windowing transformation. Note, 1 represents no overlap.
+\item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
+window overlap during a windowing transformation.
 Both \code{window_length} and \code{window_overlap} must be set for the
 windowing transformation to be applied.}
 
-\item{derived_kinematics}{A logical value specifying whether to add derived 
-kinematic features like \code{displacement}, \code{velocity}, and \code{jerk} 
-from raw \code{gyroscope_data}.}
+\item{derived_kinematics}{A logical value specifying whether to add derived
+kinematic measurements (\code{displacement}, \code{acceleration}, and \code{jerk})
+to \code{sensor_data} after the transform defined by the above parameters has
+been applied to the raw sensor measurements.}
 
-\item{funs}{A function or list of feature extraction functions that each
-accept a single numeric vector as input. Each function should return a 
-dataframe of features (normally a single-row datafame). The input vectors
-will be the axial measurements from \code{sensor_data} after the transform
-defined by the above parameters has been applied. If no argument
-is supplied to either \code{funs} or \code{models}, a default set
+\item{funs}{A function or list of functions that each accept a single numeric
+vector as input. Each function should return a dataframe of features
+(normally a single-row datafame, with column names as feature names).
+The input vectors will be the axial measurements from \code{sensor_data}
+after the transform defined by the above parameters has been applied.
+If no argument is supplied to either \code{funs} or \code{models}, a default set
 of feature extraction functions (as described in \code{default_kinematic_features})
 will be supplied for this parameter.}
 
-\item{models}{A list of functions, each of which accepts
-\code{sensor_data} as input after the transform defined by the above 
-parameters has been applied and returns features. Useful for models
+\item{models}{A function or list of functions that each accept
+\code{sensor_data} as input after the transform defined by the above
+parameters has been applied and returns features. Useful for functions
 which compute individual features using multiple input variables.}
 }
 \value{

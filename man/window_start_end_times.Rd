@@ -9,9 +9,10 @@ window_start_end_times(t, window_length, window_overlap)
 \arguments{
 \item{t}{A numeric time vector}
 
-\item{window_length}{Length of the filter}
+\item{window_length}{The number of samples per window.}
 
-\item{window_overlap}{Window overlap}
+\item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
+window overlap.}
 }
 \value{
 A dataframe with columns window, window_start_time,

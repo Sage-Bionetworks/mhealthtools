@@ -7,9 +7,10 @@
 transformation_imf_window(window_length, window_overlap, max_imf)
 }
 \arguments{
-\item{window_length}{Length of the sliding window}
+\item{window_length}{Length of the sliding window.}
 
-\item{window_overlap}{Window overlap}
+\item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
+window overlap.}
 
 \item{max_imf}{The maximum number of IMF's during EMD}
 }

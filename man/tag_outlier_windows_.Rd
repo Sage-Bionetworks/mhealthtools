@@ -9,9 +9,10 @@ tag_outlier_windows_(gravity_vector, window_length, window_overlap)
 \arguments{
 \item{gravity_vector}{A gravity vector}
 
-\item{window_length}{Length of the filter.}
+\item{window_length}{The number of samples per window.}
 
-\item{window_overlap}{Window overlap.}
+\item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
+window overlap during the windowing transformation.}
 }
 \value{
 Min and max values for each window.
