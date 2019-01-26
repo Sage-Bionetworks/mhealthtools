@@ -19,7 +19,7 @@
 #' @export
 #' @author Meghasyam Tummalacherla, Phil Snyder 
 #' @examples 
-#' heartrate_data = heartrate_data[,c('timestamp', 'red', 'green', 'blue')]
+#' heartrate_data = heartrate_data[,c('t', 'red', 'green', 'blue')]
 #' heartrate_ftrs = get_heartrate(heartrate_data)
 #'  
 get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0.5,
@@ -200,7 +200,7 @@ get_hr_from_time_series <- function(x, sampling_rate, method = 'acf', min_hr = 4
     ) %>% dplyr::filter(freq>0.6, freq< 3.3)
     # 0.6Hz = 36BPM, 3.3HZ = 198BPM
     hr <- 60*x_spec$freq[which.max(x_spec$pdf)]
-    confidence <- 'NAN-PSD'
+    confidence <- NA
   }
   
   if(method == 'peak'){
@@ -215,7 +215,7 @@ get_hr_from_time_series <- function(x, sampling_rate, method = 'acf', min_hr = 4
     x_peaks <- x_peaks[order(x_peaks[,2]),]
     peak_dist <- diff(x_peaks[,2])
     hr <- 60 * sampling_rate / (mean(peak_dist))
-    confidence <- 'NAN-PEAK'
+    confidence <- NA
   }
   
   # If hr or condidence is NaN, then return hr = 0 and confidence = 0

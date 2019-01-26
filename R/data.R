@@ -15,7 +15,7 @@
 #' 
 #' @format A data frame with 3661 rows (observations) and 7 variables:
 #' \describe{
-#'   \item{timestamp}{time, in seconds}
+#'   \item{t}{time, in seconds}
 #'   \item{green}{mean green intensity across the frame at the given timestamp}
 #'   \item{blue}{mean blue intensity across the frame at the given timestamp}
 #'   \item{red}{mean red intensity across the frame at the given timestamp}
