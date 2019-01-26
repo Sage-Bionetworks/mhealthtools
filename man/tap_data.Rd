@@ -19,6 +19,11 @@ tap_data
 \description{
 A dataframe containing sample JSON output format of the tap data,
 containing t(time), x and y (the location of the tap on the screen),
-and buttonid (which of left/right/No button was tapped)
+and buttonid (which of left/right/No button was tapped).
+}
+\details{
+Participants were shown a screen with two buttons on it, 
+indicating left and right. They were asked to tap on the buttons
+alternatingly as fast as they can for 30s.
 }
 \keyword{datasets}
