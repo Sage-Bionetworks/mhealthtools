@@ -38,8 +38,7 @@ time_domain_summary <- function(values, sampling_rate=NA) {
     mobility = sqrt(var(diff(values) * sampling_rate) / var(values)),
     mtkeo = mean(seewave::TKEO(
       values, f = sampling_rate, plot = F)[, 2], na.rm = T),
-    dfa = tryCatch({fractal::DFA(values, sum.order = 1)[[1]]},
-                   error =  function(e){NA}),
+    dfa = fractal::DFA(values, sum.order = 1)[[1]],
     rmsmag = sqrt(sum(values^2) / length(values))) %>% # Root Mean Square magnitude
     dplyr::mutate(IQR = Q25 - Q75,
                   complexity = sqrt(
