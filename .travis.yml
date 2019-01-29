@@ -5,8 +5,6 @@ sudo: false
 warnings_are_errors: false
 before_install:
   - R -e 'install.packages("devtools"); devtools::install_github("rstudio/keras"); keras::install_keras()'
-r_binary_packages:
-  - purrr
 addons:
   apt:
     update: true

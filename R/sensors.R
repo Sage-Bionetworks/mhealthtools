@@ -43,7 +43,8 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
   }
   
   transformed_sensor_data <- sensor_data %>%
-    purrr::reduce(rev(transform), purrr::compose)()
+    purrr::reduce(rev(transform), purrr::compose,
+                  .init = function(x) x, .dir = "backward")()
   if (has_error(transformed_sensor_data)) {
     features$error <- transformed_sensor_data
     return(features)
