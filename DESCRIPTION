@@ -16,10 +16,10 @@ Authors@R: c(
 License: file LICENSE
 LazyData: TRUE
 Imports:
-    purrr (== 0.2.5),
     seewave,
     data.table,
     dplyr,
+    purrr,
     tibble,
     tidyr,
     signal,
