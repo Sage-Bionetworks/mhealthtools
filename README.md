@@ -14,11 +14,6 @@ Install the `mhealthtools` package using `devtools`:
 devtools::install_github("Sage-Bionetworks/mhealthtools")
 ```
 
-Install the package with the vignettes:
-```
-devtools::install_github("Sage-Bionetworks/mhealthtools", build_vignettes = TRUE)
-```
-
 Alternatively, you can use [this Docker image](https://cloud.docker.com/repository/docker/philsnyder/mhealthtools) -- based on `rocker/tidyverse` -- which comes with `mhealthtools` preinstalled.
 
 ### Known Installation Issues
