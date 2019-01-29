@@ -19,7 +19,7 @@ Imports:
     seewave,
     data.table,
     dplyr,
-    purrr,
+    purrr (== 0.2.5),
     tibble,
     tidyr,
     signal,
