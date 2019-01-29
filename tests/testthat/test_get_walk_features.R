@@ -10,20 +10,15 @@ test_that("No arguments", {
   
 test_that("Accelerometer data only", {
   features_accel_only <- get_walk_features(
-    accelerometer_data = mini_accelerometer_data,
-    window_length = 64,
-    window_overlap = 0.2)
+    accelerometer_data = mini_accelerometer_data)
   expect_is(features_accel_only, "list")
   expect_is(features_accel_only$extracted_features, "data.frame")
 })
-
 # the test case is symmetrical for gyroscope data only, skipping
 test_that("Both accelerometer and gyroscope data", {
   features_both <- get_walk_features(
       accelerometer_data = mini_accelerometer_data,
-      gyroscope_data = mini_gyroscope_data,
-      window_length = 64,
-      window_overlap = 0.2)
+      gyroscope_data = mini_gyroscope_data)
   expect_is(features_both, "list")
   expect_is(features_both$extracted_features, "data.frame")
 })
@@ -47,8 +42,6 @@ test_that("Passing a model", {
   features_with_model <- get_walk_features(
       accelerometer_data = mini_accelerometer_data,
       gyroscope_data = mini_gyroscope_data,
-      window_length = 64,
-      window_overlap = 0.2,
       models = custom_model)
   expect_is(features_with_model, "list")
   expect_is(features_with_model$model_features, "list")
