@@ -51,6 +51,7 @@
 #'   button was tapped respectively}
 #' }
 "tap_data"
+<<<<<<< HEAD
 
 #' Accelerometer sensor measurements
 #' 
