@@ -30,7 +30,6 @@
 
 ### Load data file
 testthat::context('Load Required Data Files')
-dat <- sensor_data
 
 ### flatten data to the format needed for mHealthTools
 flatten_data <- function(dat, metric) {
@@ -42,9 +41,9 @@ flatten_data <- function(dat, metric) {
 }
 
 ### Get the formatted accelerometer and gyroscope data to use in testing below
-datAccel <- flatten_data(dat,'userAcceleration')
-datGyro  <- flatten_data(dat,'rotationRate')
-datGravity <- flatten_data(dat, 'gravity')
+datAccel <- mhealthtools::accelerometer_data
+datGyro  <- mhealthtools::gyroscope_data
+datGravity <- mhealthtools::gravity_data
 
 ### Individual test functions
 testthat::context('Setting up GuanLab Model')
