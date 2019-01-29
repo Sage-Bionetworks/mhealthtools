@@ -4,6 +4,15 @@
 #' kinetic tremor assay measured using smartphone raw accelerometer
 #' and gyroscope sensors.
 #' 
+#' The kinetic tremor assay (also known as the finger/hand to nose test)
+#' entails participants holding the mobile device
+#' in their hand (either right or left) with both the mobile device and the
+#' participants elbow at nose level. The participant then moves the mobile device
+#' away from the nose, with both mobile device and elbow parallel to the ground
+#' and the elbow joint acting as an axis of rotation. When the arm is fully extended,
+#' the participant moves the mobile device back to the nose. This happens in a 
+#' continuous motion and the motion is repeated for approximately 10 seconds.
+#' 
 #' @param accelerometer_data An \code{n} x 4 data frame with columns \code{t}, \code{x},
 #' \code{y}, \code{z} containing accelerometer measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
