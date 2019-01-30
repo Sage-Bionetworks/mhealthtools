@@ -296,10 +296,10 @@ head(heartrate_data)
 Let's look at the `red`,`blue` and `green` columns of the heartrate data against `t` (plotting only the time between 2 and 10 seconds)
 ```{r, echo=FALSE, fig.width=8, fig.height=4}
 library(ggplot2)
-a <- heartrate_data %>% dplyr::select(timestamp, red,blue,green)
-a <- tidyr::gather(a, 'axis' , 'val', -timestamp)
-a <- a %>% dplyr::filter(timestamp<10, timestamp>2)
-ggplot(a, aes(x = timestamp, y= val)) + geom_line()+facet_wrap(~axis)
+a <- heartrate_data %>% dplyr::select(t, red,blue,green)
+a <- tidyr::gather(a, 'axis' , 'val', -t)
+a <- a %>% dplyr::filter(t<10, t>2)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
 ```
 
 Now to extract the heartrate, we just pass the formatted data into `get_heartrate` which outputs a list containing estimated heartrates for the three channels: red, blue and green, the sampling rate and an error status.
