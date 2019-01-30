@@ -31,7 +31,7 @@ band from average pixel value per frame of video (processed hr) captured
 using smartphone cameras.
 }
 \examples{
-heartrate_data = heartrate_data[,c('timestamp', 'red', 'green', 'blue')]
+heartrate_data = heartrate_data[,c('t', 'red', 'green', 'blue')]
 heartrate_ftrs = get_heartrate(heartrate_data)
  
 }
