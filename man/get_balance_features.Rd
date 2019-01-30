@@ -83,7 +83,7 @@ under \code{$outlier_windows}.
 \description{
 A convenience wrapper for extracting interpretable features from the
 balance assay measured using smartphone raw accelerometer and gyroscope
-sensors.The balance assay entails participants standing still for 30 seconds
+sensors. The balance assay entails participants standing still for 30 seconds
 with the mobile device in their pocket or in a bag.
 }
 \examples{

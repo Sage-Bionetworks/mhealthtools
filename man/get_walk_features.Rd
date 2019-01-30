@@ -83,6 +83,8 @@ under \code{$outlier_windows}.
 \description{
 A convenience wrapper for extracting interpretable features from the
 walk assay measured using smartphone raw accelerometer and gyroscope sensors.
+}
+\details{
 The walk assay entails participants walking in a straight line for
 approximately 20 steps with the mobile device in their pocket or in a bag.
 }

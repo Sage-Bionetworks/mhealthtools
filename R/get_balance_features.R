@@ -2,7 +2,7 @@
 #' 
 #' A convenience wrapper for extracting interpretable features from the
 #' balance assay measured using smartphone raw accelerometer and gyroscope
-#' sensors.The balance assay entails participants standing still for 30 seconds
+#' sensors. The balance assay entails participants standing still for 30 seconds
 #' with the mobile device in their pocket or in a bag.
 #' 
 #' @param accelerometer_data An \code{n} x 4 data frame with columns \code{t}, \code{x},

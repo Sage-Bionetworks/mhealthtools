@@ -13,6 +13,7 @@
 #' the participant moves the mobile device back to the nose. This happens in a 
 #' continuous motion and the motion is repeated for approximately 10 seconds.
 #' 
+#' 
 #' @param accelerometer_data An \code{n} x 4 data frame with columns \code{t}, \code{x},
 #' \code{y}, \code{z} containing accelerometer measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
