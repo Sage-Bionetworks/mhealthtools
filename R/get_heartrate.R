@@ -19,7 +19,7 @@
 #' @export
 #' @author Meghasyam Tummalacherla, Phil Snyder 
 #' @examples 
-#' heartrate_data = heartrate_data[,c('t', 'red', 'green', 'blue')]
+#' heartrate_data = heartrate_data[,c('timestamp', 'red', 'green', 'blue')]
 #' heartrate_ftrs = get_heartrate(heartrate_data)
 #'  
 get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0.5,
@@ -95,13 +95,6 @@ get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0
 #' Bandpass and sorted mean filter the given signal
 #'
 #' @param x A time series numeric data
-#' @param sampling_rate The sampling rate (fs) of the signal
-#' @param mean_filter_order The number of samples used in the sliding window
-#' for the mean filtering function
-#' @param method The algorithm used to estimate the heartrate, because the
-#' preprocessing steps are different for each. method can be any of 
-#' 'acf','psd' or 'peak' for algorithms based on autocorrelation, 
-#' power spectral density and peak picking respectively
 #' @return The filtered time series data
 get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method = 'acf') {
   
@@ -175,10 +168,6 @@ get_filtered_signal <- function(x, sampling_rate, mean_filter_order = 65, method
 #'
 #' @param x A time series numeric data
 #' @param sampling_rate The sampling rate (fs) of the time series data
-#' @param method The algorithm used to estimate the heartrate, because the
-#' preprocessing steps are different for each. method can be any of 
-#' 'acf','psd' or 'peak' for algorithms based on autocorrelation, 
-#' power spectral density and peak picking respectively
 #' @param min_hr Minimum expected heart rate
 #' @param max_hr Maximum expected heart rate
 #' @return A named vector containing heart rate and the confidence of the result 
@@ -200,7 +189,7 @@ get_hr_from_time_series <- function(x, sampling_rate, method = 'acf', min_hr = 4
     ) %>% dplyr::filter(freq>0.6, freq< 3.3)
     # 0.6Hz = 36BPM, 3.3HZ = 198BPM
     hr <- 60*x_spec$freq[which.max(x_spec$pdf)]
-    confidence <- NA
+    confidence <- 'NAN-PSD'
   }
   
   if(method == 'peak'){
@@ -215,7 +204,7 @@ get_hr_from_time_series <- function(x, sampling_rate, method = 'acf', min_hr = 4
     x_peaks <- x_peaks[order(x_peaks[,2]),]
     peak_dist <- diff(x_peaks[,2])
     hr <- 60 * sampling_rate / (mean(peak_dist))
-    confidence <- NA
+    confidence <- 'NAN-PEAK'
   }
   
   # If hr or condidence is NaN, then return hr = 0 and confidence = 0
