@@ -14,6 +14,13 @@ Install the `mhealthtools` package using `devtools`:
 devtools::install_github("Sage-Bionetworks/mhealthtools")
 ```
 
+Install the package with the vignettes:
+```
+devtools::install_github("Sage-Bionetworks/mhealthtools", build_vignettes = TRUE)
+```
+
+Alternatively, you can use [this Docker image](https://cloud.docker.com/repository/docker/philsnyder/mhealthtools) -- based on `rocker/tidyverse` -- which comes with `mhealthtools` preinstalled.
+
 ### Known Installation Issues
 A common issue on Linux systems when installing the `seewave` dependency is to be missing the system dependencies `libfftw3` and ` libsndfile1`. In a shell, run:
 
