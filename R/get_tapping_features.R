@@ -3,6 +3,9 @@
 #' A convenience wrapper for extracting interpretable features from 
 #' screen tapping data.
 #' 
+#' The tapping assay entails alternately pressing two adjacent buttons as fast
+#' as possible.
+#' 
 #' @param tap_data A n x 4 data frame with column names as t, x, y, buttonid containing 
 #' tapping measurements. Here n is the total number of tapping measurements, t is the time 
 #' of measurement when the screen press was recorded, x and y are the coordinates of the screen 
@@ -16,6 +19,7 @@
 #' @return A 1 x 43 data frame consisting of tapping features and an error message, if any
 #' See https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md for
 #' feature definitions
+#' @seealso \code{\link{tap_data}}
 #' @examples 
 #' tap_features = get_tapping_features(tap_data)
 #' 
