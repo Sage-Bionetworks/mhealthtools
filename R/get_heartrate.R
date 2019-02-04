@@ -4,6 +4,9 @@
 #' band from average pixel value per frame of video (processed hr) captured
 #' using smartphone cameras.
 #' 
+#' The heartrate assay entails participants placing their finger over the 
+#' camera for a period of time with the flash on.
+#' 
 #' @param heartrate_data A data frame with columns t, red, green and blue
 #' @param window_length Length of the time window \emph{in seconds}, to be
 #' considered while calculating the heart rate for each channel.
@@ -16,6 +19,7 @@
 #' 
 #' @return list containing heart rate and confidence of the estimate for
 #' each color (red, green, blue)
+#' @seealso \code{\link{heartrate_data}}
 #' @export
 #' @author Meghasyam Tummalacherla, Phil Snyder 
 #' @examples 

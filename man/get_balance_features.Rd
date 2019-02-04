@@ -130,6 +130,9 @@ balance_features <- get_balance_features(
   funs = list(time_domain_summary))
   
 }
+\seealso{
+\code{\link{balance_data}}
+}
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 }
