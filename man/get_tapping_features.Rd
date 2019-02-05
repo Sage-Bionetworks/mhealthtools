@@ -29,6 +29,10 @@ feature definitions
 A convenience wrapper for extracting interpretable features from 
 screen tapping data.
 }
+\details{
+The tapping assay entails alternately pressing two adjacent buttons as fast
+as possible.
+}
 \examples{
 tap_features = get_tapping_features(tap_data)
 
@@ -36,6 +40,9 @@ tap_features = get_tapping_features(tap_data, depress_threshold = 120)
 
 tap_features = get_tapping_features(tap_data, remove_duplicates = FALSE)
 
+}
+\seealso{
+\code{\link{tap_data}}
 }
 \author{
 Elias Chaibub Neto, Meghasyam Tummalacherla, Phil Snyder, Thanneer M Perumal

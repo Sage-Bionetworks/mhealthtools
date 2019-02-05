@@ -30,10 +30,17 @@ A convenience wrapper for extracting heart rate features for each color
 band from average pixel value per frame of video (processed hr) captured
 using smartphone cameras.
 }
+\details{
+The heartrate assay entails participants placing their finger over the 
+camera for a period of time with the flash on.
+}
 \examples{
-heartrate_data = heartrate_data[,c('timestamp', 'red', 'green', 'blue')]
+heartrate_data = heartrate_data[,c('t', 'red', 'green', 'blue')]
 heartrate_ftrs = get_heartrate(heartrate_data)
  
+}
+\seealso{
+\code{\link{heartrate_data}}
 }
 \author{
 Meghasyam Tummalacherla, Phil Snyder
