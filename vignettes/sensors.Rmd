@@ -24,7 +24,7 @@ library(mhealthtools)
 ```
 
 ```{r other libraries,echo=FALSE,message=FALSE,warning=FALSE, error=FALSE, prompt=FALSE}
-library(tidyverse)
+library(dplyr)
 ```
 
 ## Accelerometer
