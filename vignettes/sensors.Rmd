@@ -16,77 +16,97 @@ knitr::opts_chunk$set(
 )
 ```
 
-`mhealthtools` offers a set of tools to extract features from some of the sensors present in almost all of the modern day phones. These include accelerometer and gyroscope data. We present examples to do so
+`mhealthtools` offers a set of tools to extract features from some of the sensors present in almost all of the modern day phones. Here we present examples from accelerometer and gyroscope data.
 
 Let's load the package first
-```{r}
+```{r mhealthtools}
 library(mhealthtools)
 ```
 
-```{r,echo=FALSE,message=FALSE,warning=FALSE, error=FALSE, prompt=FALSE}
-library(dplyr)
+```{r other libraries,echo=FALSE,message=FALSE,warning=FALSE, error=FALSE, prompt=FALSE}
+library(tidyverse)
 ```
 
 ## Accelerometer
 
 #### Data format and Sample data
 
-`mhealthtools` already comes preloaded with sample accelerometer data. You can access the data through `data(accelerometer_data)`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract accelerometer features). Where `t` is the timestamp; `x`,`y` and `z` are the X,Y and Z- axis respectively
+`mhealthtools` already comes preloaded with sample accelerometer data. You can access the data through `data(accelerometer_data)` or `mhealthtools::accelerometer_data`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract accelerometer features). Where `t` is the timestamp; `x`,`y` and `z` are the X,Y and Z- axis respectively
 
-```{r data, echo = FALSE}
+```{r accel data, echo = FALSE}
 data(accelerometer_data)
 head(accelerometer_data,5)
 ```
 
-Let's plot to see how the data actually looks like 
+Let's plot to see how the accelerometer data actually looks like 
 
-```{r, echo=FALSE, fig.width=8, fig.height=4}
+```{r accel plots, echo=FALSE, fig.width=8, fig.height=4}
 library(ggplot2)
 a <- accelerometer_data
 a$t <- a$t - a$t[1]
 a <- tidyr::gather(a, 'axis' , 'val', -t)
 ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis) + ylim(c(-0.025, 0.025))
 ```
+We are looking at 10s of data sampled at a high enough sampling rate(for accelerometer data) of 100Hz. The data looks noisy, and looks like it could make good use of some processing like frequency filters, maybe subsetting the time (time filtering) - all of which mhealthtools conveniently offers.
 
 #### Extracting features (using pre-existing pipeline)
-To use the existing feature set (you can define your own features or feed in your own model to extract features in `mhealthtools`!!). Note: You need to get the data in the proper format (as that of the sample data) to use the feature extraction pipeline.
+NOTE: To use the existing feature set (you can define your own features or feed in your own model to extract features in `mhealthtools`!!) you need to get the data in the proper format (as that of the sample data) to use the feature extraction pipeline.
 
-```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+Let's take a look at the default feature extraction pipeline, whose features are all classical signal processing features based on time domain, frequency domain and the energy bands of the frequency spectrum.
+
+```{r accel default features, warning=FALSE, error=FALSE, prompt=FALSE}
 accel_features <- accelerometer_features(accelerometer_data)
 # using default parameters
 ```
+As you can see the output file is a list containing features extracted using supplied/default functions (extracted_features), features calculated using models(model_features) and an element for error (error). Let's look at the extracted_features to see how the default features look like.
 
-```{r}
-dplyr::glimpse(accel_features)
+```{r show accel default features}
+dplyr::glimpse(accel_features$extracted_features)
 ```
 
-`accelerometer_features` also offers multiple parameter options. The follwing examples are an effort to make the user aware of the options. 
+`accelerometer_features` also offers multiple parameter options. The following examples are an effort to make the user aware of the options. 
 
-In the following example, we change the window length (to 128, with 256 being the default), having the same overlap for the same `accel_data` used before
+In the following example, we change the window length (to 128, with NULL being the default - i.e no windowing), having the 50% overlap between consecutive windows for the same `accelerometer_data` used before
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
 accel_features <- accelerometer_features(
   accelerometer_data,
   window_length = 128,
   window_overlap = 0.5)
-# Consider a window length of 128 samples
+# Consider a window length of 128 samples,
+# 50% overlap between consecutive windows
 ```
 
 ```{r}
-dplyr::glimpse(accel_features)
+dplyr::glimpse(accel_features$extracted_features)
 ```
+Notice how we now have three extra columns in the feature extraction output namely, window, window_start_time and window_stop_time - which indicate the number of the window in the signal (window 1 : the first window, (0 - window_length) samples), and the start and stop time respectively of that window.
 
-There are many other possible use cases to calculate the accelerometer features. The `time_range` parameter decides the time window to be operated on in the accelerometer signal. The `overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_range` parameter specifies the frequency range to keep for the analysis.
+There are many other possible use cases to calculate the accelerometer features. The `time_filter` parameter decides the time window to be operated on in the accelerometer signal. The `window_overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_filter` parameter specifies the frequency range to keep for the analysis.
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
-accel_features <- accelerometer_features(accelerometer_data, time_filter = c(2,5))
+accel_features <- accelerometer_features(accelerometer_data, 
+                                         time_filter = c(2,5))
 # Consider the time ranges between 2 and 5s only
 ```
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
-accel_features <- accelerometer_features(accelerometer_data, frequency_filter = c(4,16))
+accel_features <- accelerometer_features(accelerometer_data, 
+                                         frequency_filter = c(4,16))
 # Consider the frequencies only from 4Hz to 16Hz
 ```
+
+There are also advanced processing techniques that you can apply to the signal like detrending (using loess), or decompose the signal into Intrinsic Mode Functions (IMF) using the Hilbert Huang Transform. `detrend` and `IMF` respectively are the parameters that refer to these techniques.
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+accel_features <- accelerometer_features(accelerometer_data, 
+                                         IMF = 2)
+# Consider decomposing the signal into 2 IMFs and then running both the IMFs through
+# the default feature extraction pipeline
+```
+
+## PHIL'S INPUT NEEDED HERE
+### A sample example for using funs and models
 
 Please read the function documentation `?accelerometer_features` for more info.
 
@@ -94,61 +114,82 @@ Please read the function documentation `?accelerometer_features` for more info.
 
 #### Data format and Sample data
 
-`mhealthtools` already comes preloaded with sample gyroscope data. You can access the data through `data(gyroscope_data)`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract gyroscope features). Where `t` is the timestamp; `x`,`y` and `z` are the X,Y and Z- axis respectively
+`mhealthtools` already comes preloaded with sample gyroscope data. You can access the data through `data(gyroscope_data)` or `mhealthtools::gyroscope_data`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract gyroscope features). Where `t` is the timestamp; `x`,`y` and `z` are the X,Y and Z- axis respectively
 
-```{r, echo = FALSE}
+```{r gyro data, echo = FALSE}
 data(gyroscope_data)
 head(gyroscope_data,5)
 ```
 
-Let's plot to see how the data actually looks like 
+Let's plot to see how the gyroscope data actually looks like 
 
-```{r, echo=FALSE, fig.width=8, fig.height=4}
+```{r gyro plots, echo=FALSE, fig.width=8, fig.height=4}
 library(ggplot2)
-g <- gyroscope_data
-g$t <- g$t - g$t[1]
-g <- tidyr::gather(g, 'axis' , 'val', -t)
-ggplot(g, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis) + ylim(c(-0.025, 0.025))
+a <- gyroscope_data
+a$t <- a$t - a$t[1]
+a <- tidyr::gather(a, 'axis' , 'val', -t)
+ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis) + ylim(c(-0.025, 0.025))
 ```
+We are looking at 10s of data sampled at a high enough sampling rate(for gyroscope data) of 100Hz. The data looks noisy, and looks like it could make good use of some processing like frequency filters, maybe subsetting the time (time filtering) - all of which mhealthtools conveniently offers.
 
 #### Extracting features (using pre-existing pipeline)
-To use the existing feature set (you can define your own features or feed in your own model to extract features in `mhealthtools`!!). Note: You need to get the data in the proper format (as that of the sample data) to use the feature extraction pipeline.
+NOTE: To use the existing feature set (you can define your own features or feed in your own model to extract features in `mhealthtools`!!) you need to get the data in the proper format (as that of the sample data) to use the feature extraction pipeline.
 
-```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+Let's take a look at the default feature extraction pipeline, whose features are all classical signal processing features based on time domain, frequency domain and the energy bands of the frequency spectrum.
+
+```{r gyro default features, warning=FALSE, error=FALSE, prompt=FALSE}
 gyro_features <- gyroscope_features(gyroscope_data)
 # using default parameters
 ```
+As you can see the output file is a list containing features extracted using supplied/default functions (extracted_features), features calculated using models(model_features) and an element for error (error). Let's look at the extracted_features to see how the default features look like.
 
-```{r}
-dplyr::glimpse(gyro_features)
+```{r show gyro default features}
+dplyr::glimpse(gyro_features$extracted_features)
 ```
 
-`gyroscope_features` also offers multiple parameter options. The follwing examples are an effort to make the user aware of the options. 
+`gyroscope_features` also offers multiple parameter options. The following examples are an effort to make the user aware of the options. 
 
-The following example, we change the window length (to 512, with 256 being the default), having the same overlap for the same `gyro_data` used before
+In the following example, we change the window length (to 128, with NULL being the default - i.e no windowing), having the 50% overlap between consecutive windows for the same `gyroscope_data` used before
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
 gyro_features <- gyroscope_features(
   gyroscope_data,
-  window_length = 512,
+  window_length = 128,
   window_overlap = 0.5)
-# Consider a window length of 512 samples
+# Consider a window length of 128 samples,
+# 50% overlap between consecutive windows
 ```
 
 ```{r}
-dplyr::glimpse(gyro_features)
+dplyr::glimpse(gyro_features$extracted_features)
 ```
+Notice how we now have three extra columns in the feature extraction output namely, window, window_start_time and window_stop_time - which indicate the number of the window in the signal (window 1 : the first window, (0 - window_length) samples), and the start and stop time respectively of that window.
 
-There are many other possible use cases to calculate the gyroscope features. The `time_range` parameter decides the time window to be operated on in the accelerometer signal. The `overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_range` parameter specifies the frequency range to keep for the analysis.
-
-```{r, warning=FALSE, error=FALSE, prompt=FALSE}
-gyro_features <- gyroscope_features(gyroscope_data)
-```
+There are many other possible use cases to calculate the gyroscope features. The `time_filter` parameter decides the time window to be operated on in the gyroscope signal. The `window_overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_filter` parameter specifies the frequency range to keep for the analysis.
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE}
-gyro_features <- gyroscope_features(gyroscope_data, frequency_filter = c(2,18), time_filter = c(1,6))
-# Consider the frequencies only from 2Hz to 18Hz, and consider the time ranges between 1 and 6s only
+gyro_features <- gyroscope_features(gyroscope_data, 
+                                         time_filter = c(2,5))
+# Consider the time ranges between 2 and 5s only
 ```
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+gyro_features <- gyroscope_features(gyroscope_data, 
+                                         frequency_filter = c(4,16))
+# Consider the frequencies only from 4Hz to 16Hz
+```
+
+There are also advanced processing techniques that you can apply to the signal like detrending (using loess), or decompose the signal into Intrinsic Mode Functions (IMF) using the Hilbert Huang Transform. `detrend` and `IMF` respectively are the parameters that refer to these techniques.
+
+```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+gyro_features <- gyroscope_features(gyroscope_data, 
+                                         IMF = 2)
+# Consider decomposing the signal into 2 IMFs and then running both the IMFs through
+# the default feature extraction pipeline
+```
+
+## PHIL'S INPUT NEEDED HERE
+### A sample example for using funs and models
 
 Please read the function documentation `?gyroscope_features` for more info.
 
@@ -158,7 +199,7 @@ For more information on how this data was collected please look into the Parkins
 
 #### Data format and Sample data
 
-`mhealthtools` already comes preloaded with sample tapping data. You can access the data through `data(tap_data)`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract gyroscope features). Where `t` is the timestamp; `x` and `y` are the co-ordinates of the tap, and `buttonid` is to indicate whether the user tapped the left or the right button.
+`mhealthtools` already comes preloaded with sample tapping data. You can access the data through `data(tap_data)` or `mhealthtools::tap_data`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract gyroscope features). Where `t` is the timestamp; `x` and `y` are the co-ordinates of the tap, and `buttonid` is to indicate whether the user tapped the left or the right button.
 
 ```{r, echo = FALSE}
 data(tap_data)
