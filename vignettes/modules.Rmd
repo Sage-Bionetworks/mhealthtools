@@ -27,7 +27,7 @@ library(mhealthtools)
 ```
 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE, error=FALSE, prompt=FALSE}
-library(tidyverse)
+library(dplyr)
 ```
 
 ### Walk Module
