@@ -84,13 +84,13 @@ Notice how we now have three extra columns in the feature extraction output name
 
 There are many other possible use cases to calculate the accelerometer features. The `time_filter` parameter decides the time window to be operated on in the accelerometer signal. The `window_overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_filter` parameter specifies the frequency range to keep for the analysis.
 
-```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+```{r, warning=FALSE, error=FALSE, prompt=FALSE, eval=FALSE}
 accel_features <- accelerometer_features(accelerometer_data, 
                                          time_filter = c(2,5))
 # Consider the time ranges between 2 and 5s only
 ```
 
-```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+```{r, warning=FALSE, error=FALSE, prompt=FALSE, eval=FALSE}
 accel_features <- accelerometer_features(accelerometer_data, 
                                          frequency_filter = c(4,16))
 # Consider the frequencies only from 4Hz to 16Hz
@@ -98,7 +98,7 @@ accel_features <- accelerometer_features(accelerometer_data,
 
 There are also advanced processing techniques that you can apply to the signal like detrending (using loess), or decompose the signal into Intrinsic Mode Functions (IMF) using the Hilbert Huang Transform. `detrend` and `IMF` respectively are the parameters that refer to these techniques.
 
-```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+```{r, warning=FALSE, error=FALSE, prompt=FALSE, eval=FALSE}
 accel_features <- accelerometer_features(accelerometer_data, 
                                          IMF = 2)
 # Consider decomposing the signal into 2 IMFs and then running both the IMFs through
@@ -166,13 +166,13 @@ Notice how we now have three extra columns in the feature extraction output name
 
 There are many other possible use cases to calculate the gyroscope features. The `time_filter` parameter decides the time window to be operated on in the gyroscope signal. The `window_overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_filter` parameter specifies the frequency range to keep for the analysis.
 
-```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+```{r, warning=FALSE, error=FALSE, prompt=FALSE, eval=FALSE}
 gyro_features <- gyroscope_features(gyroscope_data, 
                                          time_filter = c(2,5))
 # Consider the time ranges between 2 and 5s only
 ```
 
-```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+```{r, warning=FALSE, error=FALSE, prompt=FALSE, eval=FALSE}
 gyro_features <- gyroscope_features(gyroscope_data, 
                                          frequency_filter = c(4,16))
 # Consider the frequencies only from 4Hz to 16Hz
@@ -180,7 +180,7 @@ gyro_features <- gyroscope_features(gyroscope_data,
 
 There are also advanced processing techniques that you can apply to the signal like detrending (using loess), or decompose the signal into Intrinsic Mode Functions (IMF) using the Hilbert Huang Transform. `detrend` and `IMF` respectively are the parameters that refer to these techniques.
 
-```{r, warning=FALSE, error=FALSE, prompt=FALSE}
+```{r, warning=FALSE, error=FALSE, prompt=FALSE, eval=FALSE}
 gyro_features <- gyroscope_features(gyroscope_data, 
                                          IMF = 2)
 # Consider decomposing the signal into 2 IMFs and then running both the IMFs through

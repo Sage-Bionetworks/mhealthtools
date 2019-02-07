@@ -93,7 +93,7 @@ dplyr::glimpse(walk_features$extracted_features)
 As with most of the functions in `mhealthtools`, `get_walk_features` also comes with many options for input parameters for versatile data analysis
 
 Changing the max number of possible IMFs:
-```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE}
+```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE, eval=FALSE}
 walk_features <- get_walk_features(
   accelerometer_data = accelerometer_data,
   gyroscope_data = gyroscope_data,
@@ -102,7 +102,7 @@ walk_features <- get_walk_features(
 ```
 
 Applying bandpass frequency filter before running feature extraction pipeline
-```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE}
+```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE, eval=FALSE}
 walk_features <- get_walk_features(
   accelerometer_data = accelerometer_data,
   gyroscope_data = gyroscope_data,
@@ -261,7 +261,7 @@ dplyr::glimpse(kinetic_tremor_features$extracted_features)
 
 As with most of the functions in `mhealthtools`, `get_kinetic_tremor_features` also comes with many options for input parameters for versatile data analysis
 
-```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE}
+```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE, eval=FALSE}
 kinetic_tremor_features <- get_kinetic_tremor_features(
   accelerometer_data = rest_tremor_accelerometer_data,
   gyroscope_data = rest_tremor_gyroscope_data,
@@ -317,7 +317,7 @@ dplyr::glimpse(tap_features)
 
 As with most of the functions in `mhealthtools`, `get_tapping_features` also comes with options input parameters for versatile data analysis. 
 
-```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE}
+```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE, eval=FALSE}
 tap_features <- get_tapping_features(tap_data, depress_threshold = 10)
 # Changing the threshold for intertap distance in x-axis, depress_threshold to 10 (default is 20)
 ```
