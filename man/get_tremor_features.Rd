@@ -139,6 +139,9 @@ tremor_features <- get_tremor_features(
   funs = list(time_domain_summary))
   
 }
+\seealso{
+\code{\link{tremor_data}}
+}
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 }

@@ -71,6 +71,7 @@
 #' window_overlap are set, phone rotation information will be stored
 #' under \code{$outlier_windows}.
 #' @export
+#' @seealso \code{\link{kinetic_tremor_data}}
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
 #' accelerometer_data = cbind(

@@ -61,6 +61,7 @@
 #' \code{$error}. If gravity_data is passed and window_length and 
 #' window_overlap are set, phone rotation information will be stored
 #' under \code{$outlier_windows}.
+#' @seealso \code{\link{balance_data}}
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 

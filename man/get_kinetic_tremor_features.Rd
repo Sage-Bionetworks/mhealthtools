@@ -141,6 +141,9 @@ kinetic_tremor_features <- get_kinetic_tremor_features(
   funs = list(time_domain_summary))
   
 }
+\seealso{
+\code{\link{kinetic_tremor_data}}
+}
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 }
