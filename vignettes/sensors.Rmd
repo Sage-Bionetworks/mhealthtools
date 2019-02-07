@@ -58,7 +58,7 @@ Let's take a look at the default feature extraction pipeline, whose features are
 accel_features <- accelerometer_features(accelerometer_data)
 # using default parameters
 ```
-As you can see the output file is a list containing features extracted using supplied/default functions (extracted_features), features calculated using models(model_features) and an element for error (error). Let's look at the extracted_features to see how the default features look like.
+The output file is a list containing features extracted using supplied/default functions (extracted_features), features calculated using models(model_features) and an element for error (error). Let's look at the extracted_features to see how the default features look like.
 
 ```{r show accel default features}
 dplyr::glimpse(accel_features$extracted_features)
@@ -105,8 +105,7 @@ accel_features <- accelerometer_features(accelerometer_data,
 # the default feature extraction pipeline
 ```
 
-## PHIL'S INPUT NEEDED HERE
-### A sample example for using funs and models
+## PHIL'S INPUT NEEDED HERE (A sample example for using funs and models)
 
 Please read the function documentation `?accelerometer_features` for more info.
 
@@ -141,7 +140,7 @@ Let's take a look at the default feature extraction pipeline, whose features are
 gyro_features <- gyroscope_features(gyroscope_data)
 # using default parameters
 ```
-As you can see the output file is a list containing features extracted using supplied/default functions (extracted_features), features calculated using models(model_features) and an element for error (error). Let's look at the extracted_features to see how the default features look like.
+The output file is a list containing features extracted using supplied/default functions (extracted_features), features calculated using models(model_features) and an element for error (error). Let's look at the extracted_features to see how the default features look like.
 
 ```{r show gyro default features}
 dplyr::glimpse(gyro_features$extracted_features)
@@ -188,8 +187,7 @@ gyro_features <- gyroscope_features(gyroscope_data,
 # the default feature extraction pipeline
 ```
 
-## PHIL'S INPUT NEEDED HERE
-### A sample example for using funs and models
+## PHIL'S INPUT NEEDED HERE (A sample example for using funs and models)
 
 Please read the function documentation `?gyroscope_features` for more info.
 

@@ -10,23 +10,19 @@
   \item{green}{mean green intensity across the frame at the given timestamp}
   \item{blue}{mean blue intensity across the frame at the given timestamp}
   \item{red}{mean red intensity across the frame at the given timestamp}
-  \item{brightness}{mean brightness across the frame at the given timestamp}
-  \item{hue}{mean hue across the frame at the given timestamp}
-  \item{saturation}{mean saturation across the frame at the given timestamp}
 }}
 \usage{
 heartrate_data
 }
 \description{
 A dataframe containing sample JSON output format of the heartrate data,
-containing red, green, blue levels from the camera sensor, along with the
-timestamp, and the derived metrics of hue, saturation and brightness.
+containing red, green, blue levels from the camera sensor, indexed with the
+timestamp t.
 }
 \details{
 A video(240p) of a finger covering the smartphone camera with the flash
 turned on was recorded at 60fps. The average intensity of all the pixels per
 frame in all the three color channels was calculated, and indexed along
-the timestamp of the frame. We also have hue, brightness and saturation
-calculated in a similar way.
+the timestamp of the frame.
 }
 \keyword{datasets}
