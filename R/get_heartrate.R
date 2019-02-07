@@ -222,16 +222,12 @@ get_hr_from_time_series <- function(x, sampling_rate, method = 'acf', min_hr = 4
     confidence <- NA
   }
   
-  ## If hr or condidence is NaN, then return hr = 0 and confidence = 0
-  #if (is.na(confidence) || is.na(hr)) {
-   # confidence <- NA
-   # hr <- NA
-  #}
   
   # If hr or condidence is NaN, then return hr = 0 and confidence = 0
-  if (is.null(confidence) || is.null(hr)) {
+  if ((length(hr) == 0) || is.null(hr)) {
   confidence <- NA
   hr <- NA
   }
+  
   return(c(hr, confidence))
 }
