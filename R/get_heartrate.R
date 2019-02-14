@@ -43,6 +43,9 @@ get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0
   # Convert window length from seconds to samples
   window_length <- round(sampling_rate * window_length)
   mean_filter_order <- 65
+  if(sampling_rate <= 32){
+    mean_filter_order <- 33
+    }
   
   ##  Apply pre-processing filter to all heartrate data
   
