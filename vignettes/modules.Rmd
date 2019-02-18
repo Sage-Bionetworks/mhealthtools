@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-`mhealthtools` was built to help people study the physiological symptoms that can be tracked through the sensors of the modern day smartphone. This can be the tremor in your hand using the accelerometer and gyroscope sensors while holding the phone in your hand; or Bradykinesia and Dyskinesia through the acceleremeter and gyroscope sensors while having the phone in the front pocket of your pant while you walk; or your heartrate using the camera with your finger against it. Whatever the experiment design (also referred to as module, task or activity), if it uses the smartphone sensors, you can use `mhealthtools` to extract useful and sometimes physiologically meaningful features.
+`mhealthtools` was built to help people study the physiological symptoms that can be tracked through the sensors of the modern day smartphone. This can be the tremor in your hand using the accelerometer and gyroscope sensors while holding the phone in your hand; or Bradykinesia and Dyskinesia through the acceleremeter and gyroscope sensors while having the phone in the front pocket of your pants while you walk; or your heartrate using the camera with your finger against it. Whatever the experiment design (assay), if it uses the smartphone sensors, you can use `mhealthtools` to extract useful and sometimes physiologically meaningful features.
 
 Here we describe the use of `mhealthtools` for certain modules, that are taken from the [mpower study](https://parkinsonmpower.org/) run by Sage Bionetworks to better understand Parkinson's disease, or read more at their [article published in nature](https://www.nature.com/articles/sdata201611).
 
@@ -32,37 +32,36 @@ library(dplyr)
 
 ### Walk Module
 
-In this task, the participant is asked to keep the phone in his/her pant's front pocket (if not in the waistband of the pants) and then walk in a straight line for some fixed amount of time (like 30s). For someone with Parkinson's we expect to see symptoms of Dyskinesia and Bradykinesia. 
+In this task, the participant is asked to keep the phone in his/her pants front pocket (if not in the waistband of the pants) and then walk in a straight line for some fixed amount of time (e.g. 30s). For someone with Parkinson's we expect to see symptoms of Dyskinesia and Bradykinesia. 
 
-The features extracted from `get_walk_features` do capture to some extent the effects of those symptoms. In the default processing, the signal is broken down into two IMFs (Intrinsic Mode Functions) using the Hilbert Huang Transform before they are analyzed.
+The features extracted from `get_walk_features` do capture to some extent the effects of those symptoms. In the default processing, the signal is broken down into two IMFs (Intrinsic Mode Functions) using the Hilbert Huang Transform before being analyzed.
 
 `mhealthtools` comes with preloaded sample walk data from the mpower study. Let's take a look at the walk data before we proceed to analyze it.
 
 ```{r}
-data("walk_data")
 dplyr::glimpse(walk_data)
 ```
 
 Let's look at the accelerometer data, userAcceleration (plotting only the first ten seconds)
 
-```{r, echo=FALSE, fig.width=8, fig.height=5, message=FALSE}
+```{r, echo=TRUE, fig.width=8, fig.height=5, message=FALSE}
 library(ggplot2)
 a <- walk_data$userAcceleration
 a$t <- walk_data$timestamp
-a <- tidyr::gather(a, 'axis' , 'val', -t)
+a <- tidyr::gather(a, 'axis' , 'value', -t)
 a <- a %>% dplyr::filter(t<10)
-ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
 Let's look at the gyroscope data, rotationRate (plotting only the first ten seconds)
 
-```{r, echo=FALSE, fig.width=8, fig.height=4}
+```{r, echo=TRUE, fig.width=8, fig.height=4}
 library(ggplot2)
 a <- walk_data$rotationRate
 a$t <- walk_data$timestamp
-a <- tidyr::gather(a, 'axis' , 'val', -t)
+a <- tidyr::gather(a, 'axis' , 'value', -t)
 a <- a %>% dplyr::filter(t<10)
-ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
 As you can see the accelerometer data in `walk_data` is missing the `t` column, and it is referenced as `walk_data$timestamp`, so let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_walk_features`. Similarly for the gyroscope data
@@ -125,28 +124,27 @@ The features extracted from `get_balance_features` do capture to some extent the
 `mhealthtools` comes with preloaded sample rest tremor data from the mpower study. Let's take a look at the data before we proceed to analyze it.
 
 ```{r}
-data("rest_tremor_data")
 dplyr::glimpse(rest_tremor_data)
 ```
 
 Let's look at the accelerometer data, userAcceleration (plotting only the first ten seconds)
 
-```{r, echo=FALSE, fig.width=8, fig.height=5, message=FALSE}
+```{r, echo=TRUE, fig.width=8, fig.height=5, message=FALSE}
 library(ggplot2)
 a <- rest_tremor_data$userAcceleration
 a$t <- rest_tremor_data$timestamp
-a <- tidyr::gather(a, 'axis' , 'val', -t)
-ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+a <- tidyr::gather(a, 'axis' , 'value', -t)
+ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
 Let's look at the gyroscope data, rotationRate (plotting only the first ten seconds)
 
-```{r, echo=FALSE, fig.width=8, fig.height=4}
+```{r, echo=TRUE, fig.width=8, fig.height=4}
 library(ggplot2)
 a <- rest_tremor_data$rotationRate
 a$t <- rest_tremor_data$timestamp
-a <- tidyr::gather(a, 'axis' , 'val', -t)
-ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+a <- tidyr::gather(a, 'axis' , 'value', -t)
+ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
 As you can see the accelerometer data in `rest_tremor_data` is missing the `t` column, and it is referenced as `rest_tremor_data$timestamp`, so let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_balance_features`. Similarly for the gyroscope data
@@ -208,30 +206,29 @@ The features extracted from `get_kinetic_tremor_features` do capture to some ext
 `mhealthtools` comes with preloaded sample kinetic tremor data from the mpower study. Let's take a look at the data before we proceed to analyze it.
 
 ```{r}
-data("kinetic_tremor_data")
 dplyr::glimpse(kinetic_tremor_data)
 ```
 
 Let's look at the accelerometer data, userAcceleration (plotting only the first ten seconds)
 
-```{r, echo=FALSE, fig.width=8, fig.height=5, message=FALSE}
+```{r, echo=TRUE, fig.width=8, fig.height=5, message=FALSE}
 library(ggplot2)
 a <- kinetic_tremor_data$userAcceleration
 a$t <- kinetic_tremor_data$timestamp
-a <- tidyr::gather(a, 'axis' , 'val', -t)
+a <- tidyr::gather(a, 'axis' , 'value', -t)
 a <- a %>% dplyr::filter(t<10)
-ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
 Let's look at the gyroscope data, rotationRate (plotting only the first ten seconds)
 
-```{r, echo=FALSE, fig.width=8, fig.height=4}
+```{r, echo=TRUE, fig.width=8, fig.height=4}
 library(ggplot2)
 a <- kinetic_tremor_data$rotationRate
 a$t <- kinetic_tremor_data$timestamp
-a <- tidyr::gather(a, 'axis' , 'val', -t)
+a <- tidyr::gather(a, 'axis' , 'value', -t)
 a <- a %>% dplyr::filter(t<10)
-ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
 As you can see the accelerometer data in `kinetic_tremor_data` is missing the `t` column, and it is referenced as `kinetic_tremor_data$timestamp`, so let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_kinetic_tremor_features`. Similarly for the gyroscope data
@@ -294,17 +291,16 @@ Features extracted from `get_tapping_features` of `mhealthtools` try to address 
 `mhealthtools` comes with preloaded sample tapping data from the mpower study. Let's take a look at the data before we proceed to analyze it.
 
 ```{r}
-data("tap_data")
 head(tap_data)
 ```
 
 Let's look at a plot of the `x` and `y` co-ordinates of the tap data against `t`
 
-```{r, echo=FALSE, fig.width=8, fig.height=4}
+```{r, echo=TRUE, fig.width=8, fig.height=4}
 library(ggplot2)
 a <- tap_data
-a <- tidyr::gather(a %>% dplyr::select(-buttonid), 'axis' , 'val', -t)
-ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+a <- tidyr::gather(a %>% dplyr::select(-buttonid), 'axis' , 'value', -t)
+ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
 Extracting features using the default pipeline
@@ -330,14 +326,13 @@ In this task, the participant is asked to place their finger over their smartpho
 
 To use the fucntion `get_heartrate` of `mhealthtools` the data needs to be in a certain format, fortunately the package comes preloaded with sampledata `heartrate_data`, let's take a look at it
 
-```{r, echo=FALSE, warning=FALSE, error=FALSE, prompt=FALSE}
-data("heartrate_data")
+```{r, echo=TRUE, warning=FALSE, error=FALSE, prompt=FALSE}
 head(heartrate_data)
 ```
 
 Let's look at the mean centered `red`,`blue` and `green` columns of the heartrate data against `t` (plotting only the time between 2 and 10 seconds). Mean centering because otherwise it would be diffcult to compare the y-axis across plots.
 
-```{r, echo=FALSE, fig.width=8, fig.height=4}
+```{r, echo=TRUE, fig.width=8, fig.height=4}
 library(ggplot2)
 a <- heartrate_data %>% dplyr::select(t, red,blue,green)
 a$red <- a$red - mean(a$red, na.rm = T)
@@ -345,9 +340,9 @@ a$green <- a$green - mean(a$green, na.rm = T)
 a$blue <- a$blue - mean(a$blue, na.rm = T)
 a <- a %>% dplyr::select(t, red_centered = red, green_centered = green, 
                          blue_centered = blue)
-a <- tidyr::gather(a, 'axis' , 'val', -t)
+a <- tidyr::gather(a, 'axis' , 'value', -t)
 a <- a %>% dplyr::filter(t<10, t>2)
-ggplot(a, aes(x = t, y= val)) + geom_line()+facet_wrap(~axis)
+ggplot(a, aes(x = t, y= value)) + geom_line()+facet_wrap(~axis)
 ```
 
 Now to extract the heartrate, we just pass the formatted data into `get_heartrate` which outputs a list containing estimated heartrates for the three channels: red, blue and green, the sampling rate and an error status.
@@ -382,6 +377,6 @@ The output is a list containing heartrate estimates from red, green and blue cha
 dplyr::glimpse(hr_values)
 ```
 
-Please read the function documentation `?get_heartrate` for more info.
+Please read the function documentation [`?get_heartrate`](\code{\link(get_heartrate)}) for more info. 
 
 Please refer to advanced feature extraction pipeline to use your own functions/models in the extending mhealhtools vignette
