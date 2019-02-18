@@ -377,4 +377,4 @@ The output is a list containing heartrate estimates from red, green and blue cha
 dplyr::glimpse(hr_values)
 ```
 
-Please read the function documentation [`?get_heartrate`](\code{\link{get_heartrate}}) for more info. 
+Please read the function documentation `?get_heartrate` for more info. 
