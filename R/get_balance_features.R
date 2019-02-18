@@ -67,17 +67,19 @@
 #' @examples 
 #' accelerometer_data = cbind(
 #'   t = balance_data$timestamp,
-#'   balance_data$userAcceleration)
+#'   balance_data$userAcceleration) %>% 
+#'   dplyr::filter(t < 5)
 #' gyroscope_data = cbind(
 #'   t = balance_data$timestamp,
-#'   balance_data$rotationRate)
+#'   balance_data$rotationRate) %>% 
+#'   dplyr::filter(t < 5)
 #' 
 #' balance_features <- get_balance_features(accelerometer_data, gyroscope_data)
 #' 
 #' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   time_filter = c(2,8))
+#'   time_filter = c(2,4))
 #' 
 #' balance_features <- get_balance_features(
 #'   accelerometer_data,
@@ -92,8 +94,8 @@
 #' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   window_length = 512,
-#'   window_overlap = 0.9)
+#'   window_length = 256,
+#'   window_overlap = 0.2)
 #' 
 #' balance_features <- get_balance_features(
 #'   accelerometer_data,

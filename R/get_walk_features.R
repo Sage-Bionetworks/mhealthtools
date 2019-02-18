@@ -68,10 +68,12 @@
 #' @examples 
 #' accelerometer_data = cbind(
 #'   t = walk_data$timestamp,
-#'   walk_data$userAcceleration)
+#'   walk_data$userAcceleration) %>% 
+#'   dplyr::filter(t < 5)
 #' gyroscope_data = cbind(
 #'   t = walk_data$timestamp,
-#'   walk_data$rotationRate)
+#'   walk_data$rotationRate) %>% 
+#'   dplyr::filter(t < 5)
 #' 
 #' walk_features <- get_walk_features(
 #'   accelerometer_data,
@@ -80,7 +82,7 @@
 #' walk_features <- get_walk_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   time_filter = c(2,8))
+#'   time_filter = c(2,4))
 #' 
 #' walk_features <- get_walk_features(
 #'   accelerometer_data,
@@ -95,8 +97,8 @@
 #' walk_features <- get_walk_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   window_length = 512,
-#'   window_overlap = 0.9)
+#'   window_length = 256,
+#'   window_overlap = 0.2)
 #' 
 #' walk_features <- get_walk_features(
 #'   accelerometer_data,

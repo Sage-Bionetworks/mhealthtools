@@ -76,10 +76,12 @@
 #' @examples 
 #' accelerometer_data = cbind(
 #'   t = kinetic_tremor_data$timestamp,
-#'   kinetic_tremor_data$userAcceleration)
+#'   kinetic_tremor_data$userAcceleration) %>% 
+#'   dplyr::filter(t < 5)
 #' gyroscope_data = cbind(
 #'   t = kinetic_tremor_data$timestamp,
-#'   kinetic_tremor_data$rotationRate)
+#'   kinetic_tremor_data$rotationRate) %>% 
+#'   dplyr::filter(t < 5)
 #' 
 #' kinetic_tremor_features <- get_kinetic_tremor_features(
 #'   accelerometer_data,
@@ -88,7 +90,7 @@
 #' kinetic_tremor_features <- get_kinetic_tremor_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   time_filter = c(2,8))
+#'   time_filter = c(2,4))
 #' 
 #' kinetic_tremor_features <- get_kinetic_tremor_features(
 #'   accelerometer_data,
@@ -103,8 +105,8 @@
 #' kinetic_tremor_features <- get_kinetic_tremor_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   window_length = 512,
-#'   window_overlap = 0.9)
+#'   window_length = 256,
+#'   window_overlap = 0.2)
 #' 
 #' kinetic_tremor_features <- get_kinetic_tremor_features(
 #'   accelerometer_data,
