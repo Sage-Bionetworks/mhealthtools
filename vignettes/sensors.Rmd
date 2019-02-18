@@ -23,7 +23,7 @@ Let's load the package first
 library(mhealthtools)
 ```
 
-```{r other libraries,echo=FALSE,message=FALSE,warning=FALSE, error=FALSE, prompt=FALSE}
+```{r other libraries, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, prompt=FALSE}
 library(dplyr)
 ```
 
@@ -34,8 +34,7 @@ library(dplyr)
 `mhealthtools` already comes preloaded with sample accelerometer data. You can access the data through `data(accelerometer_data)` or just `accelerometer_data`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract accelerometer features). Where `t` is the timestamp; `x`, `y` and `z` are the X, Y and Z- axis respectively.
 
 ```{r accel data, echo = FALSE}
-data(accelerometer_data)
-head(accelerometer_data,5)
+head(accelerometer_data, 5)
 ```
 *To use the default feature extraction pipelines you need to get the data in the proper format -- as that of the sample data. You can also define your own features or feed in a custom model to extract features in `mhealthtools`!*
 
@@ -117,7 +116,6 @@ Please read the function documentation `?accelerometer_features` for more info.
 `mhealthtools` already comes preloaded with sample gyroscope data. You can access the data through `data(gyroscope_data)` or `mhealthtools::gyroscope_data`. The format is similar to the accelerometer data described above.
 
 ```{r gyro data, echo = FALSE}
-data(gyroscope_data)
 head(gyroscope_data,5)
 ```
 
@@ -192,7 +190,6 @@ For more information on how this data was collected please look into the Parkins
 `mhealthtools` already comes preloaded with sample tapping data. You can access the data through `data(tap_data)` or `mhealthtools::tap_data`. The first five rows are shown below, to give you an idea of the structure of the data (this is the input format to the functions that extract gyroscope features). Where `t` is the timestamp; `x` and `y` are the co-ordinates of the tap, and `buttonid` is to indicate whether the user tapped the left or the right button.
 
 ```{r, echo = FALSE}
-data(tap_data)
 head(tap_data,5)
 ```
 
