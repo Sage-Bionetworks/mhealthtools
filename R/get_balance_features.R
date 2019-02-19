@@ -79,27 +79,15 @@
 #' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   time_filter = c(2,4))
-#' 
-#' balance_features <- get_balance_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
-#'   detrend = TRUE)
-#' 
-#' balance_features <- get_balance_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
-#'   frequency_filter = c(0.5, 25))
+#'   time_filter = c(2,4),
+#'   detrend = TRUE,
+#'   frequency_filter = c(0.5,25))
 #' 
 #' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
 #'   window_length = 256,
-#'   window_overlap = 0.2)
-#' 
-#' balance_features <- get_balance_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
+#'   window_overlap = 0.2,
 #'   derived_kinematics = TRUE)
 #' 
 #' balance_features <- get_balance_features(

@@ -82,27 +82,15 @@
 #' walk_features <- get_walk_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   time_filter = c(2,4))
-#' 
-#' walk_features <- get_walk_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
-#'   detrend = TRUE)
-#' 
-#' walk_features <- get_walk_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
-#'   frequency_filter = c(0.5, 25))
+#'   time_filter = c(2,4),
+#'   detrend = TRUE,
+#'   frequency_filter = c(0.5,25))
 #' 
 #' walk_features <- get_walk_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
 #'   window_length = 256,
-#'   window_overlap = 0.2)
-#' 
-#' walk_features <- get_walk_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
+#'   window_overlap = 0.2,
 #'   derived_kinematics = TRUE)
 #' 
 #' walk_features <- get_walk_features(
