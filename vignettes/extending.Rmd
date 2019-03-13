@@ -21,26 +21,26 @@ If you need functionality that isn't already included with mhealthtools, it will
 
 ## The mhealthtools architecture
 
-There are three distinct levels of abstraction within mhealthtools: _assay_ modules, _sensor_ modules, and _utility_ functions. The functions that actually do all the work -- taking a numerical input and producing a numerical output -- exist as utilities. These utility functions are called by sensor modules (e.g., accelerometer, gyroscope, ...). Sensor module functions are in turn called by assay modules. Thus, a clear heirarchy is established where higher level modules will call functions from lower level modules, but lower level modules will never call a function from a module that is more abstracted than itself.
+There are three distinct levels of abstraction within mhealthtools: **assay** modules, **sensor** modules, and **utility** functions. The functions that do all the "real" work -- taking a numerical input and producing a numerical output -- exist as utilities. These utility functions are called by sensor modules (e.g., accelerometer, gyroscope, ...). Sensor module functions are in turn called by assay modules. Thus, a clear heirarchy is established where higher level modules will call functions from lower level modules, but lower level modules will never call a function from a module that is more abstracted than itself.
 
 In brief summary: Assay > Sensor > Utility
 
 Examples of Assay functions:  
-- get_tremor_features  
-- get_tapping_features  
+- `get_tremor_features`  
+- `get_tapping_features`  
   
 Examples of Sensor functions:  
-- accelerometer_features  
-- gyroscope_features  
+- `accelerometer_features`  
+- `gyroscope_features` 
   
 Examples of Utility functions:  
-- mutate_detrend  
-- detrend  
-- extract_features  
+- `mutate_detrend`  
+- `detrend`  
+- `extract_features`
 
 ### Utility functions
 
-Although utilities exist at the bottom of the functional totem pole, they can serve very different purposes from each other. Functions like `map_groups` or `extract_features` are functional and abstract, and could exist in just about any codebase, whereas functions like `integral` just apply a base R function. Some utility functions are hierarchical -- `mutate_integral` makes use of `integral`, but accepts as input and outputs a dataframe with a schema optimized for kinematic sensor measurements, like those from accelerometer or gyroscope sensors. In short, utility functions are just a grab bag of functions that aren't specific to any one assay or sensor module.
+Although utilities exist at the bottom of the functional totem pole, they can serve very different purposes from each other. Functions like `map_groups` or `extract_features` are functional and abstract, and could exist in just about any codebase, whereas functions like `integral` simply call a base R function in a way that is more interpretable for this package's use cases. Some utility functions are hierarchical -- `mutate_integral` makes use of `integral`, but accepts as input and outputs a dataframe with a schema optimized for kinematic sensor measurements, like those from accelerometer or gyroscope sensors. In short, utility functions are just a grab bag of functions that aren't specific to any one assay or sensor module.
 
 ### Sensor modules
 
@@ -51,7 +51,7 @@ Sensor modules are where things start to get interesting. The implementation of 
 - Extract: features by computing statistics upon individual columns, usually grouped on an index.
 - Return: statistics/features for each group.
 
-You can write your own feature extraction functions to include in the "Extract" step of the above process. The package expects feature extraction functions to accept a numeric vector as input and output a one-row dataframe with features as columns. Here's a simple example:
+You can write your own feature extraction functions to include in the "Extract" step of the above process. **The package expects feature extraction functions to accept a numeric vector as input and output a one-row dataframe with features as columns.** Here's a simple example:
 
 ```{r echo=TRUE}
 my_feature_extraction_function <- function(x) {
@@ -70,7 +70,7 @@ accelerometer_features(
 
 Notice that we used a transform function (`detrend`) included with the package, but were also able to pass our custom feature extraction function. That's the power of computing your custom features with `mhealthtools`!
 
-In some ways this paradigm is quite flexible -- any numerical transformation can be applied to the raw sensor data, and any statistic can be computed on columns of the transformed result. But not all features you could plausibly want to compute fit well into this paradigm. Statistics that rely on complex, non-linear combinations of their input variables, such as most machine learning models, are overly cumbersome to fit into the transform -> extract model. If you'd like to use these types of complex statistics in your feature extraction process, you can circumvent the _extract_ portion of the transform -> extract pipeline by passing your own function(s) to the `models` parameter of a sensor level feature function. The `models` parameter consists of one or more functions which accept as input `sensor_data` after the specified transformations have been applied to it and outputs whatever it wants.
+In some ways this paradigm is quite flexible -- any numerical transformation can be applied to the raw sensor data, and any statistic can be computed on columns of the transformed result. But not all features you could plausibly want to compute fit well into this paradigm. Statistics that rely on complex combinations of their input variables, such as most machine learning models, are overly cumbersome to fit into the transform -> extract model. If you'd like to use these types of complex statistics in your feature extraction process, you can circumvent the _extract_ portion of the transform -> extract pipeline by passing your own function(s) to the `models` parameter of a sensor level feature function. **The `models` parameter consists of one or more functions which accept as input `sensor_data` after the specified transformations have been applied to it and outputs whatever it wants.**
 
 ```{r echo=TRUE}
 my_model_one <- function(transformed_sensor_data) {
@@ -103,13 +103,13 @@ So far we've talked about two ways to modify the behavior of the Extract step --
 
 For kinematic sensors, most users should be satisfied with the included transform options (detrending, time filtering, frequency filtering, windowing, IMF+windowing, derived kinematics). But for those still not satisfied, we need to throw away the user-friendly wrappers `accelerometer_features` and `gyroscope_features` and look under the hood at `sensor_features`.
 
-By design, there's not much to see. Any functions passed to the `transform` parameter of `sensor_features` will be applied sequentially to `sensor_data`. What makes this parameter useful is if (nearly) all functions can informally agree to a certain type of input and output. If this is the case, we can apply (nearly all) our transform functions in any order we want.
+By design, there's not much to see. Any functions passed to the `transform` parameter of `sensor_features` will be applied sequentially to `sensor_data`. What makes this parameter useful is if (nearly) all functions informally agree to a standardized type of input and output. If this is the case, we can apply (nearly all) our transform functions in any order we want.
 
-The (nearly) comes from the fact that -- in the case of the transform options included with `accelerometer_features` and `gyroscope_features` -- our transform functions like the data to be in tidy format 
+The (nearly) comes from the fact that -- in the case of the transform options included with `accelerometer_features` and `gyroscope_features` -- our transform functions like the data to be in tidy format, but these two user-friendly wrappers accept input with a schema that's more likely to conform with what is recorded by a mobile device (columns `t`, `x`, `y`, `z`, rather than a tidy schema `t`, `axis` and `value`).
 
 As a case study, let's see how `accelerometer_features` creates a list of transform functions to pass to `sensor_features`
 
-For those who want to take full advantage of the modularity of the sensor modules, it's worth understanding the heirarchy implemented in `sensors.R`. In practice, the transform step is split into two processes, a _preprocessing_ followed by a _transformation_. Preprocessing is responsible for putting the data in a tidy format and cleaning the measurements (standardizing, detrending, etc.). Transformations take that cleaned data and put it into a completely new vector space by, for example, windowing a time series vector. Many of these preprocessing/transformation steps are shared between sensors (see heirarchy below). Feature extraction happens in a single step, but has a heirarchical aspect to it as well.
+For those who want to take full advantage of the modularity of the sensor modules, it's worth understanding the heirarchy implemented in `sensors.R`. In practice, the transform step is split into two processes, a _preprocessing_ followed by a _transformation_. Preprocessing is responsible for putting the data in a tidy format and cleaning the measurements (standardizing, detrending, etc.). Transformations, on the other hand, take that cleaned data and put it into a completely new vector space by, for example, windowing a time series vector. Many of these preprocessing/transformation steps are shared between sensors (see heirarchy below). Feature extraction happens in a single step, but has a heirarchical aspect to it as well.
 
 To make things more concrete, see the heirarchical organization of the standard accelerometer/gyroscope feature extraction process below. Keep in mind the input -> transform -> extract paradigm, implemented in its purest form in `sensor_features`. Try reading the chart from bottom to top and don't forget to read the `>` symbol as a heirarchial "greater than" sign, rather than an `->` arrow indicating direction of program flow.
 
