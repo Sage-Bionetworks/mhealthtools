@@ -89,15 +89,6 @@ The walk assay entails participants walking in a straight line for
 approximately 20 steps with the mobile device in their pocket or in a bag.
 }
 \examples{
-accelerometer_data = cbind(
-  t = walk_data$timestamp,
-  walk_data$userAcceleration) \%>\% 
-  dplyr::filter(t < 5)
-gyroscope_data = cbind(
-  t = walk_data$timestamp,
-  walk_data$rotationRate) \%>\% 
-  dplyr::filter(t < 5)
-
 walk_features <- get_walk_features(
   accelerometer_data,
   gyroscope_data)

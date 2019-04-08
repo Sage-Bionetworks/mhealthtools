@@ -66,15 +66,6 @@
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
-#' accelerometer_data = cbind(
-#'   t = walk_data$timestamp,
-#'   walk_data$userAcceleration) %>% 
-#'   dplyr::filter(t < 5)
-#' gyroscope_data = cbind(
-#'   t = walk_data$timestamp,
-#'   walk_data$rotationRate) %>% 
-#'   dplyr::filter(t < 5)
-#' 
 #' walk_features <- get_walk_features(
 #'   accelerometer_data,
 #'   gyroscope_data)

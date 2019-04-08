@@ -65,15 +65,6 @@
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
-#' accelerometer_data = cbind(
-#'   t = balance_data$timestamp,
-#'   balance_data$userAcceleration) %>% 
-#'   dplyr::filter(t < 5)
-#' gyroscope_data = cbind(
-#'   t = balance_data$timestamp,
-#'   balance_data$rotationRate) %>% 
-#'   dplyr::filter(t < 5)
-#' 
 #' balance_features <- get_balance_features(accelerometer_data, gyroscope_data)
 #' 
 #' balance_features <- get_balance_features(

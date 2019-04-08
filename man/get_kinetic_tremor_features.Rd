@@ -96,15 +96,6 @@ the participant moves the mobile device back to the nose. This happens in a
 continuous motion and the motion is repeated for approximately 10 seconds.
 }
 \examples{
-accelerometer_data = cbind(
-  t = kinetic_tremor_data$timestamp,
-  kinetic_tremor_data$userAcceleration) \%>\% 
-  dplyr::filter(t < 5)
-gyroscope_data = cbind(
-  t = kinetic_tremor_data$timestamp,
-  kinetic_tremor_data$rotationRate) \%>\% 
-  dplyr::filter(t < 5)
-
 kinetic_tremor_features <- get_kinetic_tremor_features(
   accelerometer_data,
   gyroscope_data)

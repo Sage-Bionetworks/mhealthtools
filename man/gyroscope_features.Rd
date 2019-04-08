@@ -76,9 +76,9 @@ gyro_features <- gyroscope_features(gyroscope_data, IMF = 3)
 
 gyro_features <- gyroscope_features(
   gyroscope_data,
-  time_filter = c(1, 9),
+  time_filter = c(2, 5),
   detrend = TRUE,
-  frequency_filter = c(1, 25),
+  frequency_filter = c(4, 16),
   window_length = 256,
   window_overlap = 0.5,
   derived_kinematics = TRUE,
