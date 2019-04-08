@@ -161,28 +161,8 @@ default_kinematic_features <- function(sampling_rate) {
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
 #' accel_features <- accelerometer_features(accelerometer_data)
-#' accel_features <- accelerometer_features(
-#'   accelerometer_data,
-#'   time_filter = c(2,8))
-#' 
-#' accel_features <- accelerometer_features(
-#'   accelerometer_data,
-#'   detrend = TRUE)
-#' 
-#' accel_features <- accelerometer_features(
-#'   accelerometer_data,
-#'   frequency_filter = c(0.5, 25))
 #' 
 #' accel_features <- accelerometer_features(accelerometer_data, IMF = 3)
-#' 
-#' accel_features <- accelerometer_features(
-#'   accelerometer_data,
-#'   window_length = 512,
-#'   window_overlap = 0.9)
-#' 
-#' accel_features <- accelerometer_features(
-#'   accelerometer_data,
-#'   derived_kinematics = TRUE)
 #' 
 #' accel_features <- accelerometer_features(
 #'   accelerometer_data,
@@ -191,6 +171,7 @@ default_kinematic_features <- function(sampling_rate) {
 #'   frequency_filter = c(1, 25),
 #'   window_length = 256,
 #'   window_overlap = 0.5,
+#'   derived_kinematics = TRUE,
 #'   funs = time_domain_summary)
 #' 
 #' @importFrom magrittr "%>%"
@@ -272,28 +253,8 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
 #' gyro_features <- gyroscope_features(gyroscope_data)
-#' gyro_features <- gyroscope_features(
-#'   gyroscope_data,
-#'   time_filter = c(2,8))
-#' 
-#' gyro_features <- gyroscope_features(
-#'   gyroscope_data,
-#'   detrend = TRUE)
-#' 
-#' gyro_features <- gyroscope_features(
-#'   gyroscope_data,
-#'   frequency_filter = c(0.5, 25))
 #' 
 #' gyro_features <- gyroscope_features(gyroscope_data, IMF = 3)
-#' 
-#' gyro_features <- gyroscope_features(
-#'   gyroscope_data,
-#'   window_length = 512,
-#'   window_overlap = 0.9)
-#' 
-#' gyro_features <- gyroscope_features(
-#'   gyroscope_data,
-#'   derived_kinematics = TRUE)
 #' 
 #' gyro_features <- gyroscope_features(
 #'   gyroscope_data,
@@ -302,6 +263,7 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
 #'   frequency_filter = c(1, 25),
 #'   window_length = 256,
 #'   window_overlap = 0.5,
+#'   derived_kinematics = TRUE,
 #'   funs = time_domain_summary)
 #' 
 #' @importFrom magrittr "%>%"

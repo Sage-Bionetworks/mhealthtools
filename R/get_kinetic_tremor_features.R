@@ -92,11 +92,7 @@
 #'   gyroscope_data,
 #'   time_filter = c(2,4),
 #'   detrend = TRUE,
-#'   frequency_filter = c(0.5, 25))
-#' 
-#' kinetic_tremor_features <- get_kinetic_tremor_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
+#'   frequency_filter = c(0.5, 25),
 #'   window_length = 256,
 #'   window_overlap = 0.2,
 #'   derived_kinematics = TRUE)
@@ -104,8 +100,6 @@
 #' kinetic_tremor_features <- get_kinetic_tremor_features(
 #'   accelerometer_data,
 #'   gyroscope_data, 
-#'   detrend = TRUE,
-#'   frequency_filter = c(1, 25),
 #'   funs = list(time_domain_summary))
 #'   
 #' @importFrom magrittr "%>%"

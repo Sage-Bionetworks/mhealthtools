@@ -71,28 +71,8 @@ from triaxial gyroscope data collected through smartphones.
 }
 \examples{
 gyro_features <- gyroscope_features(gyroscope_data)
-gyro_features <- gyroscope_features(
-  gyroscope_data,
-  time_filter = c(2,8))
-
-gyro_features <- gyroscope_features(
-  gyroscope_data,
-  detrend = TRUE)
-
-gyro_features <- gyroscope_features(
-  gyroscope_data,
-  frequency_filter = c(0.5, 25))
 
 gyro_features <- gyroscope_features(gyroscope_data, IMF = 3)
-
-gyro_features <- gyroscope_features(
-  gyroscope_data,
-  window_length = 512,
-  window_overlap = 0.9)
-
-gyro_features <- gyroscope_features(
-  gyroscope_data,
-  derived_kinematics = TRUE)
 
 gyro_features <- gyroscope_features(
   gyroscope_data,
@@ -101,6 +81,7 @@ gyro_features <- gyroscope_features(
   frequency_filter = c(1, 25),
   window_length = 256,
   window_overlap = 0.5,
+  derived_kinematics = TRUE,
   funs = time_domain_summary)
 
 }

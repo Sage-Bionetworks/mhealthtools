@@ -69,7 +69,7 @@ time_domain_summary <- function(values, sampling_rate=NA) {
 #' frequency_features = frequency_domain_summary(
 #'   accelerometer_data$x,
 #'   sampling_rate = 100.122,
-#'   npeaks = 4)
+#'   npeaks = 3)
 frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
   if (is.na(sampling_rate)) {
     warning("Using default sampling rate of 100 for time_domain_summary")
