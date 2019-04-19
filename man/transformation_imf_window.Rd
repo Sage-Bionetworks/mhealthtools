@@ -15,8 +15,8 @@ window overlap.}
 \item{max_imf}{The maximum number of IMF's during EMD}
 }
 \value{
-A function that accepts as input a dataframe with columns 
-t, axis, value and outputs a windowed transformation of that 
+A function that accepts as input a dataframe with columns
+t, axis, value and outputs a windowed transformation of that
 dataframe's EMD.
 }
 \description{

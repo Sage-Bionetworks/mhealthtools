@@ -1,7 +1,7 @@
 #' Calculate the fatigue given a vector x
-#' 
+#'
 #' @param x A numeric vector containing inter tap intevals
-#' @return A list containing fatigue10, fatigue25, fatigue50 where 
+#' @return A list containing fatigue10, fatigue25, fatigue50 where
 #' fatigueX is the difference in the mean values of the
 #' first X percent of input x and last X percent of input x
 fatigue <- function(x) {
@@ -16,7 +16,7 @@ fatigue <- function(x) {
 }
 
 #' Calculate the drift given x and y
-#' 
+#'
 #' @param x A vecor containing x co-ordinates (same length as that of y)
 #' @param y A vecor containing y co-ordinates (same length as that of x)
 #' @return Drift vector which is sqrt(dx^2 + dy^2)
@@ -28,7 +28,7 @@ calculate_drift <- function(x, y) {
 
 #' Calculate the Mean Teager-Kaiser energy,
 #' adapted from TKEO function in library(seewave) using f = 1, m = 1, M = 1
-#' 
+#'
 #' @param x A vector x whose Mean Taiger-Kaiser Energy Operator value
 #' needs to be calculated
 #' @return A numeric value that is representative of the MeanTKEO
@@ -39,7 +39,7 @@ mean_tkeo <- function(x) {
 }
 
 #' Calculate the Coefficient of Variation (coef_var) for a given sequence
-#' 
+#'
 #' @param x A numeric vector
 #' @return A numeric value that is representative of the Coefficient of Variation
 coef_var <- function(x) {
@@ -49,7 +49,7 @@ coef_var <- function(x) {
 
 #' Curate the raw tapping data to get Left and Right events,
 #' after applying the threshold.
-#' 
+#'
 #' @param tap_data A dataframe with t,x,y and buttonid columns
 #' @param depress_threshold The threshold for intertap distance
 #' @return A dataframe with feature values and the appropriate error message
@@ -78,7 +78,7 @@ get_left_right_events_and_tap_intervals <- function(tap_data,
 }
 
 #' Calculate the sampling rate.
-#' 
+#'
 #' @param sensor_data A data frame with a time column \code{t}
 #' @return The sampling rate (number of samples taken per second on average).
 get_sampling_rate <- function(sensor_data) {
@@ -98,10 +98,10 @@ has_error <- function(sensor_data) {
 }
 
 #' Gather the axial columns
-#' 
+#'
 #' Gather x, y, and z columns into a single \code{axis} column and
 #' normalize the \code{t} column to begin at \code{t} = 0.
-#' 
+#'
 #' @param sensor_data A data frame with a time column \code{t},
 #' and at least one additional axial column.
 #' @return Sensor data in tidy format.
@@ -113,7 +113,7 @@ tidy_sensor_data <- function(sensor_data) {
     normalized_sensor_data <-  sensor_data %>% dplyr::mutate(t = t - t0)
     index <- order(sensor_data$t)
     tidy_sensor_data <- normalized_sensor_data[index, ] %>%
-      tidyr::gather(axis, value, -t) %>% 
+      tidyr::gather(axis, value, -t) %>%
       dplyr::group_by(axis)
   }, error = function(e) {
     dplyr::tibble(
@@ -123,7 +123,7 @@ tidy_sensor_data <- function(sensor_data) {
 }
 
 #' Detrend time series data
-#' 
+#'
 #' @param time Numeric vector containing the timestamp values.
 #' @param values Numeric vector the same length as \code{time}.
 #' @return Numeric vector with detrended values.
@@ -133,7 +133,7 @@ detrend <- function(time, values) {
 }
 
 #' Detrend sensor data
-#' 
+#'
 #' @param sensor_data A data frame with columns \code{t}, \code{value}.
 #' @return Sensor data with detrended values.
 mutate_detrend <- function(sensor_data) {
@@ -148,7 +148,7 @@ mutate_detrend <- function(sensor_data) {
 }
 
 #' Apply a pass-band filter to time series data
-#' 
+#'
 #' @param values Numeric vector.
 #' @param window_length The number of samples per window during filtering.
 #' @param sampling_rate Sampling rate of the values.
@@ -175,7 +175,7 @@ bandpass <- function(values, window_length, sampling_rate,
 }
 
 #' Apply a pass-band filter to sensor data
-#' 
+#'
 #' @param sensor_data A data frame with column \code{value}.
 #' @param window_length The number of samples per window during filtering.
 #' @param sampling_rate Sampling rate of the value column.
@@ -195,7 +195,7 @@ mutate_bandpass <- function(sensor_data, window_length, sampling_rate,
 }
 
 #' Select a specific time range from sensor data.
-#' 
+#'
 #' @param sensor_data A data frame with a time column \code{t}.
 #' @param t1 Start time.
 #' @param t2 End time.
@@ -207,14 +207,17 @@ filter_time <- function(sensor_data, t1, t2) {
   }
   filtered_time_sensor_data <- tryCatch({
     filtered_time_sensor_data <- sensor_data %>% dplyr::filter(t >= t1, t <= t2)
+    if (nrow(filtered_time_sensor_data) == 0) {
+      return(dplyr::tibble(error = "Not enough time samples"))
+    }
     return(filtered_time_sensor_data)
   }, error = function(e) {
-    dplyr::tibble(error = "'Not enough time samples")
+    dplyr::tibble(error = "Not enough time samples")
   })
 }
 
 #' Window the value vector of sensor data for each axis
-#' 
+#'
 #' @param sensor_data A data frame with columns \code{t}, \code{axis}, \code{value}.
 #' @param window_length The number of samples per window.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
@@ -257,7 +260,7 @@ window <- function(sensor_data, window_length, window_overlap,
 }
 
 #' Compute start/end timestamps for each window
-#' 
+#'
 #' @param t A numeric time vector
 #' @param window_length The number of samples per window.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
@@ -291,9 +294,9 @@ window_start_end_times <- function(t, window_length, window_overlap) {
 }
 
 #' Window a signal
-#'  
+#'
 #' Given a numeric vector, this function will return its windowed signal.
-#'  
+#'
 #' @param values Timeseries vector of length n.
 #' @param window_length The number of samples per window.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
@@ -316,10 +319,10 @@ window_signal <- function(values, window_length = 256,
 }
 
 #' Take the derivative of a vector v
-#' 
+#'
 #' Take the derivative of a vector v by calculating the difference
 #' between component x_i and x_(i-1).
-#' 
+#'
 #' @param v A numeric vector
 #' @return A numeric vector
 derivative <- function(v) {
@@ -329,10 +332,10 @@ derivative <- function(v) {
 }
 
 #' Take the integral of a vector v
-#' 
+#'
 #' Take the integral of a vector v by computing the inverse of
 #' the lagged differences (\code{diff} function).
-#' 
+#'
 #' @param v A numeric vector
 #' @return The integral of \code{v} as a numeric vector.
 integral <- function(v) {
@@ -342,9 +345,9 @@ integral <- function(v) {
 
 #' Add a column which is the "derivative" of an existing column
 #' to a time-series dataframe.
-#' 
+#'
 #' See function \code{derivative}.
-#' 
+#'
 #' @param sensor_data A data frame with column \code{col}.
 #' @param sampling_rate Sampling rate of \code{col}.
 #' @param col Name of column to differentiate.
@@ -363,9 +366,9 @@ mutate_derivative <- function(sensor_data, sampling_rate, col, derived_col) {
 
 #' Add a column which is the "integral" of an existing column
 #' to a time-series dataframe.
-#' 
+#'
 #' See function \code{integral}.
-#' 
+#'
 #' @param sensor_data A data frame with column \code{col}.
 #' @param sampling_rate Sampling rate of \code{col}.
 #' @param col Name of column to integrate.
@@ -383,7 +386,7 @@ mutate_integral <- function(sensor_data, sampling_rate, col, derived_col) {
 }
 
 #' Construct a dataframe with ACF values
-#' 
+#'
 #' @param sensor_data A data frame with column \code{col}.
 #' @param col Name of column to calculate acf of.
 #' @param lag_max See \code{\link[stats]{acf}}
@@ -400,7 +403,7 @@ mutate_acf <- function(sensor_data, col, lag_max = NULL) {
 }
 
 #' Get min and max gravity values for each window
-#' 
+#'
 #' @param gravity_vector A gravity vector
 #' @param window_length The number of samples per window.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
@@ -421,10 +424,10 @@ tag_outlier_windows_ <- function(gravity_vector, window_length, window_overlap) 
 }
 
 #' Identify abnormal device rotations
-#' 
+#'
 #' Identify windows in which the phone may have been rotated or flipped,
 #' as indicated by a gravity vector
-#' 
+#'
 #' @param gravity A dataframe with gravity vectors for columns
 #' @param window_length The number of samples per window.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
@@ -449,14 +452,14 @@ tag_outlier_windows <- function(gravity, window_length, window_overlap) {
 }
 
 #' Get default tapping features
-#' 
-#' Calculates features characterising tapping data 
+#'
+#' Calculates features characterising tapping data
 #' (interaction terms etc., from the tap data frame)
-#' 
-#' @param tap_data A data frame with columns t, x, y, buttonid containing 
-#' tapping measurements. buttonid can be from 
-#' c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
-#' indicating a tap that has been classified as to the 
+#'
+#' @param tap_data A data frame with columns t, x, y, buttonid containing
+#' tapping measurements. buttonid can be from
+#' c('TappedButtonLeft','TappedButtonRight','TappedButtonNone')
+#' indicating a tap that has been classified as to the
 #' left, right or neither of those places on the screen
 #' @return A features data frame of dimension 1 x n_features
 tap_data_summary_features <- function(tap_data) {
@@ -475,9 +478,9 @@ tap_data_summary_features <- function(tap_data) {
 }
 
 #' Get default tapping features for intertap distance
-#' 
-#' Calculates features characterising a timeseries data 
-#' 
+#'
+#' Calculates features characterising a timeseries data
+#'
 #' @param tap_intervals A numeric vector containing intertap intervals
 #' @return A features data frame of dimension 1 x n_features
 intertap_summary_features <- function(tap_intervals) {
@@ -515,10 +518,10 @@ intertap_summary_features <- function(tap_intervals) {
 }
 
 #' Get default tapping features for tap drift
-#' 
-#' Calculates features characterising a timeseries data 
-#' 
-#' @param tap_drift A numeric vector 
+#'
+#' Calculates features characterising a timeseries data
+#'
+#' @param tap_drift A numeric vector
 #' @return A features data frame of dimension 1 x n_features
 tapdrift_summary_features <- function(tap_drift) {
   tap_drift <- tap_drift %>% na.omit()
@@ -544,10 +547,10 @@ tapdrift_summary_features <- function(tap_drift) {
 
 
 #' Get AR spectrum
-#' 
+#'
 #' Given a numeric vector, this function will return a spectrum
 #' with all pole AR model.
-#' 
+#'
 #' @param values A timeseries vector.
 #' @param sampling_rate Sampling rate of the signal (by default it is 100 Hz).
 #' @param nfreq Number of frequecy points to be interpolated.
@@ -559,18 +562,18 @@ get_spectrum <- function(values, sampling_rate = 100, nfreq = 500){
 }
 
 
-#' Get EWT spectrum 
-#' 
-#' Given the spectrum of a time series vector this function will return its 
+#' Get EWT spectrum
+#'
+#' Given the spectrum of a time series vector this function will return its
 #' Empirical Wavelet Transformed spectrum.
-#' 
+#'
 #' @param spectrum FFT spectrum as a two dimensional data frame with columns
 #' names as freq and pdf respectively n.freq x 2.
 #' @param npeaks Number of peaks to be captured.
 #' @param fraction_min_peak_height Minimum height (relative to maximum peak height)
 #' a peak has to have. Specified as fraction between 0 and 1.
 #' @param min_peak_distance The minimum distance (in indices) peaks.
-#' have to have to be counted. 
+#' have to have to be counted.
 #' @param sampling_rate Sampling rate of the signal (by default it is 100 Hz).
 #' @return Emprical wavelet transformed spectrum of dimension n.freq x (npeaks + 1).
 get_ewt_spectrum <- function(spectrum, npeaks = 3,
@@ -583,20 +586,20 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
                                   minpeakdistance = min_peak_distance,
                                   npeaks = npeaks,
                                   sortstr = TRUE)
-  
+
   # Convert peak frequency to radians and find mid points
   peak_freqs <- spectrum$freq[suppressWarnings(
     sort(peak_freqs[, 2]))] * pi * 2 / sampling_rate
   peak_freqs <- unique(c(0, peak_freqs, pi))
   mid_peak_freqs <- c(0, peak_freqs[-length(peak_freqs)] + diff(peak_freqs) / 2, pi)
-  
+
   # Choose optimal scaling operator for the transition widths
   numerator_vec <- mid_peak_freqs[2:(length(mid_peak_freqs) + 2)] -
     mid_peak_freqs[1:(length(mid_peak_freqs) + 1)]
   denominator_vec <- mid_peak_freqs[2:(length(mid_peak_freqs) + 2)] +
     mid_peak_freqs[1:(length(mid_peak_freqs) + 1)]
   optimal_gamma <- min(numerator_vec / denominator_vec, na.rm = TRUE)
-  
+
   # Compute emprical scaling and wavelets
   empirical_wavelets <- purrr::map2(
     mid_peak_freqs[1:(length(mid_peak_freqs) - 1)],
@@ -605,19 +608,19 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
       # Compute emprical scaling function for the first peak
       phi.sy <- rep(0, n.freq)
       w <- seq(0, pi, len = n.freq)
-      
+
       # Check to see if wn1 is 0, to avoid dividing by 0
       if(wn1 == 0){
         wn1 = 0.00001
       }
-      
+
       # Compute beta (an arbitary coefficient)
       x <- (1 / (2 * optimal_gamma * wn1)) * (abs(w) - (1 - optimal_gamma) * wn1)
       beta1 <- x^4 * (35 - 84 * x + 70 * x^2 - 20 * x^3)
-      
+
       x <- (1 / (2 * optimal_gamma * wn2)) * (abs(w) - (1 - optimal_gamma) * wn2)
       beta2 <- x^4 * (35 - 84 * x + 70 * x^2 - 20 * x^3)
-      
+
       if (wn2 != pi) {
         # Compute scaling/wavelets for different conditions
         ind <- ((1 + optimal_gamma) * wn1 <= abs(w)) &
@@ -641,21 +644,21 @@ get_ewt_spectrum <- function(spectrum, npeaks = 3,
       return(phi.sy)
     },
     dim(spectrum)[1], optimal_gamma)
-  
+
   # Compute EW modified spectrumrum
   ew_spectrum <- sapply(empirical_wavelets,
                         function(x, spectrum) {spectrum$pdf * x}, spectrum)
-  
+
   return(ew_spectrum)
 }
 
 #' Map a function to a single column within tibble groups
-#' 
-#' A convenience function for mapping a function -- which accepts a 
+#'
+#' A convenience function for mapping a function -- which accepts a
 #' vector as input and outputs an atomic value -- to a single column
 #' of a dataframe. If the dataframe is grouped, the function will be
 #' applied within each group.
-#' 
+#'
 #' @param x A tibble
 #' @param col Column to pass as a vector to \code{f}.
 #' @param f Function to be mapped to \code{col}.
@@ -672,14 +675,14 @@ map_groups <- function(x, col, f, ...) {
 }
 
 #' Extract features from a column
-#' 
-#' Apply each of the functions in \code{funs} to the column 
-#' \code{col} in the grouped data frame \code{x}. Each of the functions in 
-#' \code{funs} must accept a single vector as input and output 
+#'
+#' Apply each of the functions in \code{funs} to the column
+#' \code{col} in the grouped data frame \code{x}. Each of the functions in
+#' \code{funs} must accept a single vector as input and output
 #' a data frame.
-#' 
+#'
 #' @param x A grouped data frame with column \code{col}.
-#' @param col The name of the column in \code{x} to pass to each 
+#' @param col The name of the column in \code{x} to pass to each
 #' function in \code{funs}.
 #' @param funs A list of functions that each accept a single vector as input.
 #' @return a data frame with the original grouped columns and

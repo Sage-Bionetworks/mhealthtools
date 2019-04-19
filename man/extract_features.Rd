@@ -9,7 +9,7 @@ extract_features(x, col, funs)
 \arguments{
 \item{x}{A grouped data frame with column \code{col}.}
 
-\item{col}{The name of the column in \code{x} to pass to each 
+\item{col}{The name of the column in \code{x} to pass to each
 function in \code{funs}.}
 
 \item{funs}{A list of functions that each accept a single vector as input.}
@@ -19,8 +19,8 @@ a data frame with the original grouped columns and
 other feature columns.
 }
 \description{
-Apply each of the functions in \code{funs} to the column 
-\code{col} in the grouped data frame \code{x}. Each of the functions in 
-\code{funs} must accept a single vector as input and output 
+Apply each of the functions in \code{funs} to the column
+\code{col} in the grouped data frame \code{x}. Each of the functions in
+\code{funs} must accept a single vector as input and output
 a data frame.
 }

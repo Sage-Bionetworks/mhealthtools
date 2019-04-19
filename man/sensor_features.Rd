@@ -42,7 +42,7 @@ The feature extraction paradigm is implemented as such:
 
 Input: raw sensor data
 Transform: into a format suitable for calculating statistics upon
-Extract: features by computing statistics upon individual columns 
+Extract: features by computing statistics upon individual columns
          within grouped rows -- or by using a model
 Return: A list of features
 }
