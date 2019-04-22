@@ -11,7 +11,7 @@ prepare_kinematic_sensor_args(sensor_data, metric, time_filter = NULL,
 }
 \arguments{
 \item{sensor_data}{An \code{n} x 4 data frame with column names \code{t}, \code{x},
-\code{y}, \code{z} containing kinematic sensor (accelerometer or gyroscope) 
+\code{y}, \code{z} containing kinematic sensor (accelerometer or gyroscope)
 measurements. Here \code{n} is the
 total number of measurements, \code{t} is the timestamp of each measurement, and
 \code{x}, \code{y} and \code{z} are axial measurements.}
@@ -20,9 +20,9 @@ total number of measurements, \code{t} is the timestamp of each measurement, and
 data, the metric is acceleration. Whereas for gyroscope data the metric is
 velocity.}
 
-\item{time_filter}{A length 2 numeric vector specifying the time range 
+\item{time_filter}{A length 2 numeric vector specifying the time range
 of measurements to use during preprocessing and feature extraction after
-normalizing the first timestamp to 0. A \code{NULL} value means do not 
+normalizing the first timestamp to 0. A \code{NULL} value means do not
 filter any measurements.}
 
 \item{detrend}{A logical value indicating whether to detrend the signal.}
@@ -35,8 +35,8 @@ A \code{NULL} value means do not filter frequencies.}
 transformation. The default value of 1 means do not apply EMD to the signal.}
 
 \item{window_length}{A numerical value representing the length (in number of samples)
-of the sliding window used during the windowing transformation. Both 
-\code{window_length} and \code{window_overlap} must be set for the windowing 
+of the sliding window used during the windowing transformation. Both
+\code{window_length} and \code{window_overlap} must be set for the windowing
 transformation to be applied.}
 
 \item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
@@ -66,7 +66,7 @@ which compute individual features using multiple input variables.}
 A list of arguments to be used in the general feature functions.
 }
 \description{
-Using the arguments passed to convenience functions like 
+Using the arguments passed to convenience functions like
 \code{accelerometer_features} and \code{gyroscope_features},
 build an argument set that can be used with more general functions
 like \code{kinematic_sensor_data} and \code{sensor_data}. This function

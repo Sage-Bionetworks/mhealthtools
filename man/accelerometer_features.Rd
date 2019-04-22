@@ -15,12 +15,12 @@ accelerometer_features(sensor_data, time_filter = NULL, detrend = F,
 total number of measurements, \code{t} is the timestamp of each measurement, and
 \code{x}, \code{y} and \code{z} are linear acceleration measurements.}
 
-\item{time_filter}{A length 2 numeric vector specifying the time range 
+\item{time_filter}{A length 2 numeric vector specifying the time range
 of measurements to use during preprocessing and feature extraction after
-normalizing the first timestamp to 0. A \code{NULL} value means do not 
+normalizing the first timestamp to 0. A \code{NULL} value means do not
 filter any measurements.}
 
-\item{detrend}{A logical value indicating whether to detrend the signal. 
+\item{detrend}{A logical value indicating whether to detrend the signal.
 By default the value is FALSE.}
 
 \item{frequency_filter}{A length 2 numeric vector specifying the frequency range
@@ -31,8 +31,8 @@ A \code{NULL} value means do not filter frequencies.}
 transformation. The default value of 1 means do not apply EMD to the signal.}
 
 \item{window_length}{A numerical value representing the length (in number of samples)
-of the sliding window used during the windowing transformation. Both 
-\code{window_length} and \code{window_overlap} must be set for the windowing 
+of the sliding window used during the windowing transformation. Both
+\code{window_length} and \code{window_overlap} must be set for the windowing
 transformation to be applied.}
 
 \item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
