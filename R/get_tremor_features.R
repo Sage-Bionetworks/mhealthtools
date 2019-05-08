@@ -73,15 +73,6 @@
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
-#' accelerometer_data = cbind(
-#'   t = rest_tremor_data$timestamp,
-#'   rest_tremor_data$userAcceleration) %>% 
-#'   dplyr::filter(t < 5)
-#' gyroscope_data = cbind(
-#'   t = rest_tremor_data$timestamp,
-#'   rest_tremor_data$rotationRate) %>% 
-#'   dplyr::filter(t < 5)
-#' 
 #' tremor_features <- get_tremor_features(accelerometer_data, gyroscope_data)
 #' 
 #' tremor_features <- get_tremor_features(
@@ -89,11 +80,7 @@
 #'   gyroscope_data,
 #'   time_filter = c(2,4),
 #'   detrend = TRUE,
-#'   frequency_filter = c(0.5, 25))
-#' 
-#' tremor_features <- get_tremor_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
+#'   frequency_filter = c(0.5, 25),
 #'   window_length = 256,
 #'   window_overlap = 0.2,
 #'   derived_kinematics = TRUE)
@@ -101,8 +88,6 @@
 #' tremor_features <- get_tremor_features(
 #'   accelerometer_data,
 #'   gyroscope_data, 
-#'   detrend = TRUE,
-#'   frequency_filter = c(1, 25),
 #'   funs = list(time_domain_summary))
 #'   
 #' @importFrom magrittr "%>%"

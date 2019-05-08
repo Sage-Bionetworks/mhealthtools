@@ -21,7 +21,7 @@ originally been grouped) and a \code{data} column containing
 the output of the mapped function \code{f}.
 }
 \description{
-A convenience function for mapping a function -- which accepts a 
+A convenience function for mapping a function -- which accepts a
 vector as input and outputs an atomic value -- to a single column
 of a dataframe. If the dataframe is grouped, the function will be
 applied within each group.

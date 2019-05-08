@@ -29,7 +29,7 @@ in the frequency domain.
 frequency_features = frequency_domain_summary(
   accelerometer_data$x,
   sampling_rate = 100.122,
-  npeaks = 4)
+  npeaks = 3)
 }
 \author{
 Thanneer Malai Perumal, Phil Snyder

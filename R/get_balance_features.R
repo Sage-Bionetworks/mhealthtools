@@ -65,15 +65,6 @@
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
-#' accelerometer_data = cbind(
-#'   t = balance_data$timestamp,
-#'   balance_data$userAcceleration) %>% 
-#'   dplyr::filter(t < 5)
-#' gyroscope_data = cbind(
-#'   t = balance_data$timestamp,
-#'   balance_data$rotationRate) %>% 
-#'   dplyr::filter(t < 5)
-#' 
 #' balance_features <- get_balance_features(accelerometer_data, gyroscope_data)
 #' 
 #' balance_features <- get_balance_features(
@@ -81,20 +72,14 @@
 #'   gyroscope_data,
 #'   time_filter = c(2,4),
 #'   detrend = TRUE,
-#'   frequency_filter = c(0.5,25))
-#' 
-#' balance_features <- get_balance_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
+#'   frequency_filter = c(0.5,25),
 #'   window_length = 256,
 #'   window_overlap = 0.2,
 #'   derived_kinematics = TRUE)
 #' 
 #' balance_features <- get_balance_features(
 #'   accelerometer_data,
-#'   gyroscope_data, 
-#'   detrend = TRUE,
-#'   frequency_filter = c(1, 25),
+#'   gyroscope_data,
 #'   funs = list(time_domain_summary))
 #'   
 #' @importFrom magrittr "%>%"

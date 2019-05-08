@@ -13,7 +13,7 @@ transformation_window(window_length, window_overlap)
 window overlap.}
 }
 \value{
-A function that accepts as input a dataframe with columns 
+A function that accepts as input a dataframe with columns
 t, axis, value and outputs a windowed transformation of that dataframe
 }
 \description{
