@@ -36,7 +36,7 @@ library(dplyr)
 ```{r accel data, echo = FALSE}
 head(accelerometer_data, 5)
 ```
-*To use the default feature extraction pipelines you need to get the data in the proper format -- as that of the sample data. You can also define your own features or feed in a custom model to extract features in `mhealthtools`!*
+*To use the default feature extraction pipelines you need to get the data in the proper format -- as that of the sample data. You can also define your own features or feed in a custom model to extract features in `mhealthtools` as described in [Extending mhealthtools](extending.html) under the "Sensor modules" section header.*
 
 Let's plot to see how the accelerometer data actually looks like 
 
@@ -104,8 +104,6 @@ accel_features <- accelerometer_features(accelerometer_data,
 # Consider decomposing the signal into 2 IMFs and then running both the IMFs through
 # the default feature extraction pipeline
 ```
-
-## PHIL'S INPUT NEEDED HERE (A sample example for using funs and models)
 
 Please read the function documentation `?accelerometer_features` for more info.
 
@@ -176,8 +174,6 @@ gyro_features <- gyroscope_features(gyroscope_data,
 # Consider decomposing the signal into 2 IMFs and then running both the IMFs through
 # the default feature extraction pipeline
 ```
-
-## PHIL'S INPUT NEEDED HERE (A sample example for using funs and models)
 
 Please read the function documentation `?gyroscope_features` for more info.
 
