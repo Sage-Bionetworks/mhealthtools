@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 `mhealthtools` was built to help people study the physiological symptoms that can be tracked through the sensors of the modern day smartphone. This can be the tremor in your hand using the accelerometer and gyroscope sensors while holding the phone in your hand; or Bradykinesia and Dyskinesia through the acceleremeter and gyroscope sensors while having the phone in the front pocket of your pants as you walk; or heartrate using the camera with your finger against it. Whatever the experiment design (assay), if it uses smartphone sensors, you can use `mhealthtools` to extract useful and sometimes physiologically meaningful features.
 
-Here we describe the use of `mhealthtools` for certain modules, that are taken from the [mpower study](https://parkinsonmpower.org/) run by Sage Bionetworks. For further reading please refer to the [article published in nature](https://www.nature.com/articles/sdata201611).
+Here we describe the use of `mhealthtools` for certain modules, that are taken from the [mPower study](https://parkinsonmpower.org/) run by Sage Bionetworks. For further reading please refer to the [article published in nature](https://www.nature.com/articles/sdata201611).
 
 Let's load the package before we proceed
 
@@ -50,7 +50,9 @@ a <- walk_data$userAcceleration
 a$t <- walk_data$timestamp
 a <- tidyr::gather(a, 'axis' , 'value', -t)
 a <- a %>% dplyr::filter(t<10)
-ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
+ggplot(a, aes(x = t, y= value)) +
+          geom_line() +
+          facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
 Let's look at the gyroscope data -- rotationRate (plotting only the first ten seconds)
@@ -61,13 +63,14 @@ a <- walk_data$rotationRate
 a$t <- walk_data$timestamp
 a <- tidyr::gather(a, 'axis' , 'value', -t)
 a <- a %>% dplyr::filter(t<10)
-ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
+ggplot(a, aes(x = t, y= value)) +
+          geom_line() +
+          facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
-As you can see the accelerometer data in `walk_data` is missing the `t` column, but it is referenced as `walk_data$timestamp`. Let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_walk_features`. Similarly for the gyroscope data
+Let's get both the accelerometer and gyroscope data into the required format before we extract features from it using `get_walk_features`.
 
 ```{r}
-# Getting walk acceleromter and gyroscope data into mhealthtools' tidy format
 walk_accelerometer_data <- walk_data$userAcceleration
 walk_accelerometer_data$t <- walk_data$timestamp
 
@@ -75,7 +78,7 @@ walk_gyroscope_data <- walk_data$rotationRate
 walk_gyroscope_data$t <- walk_data$timestamp
 ```
 
-Now let's get the default walk features using the tidy data
+Now let's get the default walk features.
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE}
 walk_features <- get_walk_features(accelerometer_data = walk_accelerometer_data, 
@@ -111,8 +114,6 @@ walk_features <- get_walk_features(
 
 Please read the function documentation `?get_walk_features` for more info.
 
-## PHIL'S INPUT NEEDED HERE (A sample example for using funs and models)
-
 ### Tremor Module
 
 ##### Resting tremor
@@ -121,7 +122,7 @@ In this assay, the participant is asked to hold the phone in his/her hand in the
 
 The features extracted from `get_balance_features` do capture to some extent the effects of those symptoms. 
 
-`mhealthtools` comes with preloaded sample rest tremor data from the mpower study. Let's take a look at the data before we proceed to analyze it.
+`mhealthtools` comes with preloaded sample rest tremor data from the mPower study. Let's take a look at the data before we proceed to analyze it.
 
 ```{r}
 dplyr::glimpse(rest_tremor_data)
@@ -134,7 +135,9 @@ library(ggplot2)
 a <- rest_tremor_data$userAcceleration
 a$t <- rest_tremor_data$timestamp
 a <- tidyr::gather(a, 'axis' , 'value', -t)
-ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
+ggplot(a, aes(x = t, y= value)) +
+          geom_line() +
+          facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
 Let's look at the gyroscope data -- rotationRate (plotting only the first ten seconds)
@@ -144,13 +147,14 @@ library(ggplot2)
 a <- rest_tremor_data$rotationRate
 a$t <- rest_tremor_data$timestamp
 a <- tidyr::gather(a, 'axis' , 'value', -t)
-ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
+ggplot(a, aes(x = t, y= value)) +
+          geom_line() +
+          facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
-As you can see the accelerometer data in `rest_tremor_data` is missing the `t` column, but it is referenced as `rest_tremor_data$timestamp`. Let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_balance_features`. Similarly for the gyroscope data
+Let's get the accelerometer and gyroscope data into the required format before we extract features from it using `get_balance_features`.
 
 ```{r}
-# Getting walk acceleromter and gyroscope data into mhealthtools' tidy format
 rest_tremor_accelerometer_data <- rest_tremor_data$userAcceleration
 rest_tremor_accelerometer_data$t <- rest_tremor_data$timestamp
 
@@ -158,7 +162,7 @@ rest_tremor_gyroscope_data <- rest_tremor_data$rotationRate
 rest_tremor_gyroscope_data$t <- rest_tremor_data$timestamp
 ```
 
-Now let's get the rest tremor features using the tidy data
+Now let's get the rest tremor features.
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE}
 rest_tremor_features <- get_tremor_features(
@@ -217,7 +221,9 @@ a <- kinetic_tremor_data$userAcceleration
 a$t <- kinetic_tremor_data$timestamp
 a <- tidyr::gather(a, 'axis' , 'value', -t)
 a <- a %>% dplyr::filter(t<10)
-ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
+ggplot(a, aes(x = t, y= value)) +
+          geom_line() +
+          facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
 Let's look at the gyroscope data -- rotationRate (plotting only the first ten seconds)
@@ -228,13 +234,14 @@ a <- kinetic_tremor_data$rotationRate
 a$t <- kinetic_tremor_data$timestamp
 a <- tidyr::gather(a, 'axis' , 'value', -t)
 a <- a %>% dplyr::filter(t<10)
-ggplot(a, aes(x = t, y= value)) + geom_line() + facet_wrap(~axis, dir = 'v', strip.position = 'right')
+ggplot(a, aes(x = t, y= value)) +
+          geom_line() +
+          facet_wrap(~axis, dir = 'v', strip.position = 'right')
 ```
 
-Let's get the acceleromter data into the `mhealthtools` tidy format before we extract features from it using `get_kinetic_tremor_features`. Similarly for the gyroscope data
+Let's get the accelerometer and gyroscope data into the required format before we extract features from it using `get_kinetic_tremor_features`.
 
 ```{r}
-# Getting walk acceleromter and gyroscope data into mhealthtools' tidy format
 kinetic_tremor_accelerometer_data <- kinetic_tremor_data$userAcceleration
 kinetic_tremor_accelerometer_data$t <- kinetic_tremor_data$timestamp
 
@@ -242,7 +249,7 @@ kinetic_tremor_gyroscope_data <- kinetic_tremor_data$rotationRate
 kinetic_tremor_gyroscope_data$t <- kinetic_tremor_data$timestamp
 ```
 
-Now let's get the kinetic tremor features using the tidy data
+Now let's get the kinetic tremor features.
 
 ```{r, warning=FALSE, error=FALSE, prompt=FALSE, message=FALSE}
 kinetic_tremor_features <- get_kinetic_tremor_features(
@@ -277,8 +284,6 @@ kinetic_tremor_features <- get_kinetic_tremor_features(
 # window length is 256 samples
 # 50% overlap between consecutive windows
 ```
-
-## PHIL'S INPUT NEEDED HERE (A sample example for using funs and models)
 
 Please read the function documentation `?get_kinetic_tremor_features` for more info.
 
