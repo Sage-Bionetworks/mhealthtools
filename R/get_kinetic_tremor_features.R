@@ -74,13 +74,6 @@
 #' @seealso \code{\link{kinetic_tremor_data}}
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
 #' @examples 
-#' accelerometer_data = cbind(
-#'   t = kinetic_tremor_data$timestamp,
-#'   kinetic_tremor_data$userAcceleration)
-#' gyroscope_data = cbind(
-#'   t = kinetic_tremor_data$timestamp,
-#'   kinetic_tremor_data$rotationRate)
-#' 
 #' kinetic_tremor_features <- get_kinetic_tremor_features(
 #'   accelerometer_data,
 #'   gyroscope_data)
@@ -88,34 +81,16 @@
 #' kinetic_tremor_features <- get_kinetic_tremor_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
-#'   time_filter = c(2,8))
-#' 
-#' kinetic_tremor_features <- get_kinetic_tremor_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
-#'   detrend = TRUE)
-#' 
-#' kinetic_tremor_features <- get_kinetic_tremor_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
-#'   frequency_filter = c(0.5, 25))
-#' 
-#' kinetic_tremor_features <- get_kinetic_tremor_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
-#'   window_length = 512,
-#'   window_overlap = 0.9)
-#' 
-#' kinetic_tremor_features <- get_kinetic_tremor_features(
-#'   accelerometer_data,
-#'   gyroscope_data,
+#'   time_filter = c(2,4),
+#'   detrend = TRUE,
+#'   frequency_filter = c(0.5, 25),
+#'   window_length = 256,
+#'   window_overlap = 0.2,
 #'   derived_kinematics = TRUE)
 #' 
 #' kinetic_tremor_features <- get_kinetic_tremor_features(
 #'   accelerometer_data,
 #'   gyroscope_data, 
-#'   detrend = TRUE,
-#'   frequency_filter = c(1, 25),
 #'   funs = list(time_domain_summary))
 #'   
 #' @importFrom magrittr "%>%"

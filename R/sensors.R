@@ -1,16 +1,16 @@
 #' Extract sensor features
-#' 
+#'
 #' A 'pure' implementation of the feature extraction process. This function
 #' is not normally called directly.
-#' 
+#'
 #' The feature extraction paradigm is implemented as such:
-#' 
+#'
 #' Input: raw sensor data
 #' Transform: into a format suitable for calculating statistics upon
-#' Extract: features by computing statistics upon individual columns 
+#' Extract: features by computing statistics upon individual columns
 #'          within grouped rows -- or by using a model
 #' Return: A list of features
-#' 
+#'
 #' @param sensor_data A dataframe.
 #' @param transform A function or list of functions to be applied sequentially
 #' to \code{sensor_data}.
@@ -31,17 +31,17 @@
 #' under \code{$error}.
 sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
                             extract_on = NULL, models = NULL) {
-  
+
   features <- list(extracted_features = NULL,
                    model_features = NULL,
                    error = NULL)
-  
+
   if (is.null(transform)) {
     transform <- list(function(x) x)
   } else if (!is.list(transform)) {
     transform <- list(transform)
   }
-  
+
   transformed_sensor_data <- sensor_data %>%
     purrr::reduce(rev(transform), purrr::compose,
                   .init = function(x) x, .dir = "backward")()
@@ -49,7 +49,7 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
     features$error <- transformed_sensor_data
     return(features)
   }
-  
+
   if (is.function(extract)) {
     extract <- list(extract)
   }
@@ -60,7 +60,7 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
   if (is.function(models)) {
     models <- list(models)
   }
-  
+
   if (!is.null(extract) && !is.null(extract_on)) {
     transformed_sensor_data_groups <- dplyr::groups(transformed_sensor_data)
     incidental_cols_to_preserve <- transformed_sensor_data %>%
@@ -88,14 +88,14 @@ sensor_features <- function(sensor_data, transform = NULL, extract = NULL,
 }
 
 #' Default feature extraction functions for accelerometer and gyroscope data.
-#' 
+#'
 #' @param sampling_rate Sampling rate of the data in Hz.
 #' @return A list of closures for three feature extraction functions supplied
 #' with this package that can be passed to the \code{funs} parameter
 #' in \code{*_features} functions.
 #' @export
 #' @author Phil Snyder
-#' @examples 
+#' @examples
 #' funs = default_kinematic_features(100)
 default_kinematic_features <- function(sampling_rate) {
   funs <- list(
@@ -110,19 +110,19 @@ default_kinematic_features <- function(sampling_rate) {
 }
 
 #' Extract accelerometer features
-#' 
+#'
 #' A convenience wrapper function for extracting interpretable features
 #' from triaxial accelerometer data collected through smartphones.
-#' 
+#'
 #' @param sensor_data An \code{n} x 4 data frame with column names \code{t}, \code{x},
 #' \code{y}, \code{z} containing accelerometer measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
-#' \code{x}, \code{y} and \code{z} are linear acceleration measurements. 
-#' @param time_filter A length 2 numeric vector specifying the time range 
+#' \code{x}, \code{y} and \code{z} are linear acceleration measurements.
+#' @param time_filter A length 2 numeric vector specifying the time range
 #' of measurements to use during preprocessing and feature extraction after
-#' normalizing the first timestamp to 0. A \code{NULL} value means do not 
+#' normalizing the first timestamp to 0. A \code{NULL} value means do not
 #' filter any measurements.
-#' @param detrend A logical value indicating whether to detrend the signal. 
+#' @param detrend A logical value indicating whether to detrend the signal.
 #' By default the value is FALSE.
 #' @param frequency_filter A length 2 numeric vector specifying the frequency range
 #' of the signal (in hertz) to use during preprocessing and feature extraction.
@@ -130,8 +130,8 @@ default_kinematic_features <- function(sampling_rate) {
 #' @param IMF The number of IMFs used during an empirical mode decomposition (EMD)
 #' transformation. The default value of 1 means do not apply EMD to the signal.
 #' @param window_length A numerical value representing the length (in number of samples)
-#' of the sliding window used during the windowing transformation. Both 
-#' \code{window_length} and \code{window_overlap} must be set for the windowing 
+#' of the sliding window used during the windowing transformation. Both
+#' \code{window_length} and \code{window_overlap} must be set for the windowing
 #' transformation to be applied.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
 #' window overlap during a windowing transformation.
@@ -159,40 +159,21 @@ default_kinematic_features <- function(sampling_rate) {
 #' extraction, the returned result will be stored under \code{$error}.
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
-#' @examples 
+#' @examples
 #' accel_features <- accelerometer_features(accelerometer_data)
-#' accel_features <- accelerometer_features(
-#'   accelerometer_data,
-#'   time_filter = c(2,8))
-#' 
-#' accel_features <- accelerometer_features(
-#'   accelerometer_data,
-#'   detrend = TRUE)
-#' 
-#' accel_features <- accelerometer_features(
-#'   accelerometer_data,
-#'   frequency_filter = c(0.5, 25))
-#' 
+#'
 #' accel_features <- accelerometer_features(accelerometer_data, IMF = 3)
-#' 
+#'
 #' accel_features <- accelerometer_features(
 #'   accelerometer_data,
-#'   window_length = 512,
-#'   window_overlap = 0.9)
-#' 
-#' accel_features <- accelerometer_features(
-#'   accelerometer_data,
-#'   derived_kinematics = TRUE)
-#' 
-#' accel_features <- accelerometer_features(
-#'   accelerometer_data,
-#'   time_filter = c(1, 9),
+#'   time_filter = c(2, 5),
 #'   detrend = TRUE,
-#'   frequency_filter = c(1, 25),
+#'   frequency_filter = c(4, 16),
 #'   window_length = 256,
 #'   window_overlap = 0.5,
+#'   derived_kinematics = TRUE,
 #'   funs = time_domain_summary)
-#' 
+#'
 #' @importFrom magrittr "%>%"
 accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
                                    frequency_filter = NULL, IMF = 1,
@@ -221,19 +202,19 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
 }
 
 #' Extract gyroscope features
-#' 
+#'
 #' A convenience wrapper function for extracting interpretable features
 #' from triaxial gyroscope data collected through smartphones.
-#' 
+#'
 #' @param sensor_data An \code{n} x 4 data frame with column names \code{t}, \code{x},
 #' \code{y}, \code{z} containing gyroscope measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
-#' \code{x}, \code{y} and \code{z} are linear velocity measurements. 
-#' @param time_filter A length 2 numeric vector specifying the time range 
+#' \code{x}, \code{y} and \code{z} are linear velocity measurements.
+#' @param time_filter A length 2 numeric vector specifying the time range
 #' of measurements to use during preprocessing and feature extraction after
-#' normalizing the first timestamp to 0. A \code{NULL} value means do not 
+#' normalizing the first timestamp to 0. A \code{NULL} value means do not
 #' filter any measurements.
-#' @param detrend A logical value indicating whether to detrend the signal. 
+#' @param detrend A logical value indicating whether to detrend the signal.
 #' By default the value is FALSE.
 #' @param frequency_filter A length 2 numeric vector specifying the frequency range
 #' of the signal (in hertz) to use during preprocessing and feature extraction.
@@ -241,8 +222,8 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
 #' @param IMF The number of IMFs used during an empirical mode decomposition (EMD)
 #' transformation. The default value of 1 means do not apply EMD to the signal.
 #' @param window_length A numerical value representing the length (in number of samples)
-#' of the sliding window used during the windowing transformation. Both 
-#' \code{window_length} and \code{window_overlap} must be set for the windowing 
+#' of the sliding window used during the windowing transformation. Both
+#' \code{window_length} and \code{window_overlap} must be set for the windowing
 #' transformation to be applied.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
 #' window overlap during a windowing transformation.
@@ -270,40 +251,21 @@ accelerometer_features <- function(sensor_data, time_filter = NULL, detrend = F,
 #' extraction, the returned result will be stored under \code{$error}.
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
-#' @examples 
+#' @examples
 #' gyro_features <- gyroscope_features(gyroscope_data)
-#' gyro_features <- gyroscope_features(
-#'   gyroscope_data,
-#'   time_filter = c(2,8))
-#' 
-#' gyro_features <- gyroscope_features(
-#'   gyroscope_data,
-#'   detrend = TRUE)
-#' 
-#' gyro_features <- gyroscope_features(
-#'   gyroscope_data,
-#'   frequency_filter = c(0.5, 25))
-#' 
+#'
 #' gyro_features <- gyroscope_features(gyroscope_data, IMF = 3)
-#' 
+#'
 #' gyro_features <- gyroscope_features(
 #'   gyroscope_data,
-#'   window_length = 512,
-#'   window_overlap = 0.9)
-#' 
-#' gyro_features <- gyroscope_features(
-#'   gyroscope_data,
-#'   derived_kinematics = TRUE)
-#' 
-#' gyro_features <- gyroscope_features(
-#'   gyroscope_data,
-#'   time_filter = c(1, 9),
+#'   time_filter = c(2, 5),
 #'   detrend = TRUE,
-#'   frequency_filter = c(1, 25),
+#'   frequency_filter = c(4, 16),
 #'   window_length = 256,
 #'   window_overlap = 0.5,
+#'   derived_kinematics = TRUE,
 #'   funs = time_domain_summary)
-#' 
+#'
 #' @importFrom magrittr "%>%"
 gyroscope_features <- function(sensor_data, time_filter = NULL, detrend = F,
                                frequency_filter = NULL, IMF = 1,
@@ -332,18 +294,18 @@ gyroscope_features <- function(sensor_data, time_filter = NULL, detrend = F,
 }
 
 #' Ensure the kinematic sensor arguments are well formed
-#' 
+#'
 #' Verify that the arguments passed to \code{accelerometer_features} and
 #' \code{gyroscope_features} are valid.
-#' 
+#'
 #' @param sensor_data An \code{n} x 4 data frame with column names \code{t}, \code{x},
-#' \code{y}, \code{z} containing kinematic sensor (accelerometer or gyroscope) 
+#' \code{y}, \code{z} containing kinematic sensor (accelerometer or gyroscope)
 #' measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
-#' \code{x}, \code{y} and \code{z} are linear axial measurements. 
-#' @param time_filter A length 2 numeric vector specifying the time range 
+#' \code{x}, \code{y} and \code{z} are linear axial measurements.
+#' @param time_filter A length 2 numeric vector specifying the time range
 #' of measurements to use during preprocessing and feature extraction after
-#' normalizing the first timestamp to 0. A \code{NULL} value means do not 
+#' normalizing the first timestamp to 0. A \code{NULL} value means do not
 #' filter any measurements.
 #' @param detrend A logical value indicating whether to detrend the signal.
 #' @param sampling_rate Sampling rate of \code{sensor_data}.
@@ -353,8 +315,8 @@ gyroscope_features <- function(sensor_data, time_filter = NULL, detrend = F,
 #' @param IMF The number of IMFs used during an empirical mode decomposition
 #' transformation. The default value of 1 means do not apply EMD to the signal.
 #' @param window_length A numerical value representing the length (in number of samples)
-#' of the sliding window used during the windowing transformation. Both 
-#' \code{window_length} and \code{window_overlap} must be set for the windowing 
+#' of the sliding window used during the windowing transformation. Both
+#' \code{window_length} and \code{window_overlap} must be set for the windowing
 #' transformation to be applied.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
 #' window overlap during a windowing transformation.
@@ -455,25 +417,25 @@ kinematic_sensor_argument_validator <- function(
 
 
 #' Return arguments to be used in general feature functions
-#' 
-#' Using the arguments passed to convenience functions like 
+#'
+#' Using the arguments passed to convenience functions like
 #' \code{accelerometer_features} and \code{gyroscope_features},
 #' build an argument set that can be used with more general functions
 #' like \code{kinematic_sensor_data} and \code{sensor_data}. This function
 #' is not normally called directly. See \code{accelerometer_features} and
 #' \code{gyroscope_features}.
-#' 
+#'
 #' @param sensor_data An \code{n} x 4 data frame with column names \code{t}, \code{x},
-#' \code{y}, \code{z} containing kinematic sensor (accelerometer or gyroscope) 
+#' \code{y}, \code{z} containing kinematic sensor (accelerometer or gyroscope)
 #' measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
-#' \code{x}, \code{y} and \code{z} are axial measurements. 
+#' \code{x}, \code{y} and \code{z} are axial measurements.
 #' @param metric Name of the metric measured by this sensor. For accelerometer
 #' data, the metric is acceleration. Whereas for gyroscope data the metric is
 #' velocity.
-#' @param time_filter A length 2 numeric vector specifying the time range 
+#' @param time_filter A length 2 numeric vector specifying the time range
 #' of measurements to use during preprocessing and feature extraction after
-#' normalizing the first timestamp to 0. A \code{NULL} value means do not 
+#' normalizing the first timestamp to 0. A \code{NULL} value means do not
 #' filter any measurements.
 #' @param detrend A logical value indicating whether to detrend the signal.
 #' @param frequency_filter A length 2 numeric vector specifying the frequency range
@@ -482,8 +444,8 @@ kinematic_sensor_argument_validator <- function(
 #' @param IMF The number of IMFs used during an empirical mode decomposition
 #' transformation. The default value of 1 means do not apply EMD to the signal.
 #' @param window_length A numerical value representing the length (in number of samples)
-#' of the sliding window used during the windowing transformation. Both 
-#' \code{window_length} and \code{window_overlap} must be set for the windowing 
+#' of the sliding window used during the windowing transformation. Both
+#' \code{window_length} and \code{window_overlap} must be set for the windowing
 #' transformation to be applied.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
 #' window overlap during a windowing transformation.
@@ -547,7 +509,7 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
       }
     })
   }
- 
+
   transform <- list(tidy_sensor_data)
   if (!is.null(time_filter)) {
     transform[[length(transform) + 1]] <-
@@ -568,7 +530,7 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
                      sampling_rate = sampling_rate,
                      frequency_range = frequency_filter)
   }
-  
+
   if (IMF == 1 && !is.null(window_length) && !is.null(window_overlap)) {
     transform[[length(transform) + 1]] <-
       transformation_window(
@@ -585,16 +547,19 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
   } else {
     transform[[length(transform) + 1]] <-
       function(sensor_data) {
+        if (has_error(sensor_data)) return(sensor_data)
         sensor_data %>% dplyr::select(-t)
       }
   }
   transform[[length(transform) + 1]] <- function(transformed_sensor_data) {
+    if (has_error(transformed_sensor_data)) return(transformed_sensor_data)
     transformed_sensor_data <- transformed_sensor_data %>%
       dplyr::rename(!!metric := value)
     return(transformed_sensor_data)
   }
   if (derived_kinematics && metric == "acceleration") {
     mutate_kinematics <- function(transformed_sensor_data) {
+      if (has_error(transformed_sensor_data)) return(transformed_sensor_data)
       transformed_sensor_data <- transformed_sensor_data %>%
         mutate_derivative(sampling_rate = sampling_rate,
                           col = "acceleration", derived_col = "jerk") %>%
@@ -609,6 +574,7 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
     extract_on <- c("acceleration", "jerk", "velocity", "displacement", "acf")
   } else if (derived_kinematics && metric == "velocity") {
     mutate_kinematics <- function(transformed_sensor_data) {
+      if (has_error(transformed_sensor_data)) return(transformed_sensor_data)
       transformed_sensor_data <- transformed_sensor_data %>%
         mutate_derivative(sampling_rate = sampling_rate,
                           col = "velocity", derived_col = "acceleration") %>%
@@ -630,20 +596,20 @@ prepare_kinematic_sensor_args <- function(sensor_data, metric,
   } else {
     extract_on <- metric
   }
-  
+
   args <- list(transform = transform,
                extract = funs,
                extract_on = extract_on)
-  
+
   return(args)
 }
 
 #' Generate a function for applying a window transformation to sensor data
-#' 
+#'
 #' @param window_length Length of the sliding window.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
 #' window overlap.
-#' @return A function that accepts as input a dataframe with columns 
+#' @return A function that accepts as input a dataframe with columns
 #' t, axis, value and outputs a windowed transformation of that dataframe
 transformation_window <- function(window_length, window_overlap) {
   purrr::partial(
@@ -659,15 +625,15 @@ transformation_window <- function(window_length, window_overlap) {
 }
 
 #' Generate a function for windowing sensor data after applying EMD
-#' 
+#'
 #' Apply empirical mode decomposition to sensor data, then window the result.
-#' 
+#'
 #' @param window_length Length of the sliding window.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
 #' window overlap.
 #' @param max_imf The maximum number of IMF's during EMD
-#' @return A function that accepts as input a dataframe with columns 
-#' t, axis, value and outputs a windowed transformation of that 
+#' @return A function that accepts as input a dataframe with columns
+#' t, axis, value and outputs a windowed transformation of that
 #' dataframe's EMD.
 transformation_imf_window <- function(window_length, window_overlap, max_imf) {
   purrr::partial(

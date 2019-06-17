@@ -26,12 +26,12 @@ total number of measurements, \code{t} is the timestamp of each measurement, and
 total number of measurements, \code{t} is the timestamp of each measurement, and
 \code{x}, \code{y} and \code{z} are linear gravity measurements.}
 
-\item{time_filter}{A length 2 numeric vector specifying the time range 
+\item{time_filter}{A length 2 numeric vector specifying the time range
 of measurements to use during preprocessing and feature extraction after
-normalizing the first timestamp to 0. A \code{NULL} value means do not 
+normalizing the first timestamp to 0. A \code{NULL} value means do not
 filter any measurements.}
 
-\item{detrend}{A logical value indicating whether to detrend the signal. 
+\item{detrend}{A logical value indicating whether to detrend the signal.
 By default the value is FALSE.}
 
 \item{frequency_filter}{A length 2 numeric vector specifying the frequency range
@@ -42,8 +42,8 @@ A \code{NULL} value means do not filter frequencies.}
 transformation. The default value of 1 means do not apply EMD to the signal.}
 
 \item{window_length}{A numerical value representing the length (in number of samples)
-of the sliding window used during the windowing transformation. Both 
-\code{window_length} and \code{window_overlap} must be set for the windowing 
+of the sliding window used during the windowing transformation. Both
+\code{window_length} and \code{window_overlap} must be set for the windowing
 transformation to be applied.}
 
 \item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
@@ -74,9 +74,9 @@ which compute individual features using multiple input variables.}
 \value{
 A list. The outputs from \code{funs} will
 be stored under \code{$extracted_features} and the outputs from \code{models}
-will be stored under \code{$model_features}. If there is an error 
+will be stored under \code{$model_features}. If there is an error
 during the transform process, an error dataframe will be stored under
-\code{$error}. If gravity_data is passed and window_length and 
+\code{$error}. If gravity_data is passed and window_length and
 window_overlap are set, phone rotation information will be stored
 under \code{$outlier_windows}.
 }
@@ -96,51 +96,26 @@ the arm parallel to the ground and perpindicular to the front of the body --
 for approximately 10 seconds.
 }
 \examples{
-accelerometer_data = cbind(
-  t = rest_tremor_data$timestamp,
-  rest_tremor_data$userAcceleration)
-gyroscope_data = cbind(
-  t = rest_tremor_data$timestamp,
-  rest_tremor_data$rotationRate)
-
 tremor_features <- get_tremor_features(accelerometer_data, gyroscope_data)
 
 tremor_features <- get_tremor_features(
   accelerometer_data,
   gyroscope_data,
-  time_filter = c(2,8))
-
-tremor_features <- get_tremor_features(
-  accelerometer_data,
-  gyroscope_data,
-  detrend = TRUE)
-
-tremor_features <- get_tremor_features(
-  accelerometer_data,
-  gyroscope_data,
-  frequency_filter = c(0.5, 25))
-
-tremor_features <- get_tremor_features(
-  accelerometer_data,
-  gyroscope_data,
-  window_length = 512,
-  window_overlap = 0.9)
-
-tremor_features <- get_tremor_features(
-  accelerometer_data,
-  gyroscope_data,
+  time_filter = c(2,4),
+  detrend = TRUE,
+  frequency_filter = c(0.5, 25),
+  window_length = 256,
+  window_overlap = 0.2,
   derived_kinematics = TRUE)
 
 tremor_features <- get_tremor_features(
   accelerometer_data,
-  gyroscope_data, 
-  detrend = TRUE,
-  frequency_filter = c(1, 25),
+  gyroscope_data,
   funs = list(time_domain_summary))
-  
+
 }
 \seealso{
-\code{\link{tremor_data}}
+\code{\link{rest_tremor_data}}
 }
 \author{
 Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder

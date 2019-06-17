@@ -43,6 +43,9 @@ get_heartrate <- function(heartrate_data, window_length = 10, window_overlap = 0
   # Convert window length from seconds to samples
   window_length <- round(sampling_rate * window_length)
   mean_filter_order <- 65
+  if(sampling_rate <= 32){
+    mean_filter_order <- 33
+    }
   
   ##  Apply pre-processing filter to all heartrate data
   
@@ -222,10 +225,11 @@ get_hr_from_time_series <- function(x, sampling_rate, method = 'acf', min_hr = 4
     confidence <- NA
   }
   
+  
   # If hr or condidence is NaN, then return hr = 0 and confidence = 0
-  if (is.na(confidence) || is.na(hr)) {
-    confidence <- NA
-    hr <- NA
+  if ((length(hr) == 0) || is.null(hr)) {
+  confidence <- NA
+  hr <- NA
   }
   
   return(c(hr, confidence))

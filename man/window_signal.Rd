@@ -2,9 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{window_signal}
 \alias{window_signal}
-\title{Window a signal
- 
-Given a numeric vector, this function will return its windowed signal.}
+\title{Window a signal}
 \usage{
 window_signal(values, window_length = 256, window_overlap = 0.5,
   window_name = "hamming")
@@ -24,7 +22,5 @@ hanning, or rectangle. See \code{\link[seewave]{ftwindow}}.}
 A matrix of window_length x nwindows
 }
 \description{
-Window a signal
- 
 Given a numeric vector, this function will return its windowed signal.
 }

@@ -10,7 +10,7 @@ fatigue(x)
 \item{x}{A numeric vector containing inter tap intevals}
 }
 \value{
-A list containing fatigue10, fatigue25, fatigue50 where 
+A list containing fatigue10, fatigue25, fatigue50 where
 fatigueX is the difference in the mean values of the
 first X percent of input x and last X percent of input x
 }

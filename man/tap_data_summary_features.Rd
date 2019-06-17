@@ -7,16 +7,16 @@
 tap_data_summary_features(tap_data)
 }
 \arguments{
-\item{tap_data}{A data frame with columns t, x, y, buttonid containing 
-tapping measurements. buttonid can be from 
-c('TappedButtonLeft','TappedButtonRight','TappedButtonNone') 
-indicating a tap that has been classified as to the 
+\item{tap_data}{A data frame with columns t, x, y, buttonid containing
+tapping measurements. buttonid can be from
+c('TappedButtonLeft','TappedButtonRight','TappedButtonNone')
+indicating a tap that has been classified as to the
 left, right or neither of those places on the screen}
 }
 \value{
 A features data frame of dimension 1 x n_features
 }
 \description{
-Calculates features characterising tapping data 
+Calculates features characterising tapping data
 (interaction terms etc., from the tap data frame)
 }

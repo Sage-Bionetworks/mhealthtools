@@ -25,6 +25,6 @@ have to have to be counted.}
 Emprical wavelet transformed spectrum of dimension n.freq x (npeaks + 1).
 }
 \description{
-Given the spectrum of a time series vector this function will return its 
+Given the spectrum of a time series vector this function will return its
 Empirical Wavelet Transformed spectrum.
 }

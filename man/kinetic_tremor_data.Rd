@@ -25,7 +25,7 @@ in their hand (either right or left) with both the mobile device and the
 participants elbow at nose level. The participant then moves the mobile device
 away from the nose, with both mobile device and elbow parallel to the ground
 and the elbow joint acting as an axis of rotation. When the arm is fully extended,
-the participant moves the mobile device back to the nose. This happens in a 
+the participant moves the mobile device back to the nose. This happens in a
 continuous motion and the motion is repeated for approximately 10 seconds.
 }
 \keyword{datasets}

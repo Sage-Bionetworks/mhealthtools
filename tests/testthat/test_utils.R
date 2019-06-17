@@ -18,7 +18,7 @@ test_that(paste("Function to extract left, right tapping events",
         tap_data = tap_data,
         depress_threshold = 10),
       "list")
-    tempDat <- tap_data[1:2,] 
+    tempDat <- tap_data[1:2,]
     # Only 2 rows, lesser than the required 5, Should expect an error
     expect_equal(
       get_left_right_events_and_tap_intervals(tap_data = tempDat),
@@ -35,14 +35,14 @@ test_that("Extract default inter tap time features", {
 
 test_that("Extract default tap drift features", {
   # tap drift is a numeric vector, like tapInter. So we are going to
-  # use tapInter to test the function rather than creating a seperate 
+  # use tapInter to test the function rather than creating a seperate
   # tapDrift numeric vector
   expect_is(
     tapdrift_summary_features(tap_drift = tapInter), "data.frame")
 })
 
 test_that(
-  "Extract deafult tap data features (features based on interaction 
+  "Extract deafult tap data features (features based on interaction
   between x and y, etc.)", {
     expect_is(
       tap_data_summary_features(tap_data = tap_data), "data.frame")
@@ -50,7 +50,7 @@ test_that(
 
 test_that("Tidying sensor data", {
   expect_is(
-    tidy_sensor_data(sensor_data = accelerometer_data), "data.frame") 
+    tidy_sensor_data(sensor_data = accelerometer_data), "data.frame")
   tempDat <- data.table::copy(accelerometer_data)
   tempDat$t[1] <- NA # time column now has a NA in it
   expect_error(
@@ -60,7 +60,7 @@ test_that("Tidying sensor data", {
   # tidy_sensor_data should return the input, i.e, an identity function
   # because there is a non-zero error value in the error column
   expect_equal(tidy_sensor_data(sensor_data = tempDat), tempDat)
-  tempDat <- tempDat %>% dplyr::select(-t, -error) 
+  tempDat <- tempDat %>% dplyr::select(-t, -error)
   # Removing the t and error columns, tidy_sensor_data throw an error
   expect_equal(is_error_dataframe(
     suppressWarnings(tidy_sensor_data(sensor_data = tempDat))), T)
@@ -73,7 +73,7 @@ gyroscope_dataTidy <- tidy_sensor_data(sensor_data = gyroscope_data)
 
 test_that("Detrend the data given a time series", {
   expect_is(
-    detrend(time = accelerometer_data$t, values =  accelerometer_data$y), "numeric") 
+    detrend(time = accelerometer_data$t, values =  accelerometer_data$y), "numeric")
   # Check to see how NA"s are handled (they are removed, i.e.,
   # below we will see points 2,3,4,6 as 1 has (time NA),5 has (values NA))
   suppressWarnings(detrend(time = c(NA,2,3,4,5,6), values = c(10,20,30,40,NA,60)))
@@ -81,7 +81,7 @@ test_that("Detrend the data given a time series", {
 
 test_that("Detrend the given sensor data", {
   expect_is(
-    mutate_detrend(sensor_data = accelerometer_dataTidy), "data.frame") 
+    mutate_detrend(sensor_data = accelerometer_dataTidy), "data.frame")
   # Given wrong format of data, the function should throw an error
   expect_equal(is_error_dataframe(
     mutate_detrend(sensor_data = accelerometer_data)), T)
@@ -105,7 +105,7 @@ test_that("Bandpass a timeseries data", {
     bandpass(values = rep(NA, 990),
              window_length =  120,
              sampling_rate = 100,
-             frequency_range =  c(1, 10))) 
+             frequency_range =  c(1, 10)))
 })
 
 test_that("Bandpass the tidy sensor data", {
@@ -113,26 +113,26 @@ test_that("Bandpass the tidy sensor data", {
     mutate_bandpass(sensor_data = accelerometer_dataTidy,
                     window_length =  120,
                     sampling_rate =  100,
-                    frequency_range =  c(1, 25)), "data.frame") 
+                    frequency_range =  c(1, 25)), "data.frame")
   expect_equal(is_error_dataframe(
     mutate_bandpass(
       sensor_data = accelerometer_data,
       window_length = 120,
       sampling_rate = 100,
-      frequency_range = c(1, 25))), T) 
+      frequency_range = c(1, 25))), T)
   # Error if input data is of wrong format
   expect_equal(is_error_dataframe(
     mutate_bandpass(
       sensor_data = accelerometer_dataTidy,
       window_length = 120,
       sampling_rate = 100,
-      frequency_range = c(1, 51))), T) 
+      frequency_range = c(1, 51))), T)
   # Error if freq ranges of bandpass filter violate Nyquist criterion
 })
 
 test_that("Filtering the time series data by selecting a time range", {
     expect_is(filter_time(sensor_data = accelerometer_dataTidy, t1 = 1, t2 = 2),
-              "data.frame") 
+              "data.frame")
     expect_error(
       filter_time(sensor_data = accelerometer_data[, "x"], t1 = 1, t2 = 2))
     # throw an error if there is no t column
@@ -142,6 +142,7 @@ test_that("Filtering the time series data by selecting a time range", {
               "data.frame")
     # NA behavior, they are removed i.r t = c(1,2,NA,4,5,NA), t1 = 2, t2 = 4,
     # then the output will have t = c(2,4), NA"s (3 was missing) are removed
+    expect_equal(has_error(filter_time(accelerometer_dataTidy, 11, 15)), TRUE)
 })
 
 test_that("Windowing a time series", {
@@ -151,7 +152,7 @@ test_that("Windowing a time series", {
   # NA"s we see an output with all NA"s )
   gravityVec <- c(rep(NA, 255), 1)
   expect_is(window_signal(values = gravityVec), "matrix")
-  
+
   ############
   # UNCOMMENT FOLLOWING TEST AFTER EDITING window_signal
   ############
@@ -173,14 +174,14 @@ test_that("Windowing the sensor data by axis", {
   expect_is(window(sensor_data = accelerometer_dataTidy,
                    window_length =  256,
                    window_overlap =  0.5), "data.frame")
-  
+
   ############
   # UNCOMMENT FOLLOWING TEST AFTER EDITING window
   ############
-  # 
+  #
   # tempDat <- accelerometer_dataTidy %>%
   #   dplyr::filter(t < 2)
-  # # A max possible window length of 2s ~ 2 x 100(sampling rate) = 200 samples 
+  # # A max possible window length of 2s ~ 2 x 100(sampling rate) = 200 samples
   # expect_equal(is_error_dataframe(
   #   window(sensor_data = tempDat,
   #                         window_length =  256,
@@ -190,7 +191,7 @@ test_that("Windowing the sensor data by axis", {
   # Maybe throw an error frame with "window_length greater than max t" etc.,
   # Look at the test for window_signal that tackles the problem at a unit level,
   # because the above test for window would be a regression test.
-  
+
   expect_equal(is_error_dataframe(
     window(
       sensor_data = accelerometer_data,
@@ -218,7 +219,7 @@ test_that("Compute start and stop timestamp for each window", {
 
 test_that(
   "Calculate Derivative given acceleration and sampling rate", {
-    expect_is(derivative(v = accelerometer_data$x), "numeric") 
+    expect_is(derivative(v = accelerometer_data$x), "numeric")
 })
 
 test_that("Calculate and add a derivative column for the sensor data", {
@@ -226,40 +227,40 @@ test_that("Calculate and add a derivative column for the sensor data", {
       mutate_derivative(sensor_data = accelerometer_data,
                         sampling_rate = 100,
                         col = "x",
-                        derived_col = "dx"), "data.frame") 
-    
+                        derived_col = "dx"), "data.frame")
+
     expect_equal(is_error_dataframe(
       mutate_derivative(
         sensor_data = accelerometer_dataTidy,
         sampling_rate = 100,
         col = "x",
-        derived_col = "dx")), T) 
+        derived_col = "dx")), T)
     expect_equal(is_error_dataframe(
       mutate_derivative(
         sensor_data = accelerometer_dataTidy,
         col = "x",
-        derived_col = "dx")), T) 
+        derived_col = "dx")), T)
 })
 
 test_that("Calculate Integral given acceleration and sampling rate", {
-    expect_is(integral(v = accelerometer_data$x), "numeric") 
+    expect_is(integral(v = accelerometer_data$x), "numeric")
 })
 
 test_that("Calculate and add a integral column for the sensor data", {
     expect_is(mutate_integral(sensor_data = accelerometer_data,
                               sampling_rate = 100,
                               col = "x",
-                              derived_col = "dx"), "data.frame") 
+                              derived_col = "dx"), "data.frame")
 })
 
 test_that("Construct a dataframe with ACF values given tidy sensor data", {
-    expect_is(mutate_acf(sensor_data = accelerometer_dataTidy, col = "value"), "data.frame") 
+    expect_is(mutate_acf(sensor_data = accelerometer_dataTidy, col = "value"), "data.frame")
     expect_equal(is_error_dataframe(
-      mutate_acf(sensor_data = accelerometer_data, col = "value")), T) 
+      mutate_acf(sensor_data = accelerometer_data, col = "value")), T)
 })
 
 test_that("Identify min, max gravity values for each window of tidy sensor data", {
-    gravityVec <- gravity_data$x 
+    gravityVec <- gravity_data$x
     expect_is(tag_outlier_windows_(gravity_vector = gravityVec,
                                    window_length = 256,
                                    window_overlap =  0.5), "data.frame")
@@ -296,14 +297,14 @@ test_that("Time domain summary given acceleration", {
 })
 
 test_that("Frequency domain summary given acceleration", {
-  accelVec <- accelerometer_data$x[1:256] 
+  accelVec <- accelerometer_data$x[1:256]
   expect_is(frequency_domain_summary(values = accelVec,
                                      sampling_rate = 100,
                                      npeaks = 3), "data.frame")
 })
 
 test_that("Frequency domain energy given acceleration", {
-  accelVec <- accelerometer_data$x[1:256] 
+  accelVec <- accelerometer_data$x[1:256]
   expect_is(frequency_domain_energy(values = accelVec,
                                     sampling_rate = 100), "data.frame")
 })
@@ -312,7 +313,7 @@ test_that("Get Spectrum given a time series and sampling rate", {
   accelVec <- accelerometer_data$x[1:512]
   expect_is(get_spectrum(values = accelVec,
                          sampling_rate = 100,
-                         nfreq = 500), "data.frame") 
+                         nfreq = 500), "data.frame")
   expect_equal(
     dim(get_spectrum(
       accelVec, sampling_rate = 100, nfreq = 256))[1], 256)
@@ -320,11 +321,11 @@ test_that("Get Spectrum given a time series and sampling rate", {
 })
 
 test_that("Get EWT spectrum", {
-  accelVec <- accelerometer_data$x[1:512] # A 512 length acceleration vector  
+  accelVec <- accelerometer_data$x[1:512] # A 512 length acceleration vector
   accelVecSpec <- get_spectrum(values = accelVec,
                                sampling_rate = 100,
                                nfreq = 500) # 500x2 spectrum
-  expect_is(get_ewt_spectrum(spectrum = accelVecSpec), "matrix") 
+  expect_is(get_ewt_spectrum(spectrum = accelVecSpec), "matrix")
 })
 
 test_that("fatigue", {

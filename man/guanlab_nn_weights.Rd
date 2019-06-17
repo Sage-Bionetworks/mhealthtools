@@ -4,7 +4,7 @@
 \name{guanlab_nn_weights}
 \alias{guanlab_nn_weights}
 \title{Weights for the included GuanLab model}
-\format{A list of length 10. Each list item contains a 
+\format{A list of length 10. Each list item contains a
 matrix/array object of varying dimensionality.}
 \source{
 \url{https://www.synapse.org/#!Synapse:syn10146135/wiki/448409}
