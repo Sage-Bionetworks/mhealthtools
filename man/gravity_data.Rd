@@ -5,7 +5,7 @@
 \alias{gravity_data}
 \title{Gravity sensor measurements}
 \format{An 990 x 4 data frame with column names \code{t}, \code{x},
-\code{y}, \code{z} containing acceleration measurements due to gravity. 
+\code{y}, \code{z} containing acceleration measurements due to gravity.
 \code{t} is the timestamp of each measurement, and \code{x}, \code{y}
 and \code{z} are linear gravity measurements along the respective axis.}
 \usage{

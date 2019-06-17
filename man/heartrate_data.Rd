@@ -16,7 +16,7 @@ heartrate_data
 }
 \description{
 A dataframe containing sample JSON output format of the heartrate data,
-containing red, green, blue levels from the camera sensor, indexed with the
+containing red, green, blue levels from the camera sensor, indexed along the
 timestamp t.
 }
 \details{

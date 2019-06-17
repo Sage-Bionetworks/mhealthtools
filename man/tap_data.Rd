@@ -10,7 +10,7 @@
   \item{x}{the x location of the tap on the phone screen}
   \item{y}{the y location of the tap on the phone screen}
   \item{buttonid}{a string from 'TappedButonLeft', 'TappedButtonRight' or
-  'TappedButtonNone' indicating that at that time the left, right or No 
+  'TappedButtonNone' indicating that at that time the left, right or No
   button was tapped respectively}
 }}
 \usage{
@@ -22,7 +22,7 @@ containing t(time), x and y (the location of the tap on the screen),
 and buttonid (which of left/right/No button was tapped).
 }
 \details{
-Participants were shown a screen with two buttons on it, 
+Participants were shown a screen with two buttons on it,
 indicating left and right. They were asked to tap on the buttons
 alternatingly as fast as they can for 30s.
 }
