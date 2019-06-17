@@ -48,7 +48,7 @@ a <- tidyr::gather(a, 'axis' , 'value', -t)
 ggplot(a, aes(x = t, y= value)) + geom_line() + 
   facet_wrap(~axis, dir = 'v', strip.position = 'right') + ylim(c(-0.025, 0.025))
 ```
-We are looking at 10s of data sampled at a high enough sampling rate (for accelerometer data) of 100Hz. The data looks noisy, and looks like it could make good use of some pre-processing like frequency filtering, maybe subsetting the time (time filtering) -- all of which `mhealthtools` conveniently offers.
+We are looking at 10s of data sampled at a sampling rate (for accelerometer data) of 100Hz. The data looks noisy, and looks like it could make good use of some pre-processing like frequency filtering, maybe subsetting the time (time filtering) -- all of which `mhealthtools` conveniently offers.
 
 #### Extracting features (using pre-existing pipeline)
 
@@ -80,7 +80,7 @@ accel_features <- accelerometer_features(
 ```{r}
 dplyr::glimpse(accel_features$extracted_features)
 ```
-Notice how we now have three extra columns in the feature extraction output namely, `window`, `window_start_time` and `window_stop_time` - which indicate the number of the window in the signal (the first window is window 1, the next consecutive window is window 2 and so on), and the start and stop time respectively of that window.
+Notice how we now have three extra columns in the feature extraction output namely, `window`, `window_start_time` and `window_stop_time` - which indicate the number of each window in the signal (the first window is window 1, the next consecutive window is window 2 and so on), and the start and stop time respectively of that window.
 
 There are many other possible use cases to calculate the accelerometer features. The `time_filter` parameter decides the time window to be operated on in the accelerometer signal. The `window_overlap` parameter decides the amount of overlap between consecutive windows. The `frequency_filter` parameter specifies the frequency range to keep for the analysis.
 
