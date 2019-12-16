@@ -1,27 +1,35 @@
 ---
-  title: 'Gala: A Python package for galactic dynamics'
-tags:
-  - Python
-- astronomy
-- dynamics
-- galactic dynamics
-- milky way
-authors:
-  - name: Adrian M. Price-Whelan
-orcid: 0000-0003-0872-7098
-affiliation: "1, 2" # (Multiple affiliations must be quoted)
-- name: Author Without ORCID
-affiliation: 2
-affiliations:
-  - name: Lyman Spitzer, Jr. Fellow, Princeton University
-index: 1
-- name: Institution 2
-index: 2
-date: 13 August 2017
-bibliography: paper.bib
+  title: 'mhealthtools: A modular R package for extracting features from mobile sensor data'
 
-# Optional fields if submitting to a AAS journal too, see this blog post:
-# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
-aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
-aas-journal: Astrophysical Journal <- The name of the AAS journal.
+tags:
+- R
+- mhealth
+- mobile health
+- digital health
+- ehealth
+- accelerometer
+- feature extraction
+- gait
+- heart rate
+- tapping
+- tremor
+- parkinsons
+authors:
+  - name: Phil Snyder
+    orcid: 0000-0002-6967-2185
+    affiliation: 1
+  - name: Meghasyam Tummalacherla
+    orcid: 0000-0002-0741-8683
+    affiliation: 1
+  - name: Thanneer Perumal
+    orcid: 0000-0003-1168-8982
+    affiliation: TODO
+  - name: Larsson Omberg
+    orcid: 0000-0002-4719-9120
+    affiliation: 1
+affiliations:
+  - name: Sage Bionetworks
+    index: 1
+date: 15 December 2019
+bibliography: paper.bib
 ---
