@@ -1,19 +1,18 @@
 ---
-  title: 'mhealthtools: A modular R package for extracting features from mobile sensor data'
-
+title: 'mhealthtools: A modular R package for extracting features from mobile sensor data'
 tags:
-- R
-- mhealth
-- mobile health
-- digital health
-- ehealth
-- accelerometer
-- feature extraction
-- gait
-- heart rate
-- tapping
-- tremor
-- parkinsons
+  - R
+  - mhealth
+  - mobile health
+  - digital health
+  - ehealth
+  - accelerometer
+  - feature extraction
+  - gait
+  - heart rate
+  - tapping
+  - tremor
+  - parkinsons
 authors:
   - name: Phil Snyder
     orcid: 0000-0002-6967-2185
@@ -33,3 +32,6 @@ affiliations:
 date: 15 December 2019
 bibliography: paper.bib
 ---
+
+
+# References
