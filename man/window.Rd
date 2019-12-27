@@ -4,8 +4,7 @@
 \alias{window}
 \title{Window the value vector of sensor data for each axis}
 \usage{
-window(sensor_data, window_length, window_overlap,
-  window_name = "hamming")
+window(sensor_data, window_length, window_overlap, window_name = "hamming")
 }
 \arguments{
 \item{sensor_data}{A data frame with columns \code{t}, \code{axis}, \code{value}.}

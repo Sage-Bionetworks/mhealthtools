@@ -4,9 +4,19 @@
 \alias{kinematic_sensor_argument_validator}
 \title{Ensure the kinematic sensor arguments are well formed}
 \usage{
-kinematic_sensor_argument_validator(sensor_data, time_filter, detrend,
-  sampling_rate, frequency_filter, IMF, window_length, window_overlap,
-  derived_kinematics, funs, models)
+kinematic_sensor_argument_validator(
+  sensor_data,
+  time_filter,
+  detrend,
+  sampling_rate,
+  frequency_filter,
+  IMF,
+  window_length,
+  window_overlap,
+  derived_kinematics,
+  funs,
+  models
+)
 }
 \arguments{
 \item{sensor_data}{An \code{n} x 4 data frame with column names \code{t}, \code{x},

@@ -4,8 +4,12 @@
 \alias{window_signal}
 \title{Window a signal}
 \usage{
-window_signal(values, window_length = 256, window_overlap = 0.5,
-  window_name = "hamming")
+window_signal(
+  values,
+  window_length = 256,
+  window_overlap = 0.5,
+  window_name = "hamming"
+)
 }
 \arguments{
 \item{values}{Timeseries vector of length n.}

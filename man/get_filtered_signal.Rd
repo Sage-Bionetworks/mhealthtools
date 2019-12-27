@@ -4,8 +4,7 @@
 \alias{get_filtered_signal}
 \title{Bandpass and sorted mean filter the given signal}
 \usage{
-get_filtered_signal(x, sampling_rate, mean_filter_order = 65,
-  method = "acf")
+get_filtered_signal(x, sampling_rate, mean_filter_order = 65, method = "acf")
 }
 \arguments{
 \item{x}{A time series numeric data}

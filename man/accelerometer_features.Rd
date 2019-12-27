@@ -4,10 +4,18 @@
 \alias{accelerometer_features}
 \title{Extract accelerometer features}
 \usage{
-accelerometer_features(sensor_data, time_filter = NULL, detrend = F,
-  frequency_filter = NULL, IMF = 1, window_length = NULL,
-  window_overlap = NULL, derived_kinematics = F, funs = NULL,
-  models = NULL)
+accelerometer_features(
+  sensor_data,
+  time_filter = NULL,
+  detrend = F,
+  frequency_filter = NULL,
+  IMF = 1,
+  window_length = NULL,
+  window_overlap = NULL,
+  derived_kinematics = F,
+  funs = NULL,
+  models = NULL
+)
 }
 \arguments{
 \item{sensor_data}{An \code{n} x 4 data frame with column names \code{t}, \code{x},
