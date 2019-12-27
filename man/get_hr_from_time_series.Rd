@@ -5,8 +5,13 @@
 \title{Given a processed time series find its period using autocorrelation
 and then convert it to heart rate (bpm)}
 \usage{
-get_hr_from_time_series(x, sampling_rate, method = "acf", min_hr = 40,
-  max_hr = 200)
+get_hr_from_time_series(
+  x,
+  sampling_rate,
+  method = "acf",
+  min_hr = 40,
+  max_hr = 200
+)
 }
 \arguments{
 \item{x}{A time series numeric data}

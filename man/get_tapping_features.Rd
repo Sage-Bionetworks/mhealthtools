@@ -4,8 +4,11 @@
 \alias{get_tapping_features}
 \title{Preprocess and extract interpretable features from screen tapping data.}
 \usage{
-get_tapping_features(tap_data, depress_threshold = 20,
-  remove_duplicates = TRUE)
+get_tapping_features(
+  tap_data,
+  depress_threshold = 20,
+  remove_duplicates = TRUE
+)
 }
 \arguments{
 \item{tap_data}{A n x 4 data frame with column names as t, x, y, buttonid containing 

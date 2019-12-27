@@ -9,7 +9,7 @@ frequency_domain_summary(values, sampling_rate = NA, npeaks = NA)
 \arguments{
 \item{values}{A numeric vector from a time series measurement.}
 
-\item{sampling_rate}{Sampling_rate of \code{values}. If NA it uses default 
+\item{sampling_rate}{Sampling_rate of \code{values}. If NA it uses default
 sampling rate of 100Hz.}
 
 \item{npeaks}{Number of peaks to be computed in emprical wavelet transformation (EWT).
@@ -17,8 +17,8 @@ If NA it uses the default value of 3.}
 }
 \value{
 A features data frame of dimension 1 x 19. See the
-\href{https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md}{feature definitions}
-document.
+feature definition vignette:
+\code{vignette("feature_definitions", package="mhealthtools")}
 }
 \description{
 A convenience feature extraction function that characterises the

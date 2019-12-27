@@ -4,11 +4,20 @@
 \alias{get_tremor_features}
 \title{Preprocess and extract interpretable features from resting and postural tremor assays.}
 \usage{
-get_tremor_features(accelerometer_data = NULL, gyroscope_data = NULL,
-  gravity_data = NULL, time_filter = NULL, detrend = F,
-  frequency_filter = NULL, IMF = 1, window_length = NULL,
-  window_overlap = NULL, derived_kinematics = F, funs = NULL,
-  models = NULL)
+get_tremor_features(
+  accelerometer_data = NULL,
+  gyroscope_data = NULL,
+  gravity_data = NULL,
+  time_filter = NULL,
+  detrend = F,
+  frequency_filter = NULL,
+  IMF = 1,
+  window_length = NULL,
+  window_overlap = NULL,
+  derived_kinematics = F,
+  funs = NULL,
+  models = NULL
+)
 }
 \arguments{
 \item{accelerometer_data}{An \code{n} x 4 data frame with columns \code{t}, \code{x},

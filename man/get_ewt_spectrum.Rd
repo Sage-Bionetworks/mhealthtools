@@ -4,8 +4,13 @@
 \alias{get_ewt_spectrum}
 \title{Get EWT spectrum}
 \usage{
-get_ewt_spectrum(spectrum, npeaks = 3, fraction_min_peak_height = 0.1,
-  min_peak_distance = 1, sampling_rate = 100)
+get_ewt_spectrum(
+  spectrum,
+  npeaks = 3,
+  fraction_min_peak_height = 0.1,
+  min_peak_distance = 1,
+  sampling_rate = 100
+)
 }
 \arguments{
 \item{spectrum}{FFT spectrum as a two dimensional data frame with columns

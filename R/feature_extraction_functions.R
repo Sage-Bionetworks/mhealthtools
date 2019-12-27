@@ -1,17 +1,17 @@
 #' Returns statistical summary of the time series
-#' 
+#'
 #' A convenience feature extraction function which characterises a given
 #' time series in to statistical features in the time domain.
-#' 
+#'
 #' @param values A numeric vector.
-#' @param sampling_rate Sampling_rate of \code{values}. If NA it uses default 
+#' @param sampling_rate Sampling_rate of \code{values}. If NA it uses default
 #' sampling rate of 100Hz.
 #' @return A features data frame of dimension 1 x 20. See the
-#' \href{https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md}{feature definitions}
-#' document.
+#' feature definition vignette:
+#' \code{vignette("feature_definitions", package="mhealthtools")}
 #' @author Thanneer Malai Perumal, Phil Snyder
 #' @export
-#' @examples 
+#' @examples
 #' time_features = time_domain_summary(
 #'   accelerometer_data$x,
 #'   sampling_rate = 100.122)
@@ -50,22 +50,22 @@ time_domain_summary <- function(values, sampling_rate=NA) {
 }
 
 #' Returns statistical summary of the frequency spectrum
-#' 
+#'
 #' A convenience feature extraction function that characterises the
 #' frequency spectrum of a given time series in to statistical features
 #' in the frequency domain.
-#' 
+#'
 #' @param values A numeric vector from a time series measurement.
-#' @param sampling_rate Sampling_rate of \code{values}. If NA it uses default 
+#' @param sampling_rate Sampling_rate of \code{values}. If NA it uses default
 #' sampling rate of 100Hz.
 #' @param npeaks Number of peaks to be computed in emprical wavelet transformation (EWT).
 #' If NA it uses the default value of 3.
 #' @return A features data frame of dimension 1 x 19. See the
-#' \href{https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md}{feature definitions}
-#' document.
+#' feature definition vignette:
+#' \code{vignette("feature_definitions", package="mhealthtools")}
 #' @author Thanneer Malai Perumal, Phil Snyder
 #' @export
-#' @examples 
+#' @examples
 #' frequency_features = frequency_domain_summary(
 #'   accelerometer_data$x,
 #'   sampling_rate = 100.122,
@@ -85,7 +85,7 @@ frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
   pdf_adjusted <- pdf - mean(pdf)
   cdf <- cumsum(pdf)
   w <- sd(pdf)
-  
+
   # Get STFT spectrum based features
   features <- dplyr::tibble(
     mn = sum(freq * pdf),
@@ -102,15 +102,15 @@ frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
     kurt = (sum((pdf_adjusted)^4) / (dim(spect)[1] - 1)) / w^4,
     sfm = seewave::sfm(pdf),
     sh = seewave::sh(pdf))
-  
+
   # Get EWT spectrum
   ewt_spectrum <- data.frame(freq = freq, pdf = pdf) %>%
     get_ewt_spectrum(sampling_rate = sampling_rate, npeaks = npeaks)
-  
+
   # Compute normalised point energies of each EW spctrum
   ew_energy <- colSums(ewt_spectrum^2, na.rm = T)
   ew_energy <- ew_energy / sum(ew_energy, na.rm = T)
-  
+
   # Compute entropy with EWT approximated energies
   features <- features %>%
     dplyr::mutate(
@@ -121,28 +121,28 @@ frequency_domain_summary <- function(values, sampling_rate = NA, npeaks = NA) {
         ew_energy, alpha = 2), # alpha is hardcoded to be 2
       ewt.tsallisEnt = (
         1 - sum(ew_energy ^ 0.1)) / (0.1 - 1)) # q is hardcoded to be 0.1
-  
+
   names(features) <- paste0(names(features), ".fr")
-  
+
   return(data.frame(features))
 }
 
 #' Returns energy for each 0.5Hz band in the frequency spectrum.
-#' 
+#'
 #' A convenience feature extraction function that converts a given
 #' time series in to frequency spectrum and computes energy in each
 #' 0.5Hz band from 0 to 25 Hz.
-#' 
+#'
 #' @param values A numeric vector.
-#' @param sampling_rate Sampling_rate of \code{values}. If NA it uses default 
+#' @param sampling_rate Sampling_rate of \code{values}. If NA it uses default
 #' sampling rate of 100Hz.
-#' @return A features data frame of dimension 1 x 48, each representing energy within 
+#' @return A features data frame of dimension 1 x 48, each representing energy within
 #' a 0.5Hz band. See the
-#' \href{https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md}{feature definitions}
-#' document.
+#' feature definition vignette:
+#' \code{vignette("feature_definitions", package="mhealthtools")}
 #' @author Thanneer Malai Perumal, Phil Snyder
 #' @export
-#' @examples 
+#' @examples
 #' frequency_energy_features = frequency_domain_energy(
 #'   accelerometer_data$x,
 #'   sampling_rate = 100.122)
@@ -154,15 +154,15 @@ frequency_domain_energy <- function(values, sampling_rate=NA) {
   spect <- get_spectrum(values, sampling_rate)
   freq <- spect$freq
   pdf <- spect$pdf / sum(spect$pdf, na.rm = T)
-  
+
   st <- seq(1, 24.5, 0.5)
   en <- seq(1.5, 25, 0.5)
-  
+
   features <- mapply(function(ind_str, ind_en){
     ind <- which(freq >= ind_str & freq <= ind_en)
     pracma::trapz(freq[ind], pdf[ind])
   }, st, en) %>% t %>% data.frame()
   colnames(features) <- paste0("EnergyInBand", gsub("\\.", "_", st))
-  
+
   return(features)
 }

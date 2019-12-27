@@ -34,7 +34,7 @@ Imports:
     statcomp
 Remotes: cran/statcomp
 URL: https://github.com/Sage-Bionetworks/mHealthTools
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.0
 Encoding: UTF-8
 Suggests:
     testthat,

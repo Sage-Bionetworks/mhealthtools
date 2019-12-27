@@ -4,10 +4,19 @@
 \alias{prepare_kinematic_sensor_args}
 \title{Return arguments to be used in general feature functions}
 \usage{
-prepare_kinematic_sensor_args(sensor_data, metric, time_filter = NULL,
-  detrend = F, frequency_filter = NULL, IMF = 1,
-  window_length = NULL, window_overlap = NULL,
-  derived_kinematics = F, funs = NULL, models = NULL)
+prepare_kinematic_sensor_args(
+  sensor_data,
+  metric,
+  time_filter = NULL,
+  detrend = F,
+  frequency_filter = NULL,
+  IMF = 1,
+  window_length = NULL,
+  window_overlap = NULL,
+  derived_kinematics = F,
+  funs = NULL,
+  models = NULL
+)
 }
 \arguments{
 \item{sensor_data}{An \code{n} x 4 data frame with column names \code{t}, \code{x},

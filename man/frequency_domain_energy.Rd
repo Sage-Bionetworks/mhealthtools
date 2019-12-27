@@ -9,14 +9,14 @@ frequency_domain_energy(values, sampling_rate = NA)
 \arguments{
 \item{values}{A numeric vector.}
 
-\item{sampling_rate}{Sampling_rate of \code{values}. If NA it uses default 
+\item{sampling_rate}{Sampling_rate of \code{values}. If NA it uses default
 sampling rate of 100Hz.}
 }
 \value{
-A features data frame of dimension 1 x 48, each representing energy within 
+A features data frame of dimension 1 x 48, each representing energy within
 a 0.5Hz band. See the
-\href{https://github.com/Sage-Bionetworks/mhealthtools/blob/master/FeatureDefinitions.md}{feature definitions}
-document.
+feature definition vignette:
+\code{vignette("feature_definitions", package="mhealthtools")}
 }
 \description{
 A convenience feature extraction function that converts a given

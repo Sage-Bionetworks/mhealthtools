@@ -4,8 +4,13 @@
 \alias{sensor_features}
 \title{Extract sensor features}
 \usage{
-sensor_features(sensor_data, transform = NULL, extract = NULL,
-  extract_on = NULL, models = NULL)
+sensor_features(
+  sensor_data,
+  transform = NULL,
+  extract = NULL,
+  extract_on = NULL,
+  models = NULL
+)
 }
 \arguments{
 \item{sensor_data}{A dataframe.}
