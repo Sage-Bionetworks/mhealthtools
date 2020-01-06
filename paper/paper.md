@@ -66,10 +66,6 @@ For more information, including how to use custom preprocessing functions as par
 
 # Features
 
-Default feature sets are provided for both time and frequency domains. For a full list of features and their definitions, see the _Feature Definitions_ vignette:
-
-```
-vignette("feature_definitions", package="mhealthtools")
-```
+Default feature sets are provided for both time and frequency domains. For a full list of features and their definitions, see the _Feature Definitions_ vignette.
 
 # References
