@@ -31,9 +31,9 @@
 #' and \code{z} are linear gravity measurements along the respective axis.
 "gravity_data"
 
-#' Device-Motion data from a performed balance assay
+#' Device-Motion data from a performed balance activity
 #'
-#' The balance assay entails participants standing still for 30 seconds
+#' The balance activity entails participants standing still for 30 seconds
 #' with the mobile device in their pocket or in a bag.
 #'
 #' @format A 3002 x 6 data frame with column names \code{attitude},
@@ -49,9 +49,9 @@
 #' columns are quaternion coefficients.
 "balance_data"
 
-#' Device-Motion data from a performed walk assay
+#' Device-Motion data from a performed walk activity
 #'
-#' The walk assay entails participants walking in a straight line for
+#' The walk activity entails participants walking in a straight line for
 #' approximately 20 steps with the mobile device in their pocket or in a bag.
 #'
 #' @format A 3002 x 6 data frame with column names \code{attitude},
@@ -67,9 +67,9 @@
 #' columns are quaternion coefficients.
 "walk_data"
 
-#' Device-Motion data from a performed resting tremor assay
+#' Device-Motion data from a performed resting tremor activity
 #'
-#' The resting tremor assay entails participants holding the mobile device
+#' The resting tremor activity entails participants holding the mobile device
 #' in their hand (either right or left) while resting that hand in their lap
 #' for approximately 10 seconds.
 #'
@@ -86,9 +86,9 @@
 #' columns are quaternion coefficients.
 "rest_tremor_data"
 
-#' Device-Motion data from a performed kinetic tremor assay
+#' Device-Motion data from a performed kinetic tremor activity
 #'
-#' The kinetic tremor assay (also known as the finger/hand to nose test)
+#' The kinetic tremor activity (also known as the finger/hand to nose test)
 #' entails participants holding the mobile device
 #' in their hand (either right or left) with both the mobile device and the
 #' participants elbow at nose level. The participant then moves the mobile device
@@ -130,7 +130,7 @@
 #' }
 "heartrate_data"
 
-#' Sample tapping data from the tapping assay on a smartphone
+#' Sample tapping data from the tapping activity on a smartphone
 #'
 #' A dataframe containing sample JSON output format of the tap data,
 #' containing t(time), x and y (the location of the tap on the screen),

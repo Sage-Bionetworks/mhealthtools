@@ -3,7 +3,7 @@
 \docType{data}
 \name{walk_data}
 \alias{walk_data}
-\title{Device-Motion data from a performed walk assay}
+\title{Device-Motion data from a performed walk activity}
 \format{A 3002 x 6 data frame with column names \code{attitude},
 \code{timestamp}, \code{rotationRate}, \code{userAcceleration},
 \code{gravity}, and \code{magneticField}. The column names correspond
@@ -19,7 +19,7 @@ columns are quaternion coefficients.}
 walk_data
 }
 \description{
-The walk assay entails participants walking in a straight line for
+The walk activity entails participants walking in a straight line for
 approximately 20 steps with the mobile device in their pocket or in a bag.
 }
 \keyword{datasets}

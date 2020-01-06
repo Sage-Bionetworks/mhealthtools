@@ -1,27 +1,27 @@
-#' Preprocess and extract interpretable features from balance assay.
-#' 
+#' Preprocess and extract interpretable features from balance activity.
+#'
 #' A convenience wrapper for extracting interpretable features from the
-#' balance assay measured using smartphone raw accelerometer and gyroscope
-#' sensors. The balance assay entails participants standing still for 30 seconds
+#' balance activity measured using smartphone raw accelerometer and gyroscope
+#' sensors. The balance activity entails participants standing still for 30 seconds
 #' with the mobile device in their pocket or in a bag.
-#' 
+#'
 #' @param accelerometer_data An \code{n} x 4 data frame with columns \code{t}, \code{x},
 #' \code{y}, \code{z} containing accelerometer measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
-#' \code{x}, \code{y} and \code{z} are linear acceleration measurements. 
+#' \code{x}, \code{y} and \code{z} are linear acceleration measurements.
 #' @param gyroscope_data An \code{n} x 4 data frame with columns \code{t}, \code{x},
 #' \code{y}, \code{z} containing gyroscope measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
-#' \code{x}, \code{y} and \code{z} are linear velocity measurements. 
+#' \code{x}, \code{y} and \code{z} are linear velocity measurements.
 #' @param gravity_data An \code{n} x 4 data frame with columns \code{t}, \code{x},
 #' \code{y}, \code{z} containing gravity measurements. Here \code{n} is the
 #' total number of measurements, \code{t} is the timestamp of each measurement, and
 #' \code{x}, \code{y} and \code{z} are linear gravity measurements.
-#' @param time_filter A length 2 numeric vector specifying the time range 
+#' @param time_filter A length 2 numeric vector specifying the time range
 #' of measurements to use during preprocessing and feature extraction after
-#' normalizing the first timestamp to 0. A \code{NULL} value means do not 
+#' normalizing the first timestamp to 0. A \code{NULL} value means do not
 #' filter any measurements.
-#' @param detrend A logical value indicating whether to detrend the signal. 
+#' @param detrend A logical value indicating whether to detrend the signal.
 #' By default the value is FALSE.
 #' @param frequency_filter A length 2 numeric vector specifying the frequency range
 #' of the signal (in hertz) to use during preprocessing and feature extraction.
@@ -29,8 +29,8 @@
 #' @param IMF The number of IMFs used during an empirical mode decomposition (EMD)
 #' transformation. The default value of 1 means do not apply EMD to the signal.
 #' @param window_length A numerical value representing the length (in number of samples)
-#' of the sliding window used during the windowing transformation. Both 
-#' \code{window_length} and \code{window_overlap} must be set for the windowing 
+#' of the sliding window used during the windowing transformation. Both
+#' \code{window_length} and \code{window_overlap} must be set for the windowing
 #' transformation to be applied.
 #' @param window_overlap Fraction in the interval [0, 1) specifying the amount of
 #' window overlap during a windowing transformation.
@@ -53,20 +53,20 @@
 #' \code{sensor_data} as input after the transform defined by the above
 #' parameters has been applied and returns features. Useful for functions
 #' which compute individual features using multiple input variables.
-#' 
+#'
 #' @return A list. The outputs from \code{funs} will
 #' be stored under \code{$extracted_features} and the outputs from \code{models}
-#' will be stored under \code{$model_features}. If there is an error 
+#' will be stored under \code{$model_features}. If there is an error
 #' during the transform process, an error dataframe will be stored under
-#' \code{$error}. If gravity_data is passed and window_length and 
+#' \code{$error}. If gravity_data is passed and window_length and
 #' window_overlap are set, phone rotation information will be stored
 #' under \code{$outlier_windows}.
 #' @seealso \code{\link{balance_data}}
 #' @export
 #' @author Thanneer Malai Perumal, Meghasyam Tummalacherla, Phil Snyder
-#' @examples 
+#' @examples
 #' balance_features <- get_balance_features(accelerometer_data, gyroscope_data)
-#' 
+#'
 #' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
@@ -76,24 +76,24 @@
 #'   window_length = 256,
 #'   window_overlap = 0.2,
 #'   derived_kinematics = TRUE)
-#' 
+#'
 #' balance_features <- get_balance_features(
 #'   accelerometer_data,
 #'   gyroscope_data,
 #'   funs = list(time_domain_summary))
-#'   
+#'
 #' @importFrom magrittr "%>%"
 get_balance_features <- function(
   accelerometer_data = NULL, gyroscope_data = NULL, gravity_data = NULL,
   time_filter = NULL, detrend = F, frequency_filter = NULL, IMF = 1,
   window_length = NULL, window_overlap = NULL, derived_kinematics = F,
   funs = NULL, models = NULL) {
-  
+
   features <- list(extracted_features = NULL,
                    model_features = NULL,
                    error = NULL,
                    outlier_windows = NULL)
-  
+
   # check input integrity
   if (!is.null(accelerometer_data) && any(is.na(accelerometer_data))) {
     features$error <- dplyr::tibble(error = "Malformed accelerometer data")
@@ -102,7 +102,7 @@ get_balance_features <- function(
     features$error <- dplyr::tibble(error = "Malformed gyroscope data")
     return(features)
   }
-  
+
   # Get accelerometer features
   if (!is.null(accelerometer_data)) {
     features_accel <- accelerometer_features(
@@ -119,7 +119,7 @@ get_balance_features <- function(
   } else {
     features_accel <- list()
   }
-  
+
   # Get gyroscope features
   if (!is.null(gyroscope_data)) {
     features_gyro <- gyroscope_features(
@@ -136,7 +136,7 @@ get_balance_features <- function(
   } else {
     features_gyro <- list()
   }
-  
+
   # Combine features into a single list
   if (!is.null(features_accel$extracted_features) ||
       !is.null(features_gyro$extracted_features)) {
@@ -157,7 +157,7 @@ get_balance_features <- function(
       accelerometer = features_accel$model_features,
       gyroscope = features_gyro$model_features)
   }
-  
+
   # tag outlier windows if there was a windowing transformation performed
   if (!is.null(features$extracted_features) && !is.null(gravity_data) &&
       !is.null(window_length) && !is.null(window_overlap)) {
@@ -166,6 +166,6 @@ get_balance_features <- function(
       window_length = window_length,
       window_overlap = window_overlap)
   }
-  
+
   return(features)
 }

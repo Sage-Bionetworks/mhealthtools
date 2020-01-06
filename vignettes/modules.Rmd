@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-`mhealthtools` was built to help people study the physiological symptoms that can be tracked through the sensors of the modern day smartphone. This can be the tremor in your hand using the accelerometer and gyroscope sensors while holding the phone in your hand; or Bradykinesia and Dyskinesia through the acceleremeter and gyroscope sensors while having the phone in the front pocket of your pants as you walk; or heartrate using the camera with your finger against it. Whatever the experiment design (assay), if it uses smartphone sensors, you can use `mhealthtools` to extract useful and sometimes physiologically meaningful features.
+`mhealthtools` was built to help people study the physiological symptoms that can be tracked through the sensors of the modern day smartphone. This can be the tremor in your hand using the accelerometer and gyroscope sensors while holding the phone in your hand; or Bradykinesia and Dyskinesia through the acceleremeter and gyroscope sensors while having the phone in the front pocket of your pants as you walk; or heartrate using the camera with your finger against it. Whatever the experiment design (activity), if it uses smartphone sensors, you can use `mhealthtools` to extract useful and sometimes physiologically meaningful features.
 
 Here we describe the use of `mhealthtools` for certain modules, that are taken from the [mPower study](https://parkinsonmpower.org/) run by Sage Bionetworks. For further reading please refer to the [article published in nature](https://www.nature.com/articles/sdata201611).
 
@@ -32,7 +32,7 @@ library(dplyr)
 
 ### Walk Module
 
-In this assay, the participant is asked to keep the phone in his/her pants' front pocket (if not in the waistband of the pants) and then walk in a straight line for some fixed amount of time (e.g. 30s). For someone with Parkinson's we expect to see symptoms of Dyskinesia and Bradykinesia. 
+In this activity, the participant is asked to keep the phone in his/her pants' front pocket (if not in the waistband of the pants) and then walk in a straight line for some fixed amount of time (e.g. 30s). For someone with Parkinson's we expect to see symptoms of Dyskinesia and Bradykinesia. 
 
 The features extracted from `get_walk_features` do capture to some extent the effects of those symptoms. In the default processing, the signal is broken down into two IMFs (Intrinsic Mode Functions) using the Hilbert Huang Transform before being analyzed.
 
@@ -118,7 +118,7 @@ Please read the function documentation `?get_walk_features` for more info.
 
 ##### Resting tremor
 
-In this assay, the participant is asked to hold the phone in his/her hand in their lap so that their resting tremor can be measured. For someone with Parkinson's we expect to see some effects of the characteristic pill rolling tremor spread across gyroscope and accelerometer measurements. 
+In this activity, the participant is asked to hold the phone in his/her hand in their lap so that their resting tremor can be measured. For someone with Parkinson's we expect to see some effects of the characteristic pill rolling tremor spread across gyroscope and accelerometer measurements. 
 
 The features extracted from `get_balance_features` do capture to some extent the effects of those symptoms. 
 
@@ -203,7 +203,7 @@ Please read the function documentation `?get_tremor_features` for more info.
 
 ##### Kinetic tremor (Action tremor)
 
-In this assay, the participant is asked to hold the phone in their hand, and extend their hands to shoulder length and then touch their nose with their finger, and keep this motion in a loop.
+In this activity, the participant is asked to hold the phone in their hand, and extend their hands to shoulder length and then touch their nose with their finger, and keep this motion in a loop.
 
 The features extracted from `get_kinetic_tremor_features` do capture to some extent the effects of those symptoms. In the default processing, the signal is broken down into IMFs (Intrinsic Mode Functions) using the Hilbert Huang Transform before they are analyzed.
 
@@ -289,7 +289,7 @@ Please read the function documentation `?get_kinetic_tremor_features` for more i
 
 ### Tapping Module (Touchscreen)
 
-In this assay, the participant is asked to tap the screen with their middle and pointing finger alternatingly as fast as they can for 30s (with one hand first, and if possible the other hand too). For people having Parkinson's they might not be able to tap as fast as a normal person, and also they might show higher fatigue (slower tap rate) at the end of the assay than a normal person.
+In this activity, the participant is asked to tap the screen with their middle and pointing finger alternatingly as fast as they can for 30s (with one hand first, and if possible the other hand too). For people having Parkinson's they might not be able to tap as fast as a normal person, and also they might show higher fatigue (slower tap rate) at the end of the activity than a normal person.
 
 Features extracted from `get_tapping_features` of `mhealthtools` try to address these symptoms.
 
@@ -327,7 +327,7 @@ Please read the function documentation `?get_tapping_features` for more info.
 
 ###  Heartrate Module (Camera)
 
-In this assay, the participant is asked to place their finger over their smartphone camera and from the average pixel intensity across frames, we estimate the heartrate of the participant. 
+In this activity, the participant is asked to place their finger over their smartphone camera and from the average pixel intensity across frames, we estimate the heartrate of the participant. 
 
 To use the fucntion `get_heartrate` of `mhealthtools` the data needs to be in a certain format, fortunately the package comes preloaded with sampledata `heartrate_data`, let's take a look at it
 

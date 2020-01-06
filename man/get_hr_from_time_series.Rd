@@ -19,8 +19,8 @@ get_hr_from_time_series(
 \item{sampling_rate}{The sampling rate (fs) of the time series data}
 
 \item{method}{The algorithm used to estimate the heartrate, because the
-preprocessing steps are different for each. method can be any of 
-'acf','psd' or 'peak' for algorithms based on autocorrelation, 
+preprocessing steps are different for each. method can be any of
+'acf','psd' or 'peak' for algorithms based on autocorrelation,
 power spectral density and peak picking respectively}
 
 \item{min_hr}{Minimum expected heart rate}

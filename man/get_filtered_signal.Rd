@@ -15,8 +15,8 @@ get_filtered_signal(x, sampling_rate, mean_filter_order = 65, method = "acf")
 for the mean filtering function}
 
 \item{method}{The algorithm used to estimate the heartrate, because the
-preprocessing steps are different for each. method can be any of 
-'acf','psd' or 'peak' for algorithms based on autocorrelation, 
+preprocessing steps are different for each. method can be any of
+'acf','psd' or 'peak' for algorithms based on autocorrelation,
 power spectral density and peak picking respectively}
 }
 \value{

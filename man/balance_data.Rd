@@ -3,7 +3,7 @@
 \docType{data}
 \name{balance_data}
 \alias{balance_data}
-\title{Device-Motion data from a performed balance assay}
+\title{Device-Motion data from a performed balance activity}
 \format{A 3002 x 6 data frame with column names \code{attitude},
 \code{timestamp}, \code{rotationRate}, \code{userAcceleration},
 \code{gravity}, and \code{magneticField}. The column names correspond
@@ -19,7 +19,7 @@ columns are quaternion coefficients.}
 balance_data
 }
 \description{
-The balance assay entails participants standing still for 30 seconds
+The balance activity entails participants standing still for 30 seconds
 with the mobile device in their pocket or in a bag.
 }
 \keyword{datasets}

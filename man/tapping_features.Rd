@@ -7,9 +7,9 @@
 tapping_features(tap_data, depress_threshold = 20)
 }
 \arguments{
-\item{tap_data}{A n x 4 data frame with column names as t, x, y, buttonid containing 
-tapping measurements. Here n is the total number of tapping measurements, t is the time 
-of measurement when the screen press was recorded, x and y are the coordinates of the screen 
+\item{tap_data}{A n x 4 data frame with column names as t, x, y, buttonid containing
+tapping measurements. Here n is the total number of tapping measurements, t is the time
+of measurement when the screen press was recorded, x and y are the coordinates of the screen
 touch in the smartphone, and buttonid can be one of the following values c('TappedButtonLeft',
 'TappedButtonRight','TappedButtonNone') indicating a tap that has been classified as to the left,
 right or neither of those places on the screen}
