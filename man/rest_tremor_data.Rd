@@ -3,7 +3,7 @@
 \docType{data}
 \name{rest_tremor_data}
 \alias{rest_tremor_data}
-\title{Device-Motion data from a performed resting tremor assay}
+\title{Device-Motion data from a performed resting tremor activity}
 \format{A 3002 x 6 data frame with column names \code{attitude},
 \code{timestamp}, \code{rotationRate}, \code{userAcceleration},
 \code{gravity}, and \code{magneticField}. The column names correspond
@@ -19,7 +19,7 @@ columns are quaternion coefficients.}
 rest_tremor_data
 }
 \description{
-The resting tremor assay entails participants holding the mobile device
+The resting tremor activity entails participants holding the mobile device
 in their hand (either right or left) while resting that hand in their lap
 for approximately 10 seconds.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_tremor_features.R
 \name{get_tremor_features}
 \alias{get_tremor_features}
-\title{Preprocess and extract interpretable features from resting and postural tremor assays.}
+\title{Preprocess and extract interpretable features from resting and postural tremor activities.}
 \usage{
 get_tremor_features(
   accelerometer_data = NULL,
@@ -91,15 +91,15 @@ under \code{$outlier_windows}.
 }
 \description{
 A convenience wrapper for extracting interpretable features from the resting
-and postural tremor assays measured using smartphone raw accelerometer
+and postural tremor activities measured using smartphone raw accelerometer
 and gyroscope sensors.
 }
 \details{
-The resting tremor assay entails participants holding the mobile device
+The resting tremor activity entails participants holding the mobile device
 in their hand (either right or left) while resting that hand in their lap
 for approximately 10 seconds.
 
-The postural tremor assay entails participants holding the mobile device
+The postural tremor activity entails participants holding the mobile device
 in their hand (either right or left) while keeping their arm extended --
 the arm parallel to the ground and perpindicular to the front of the body --
 for approximately 10 seconds.

@@ -3,7 +3,7 @@
 \docType{data}
 \name{tap_data}
 \alias{tap_data}
-\title{Sample tapping data from the tapping assay on a smartphone}
+\title{Sample tapping data from the tapping activity on a smartphone}
 \format{A data frame with 181 rows (observations) and 4 variables:
 \describe{
   \item{t}{time, in seconds}

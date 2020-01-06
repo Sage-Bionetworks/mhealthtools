@@ -3,7 +3,7 @@
 \docType{data}
 \name{kinetic_tremor_data}
 \alias{kinetic_tremor_data}
-\title{Device-Motion data from a performed kinetic tremor assay}
+\title{Device-Motion data from a performed kinetic tremor activity}
 \format{A 3002 x 6 data frame with column names \code{attitude},
 \code{timestamp}, \code{rotationRate}, \code{userAcceleration},
 \code{gravity}, and \code{magneticField}. The column names correspond
@@ -19,7 +19,7 @@ columns are quaternion coefficients.}
 kinetic_tremor_data
 }
 \description{
-The kinetic tremor assay (also known as the finger/hand to nose test)
+The kinetic tremor activity (also known as the finger/hand to nose test)
 entails participants holding the mobile device
 in their hand (either right or left) with both the mobile device and the
 participants elbow at nose level. The participant then moves the mobile device

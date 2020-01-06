@@ -17,15 +17,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-If you need functionality that isn't already included with mhealthtools, it will be necessary to incorporate your own code within the existing mhealthtools architecture. Fortunately, mhealthtools is written with modularity in mind, and using (or excluding) any part of the mhealthtools pipeline is easy -- at least once you understand the underlying structure of the package. Whether it's including a new statistical measure to be computed, a new assay, or even a completely new mobile sensor, it can be done without ever modifying the underlying codebase of mhealthtools.
+If you need functionality that isn't already included with mhealthtools, it will be necessary to incorporate your own code within the existing mhealthtools architecture. Fortunately, mhealthtools is written with modularity in mind, and using (or excluding) any part of the mhealthtools pipeline is easy -- at least once you understand the underlying structure of the package. Whether it's including a new statistical measure to be computed, a new activity, or even a completely new mobile sensor, it can be done without ever modifying the underlying codebase of mhealthtools.
 
 ## The mhealthtools architecture
 
-There are three distinct levels of abstraction within mhealthtools: **assay** modules, **sensor** modules, and **utility** functions. The functions that do all the "real" work -- taking a numerical input and producing a numerical output -- exist as utilities. These utility functions are called by sensor modules (e.g., accelerometer, gyroscope, ...). Sensor module functions are in turn called by assay modules. Thus, a heirarchy is established where higher level modules will call functions from lower level modules, but lower level modules will never call a function from a module that is more abstracted than itself.
+There are three distinct levels of abstraction within mhealthtools: **activity** modules, **sensor** modules, and **utility** functions. The functions that do all the "real" work -- taking a numerical input and producing a numerical output -- exist as utilities. These utility functions are called by sensor modules (e.g., accelerometer, gyroscope, ...). Sensor module functions are in turn called by activity modules. Thus, a heirarchy is established where higher level modules will call functions from lower level modules, but lower level modules will never call a function from a module that is more abstracted than itself.
 
-In brief summary: Assay > Sensor > Utility
+In brief summary: Activity > Sensor > Utility
 
-Examples of Assay modules:  
+Examples of Activity modules:  
 - `get_tremor_features`  
 - `get_tapping_features`  
   
@@ -40,7 +40,7 @@ Examples of Utility functions:
 
 ### Utility functions
 
-Although utilities exist at the bottom of the functional totem pole, they often serve very different purposes from one another. Functions like `map_groups` or `extract_features` are functional and abstract, and could exist in just about any codebase, whereas functions like `integral` simply call a base R function in a way that is more interpretable for this package's use cases. Some utility functions are hierarchical -- `mutate_integral` makes use of `integral`, but accepts as input and outputs a dataframe with a schema optimized for kinematic sensor measurements, like those from accelerometer or gyroscope sensors. In short, utility functions are just a grab bag of functions that aren't specific to any one assay or sensor module.
+Although utilities exist at the bottom of the functional totem pole, they often serve very different purposes from one another. Functions like `map_groups` or `extract_features` are functional and abstract, and could exist in just about any codebase, whereas functions like `integral` simply call a base R function in a way that is more interpretable for this package's use cases. Some utility functions are hierarchical -- `mutate_integral` makes use of `integral`, but accepts as input and outputs a dataframe with a schema optimized for kinematic sensor measurements, like those from accelerometer or gyroscope sensors. In short, utility functions are just a grab bag of functions that aren't specific to any one activity or sensor module.
 
 ### Sensor modules
 
@@ -90,9 +90,9 @@ accelerometer_features(
 
 The above example is not particularly realistic, but you can imagine a neural net model trained on kinematic sensor data to output a dense feature embedding for downstream analysis might be more useful.
 
-### Assay modules
+### Activity modules
 
-Assay modules are meant to group together all sensor modules that relate to a given assay. For example, the assay module `get_walk_features` takes accelerometer, gyroscope, and gravity data as input, but is otherwise parameterized similarly to the sensor modules `accelerometer_features` and `gyroscope_features`. Within the function body, we perform some input validation, a call to `accelerometer_features` and `gyroscope_features`, the combining of their results into a single list object, and -- if gravity sensor data was provided -- the tagging of potential outlier windows. Assay modules allow us to extract features from all relevant sensors with a single function call and argument set.
+Activity modules are meant to group together all sensor modules that relate to a given activity. For example, the activity module `get_walk_features` takes accelerometer, gyroscope, and gravity data as input, but is otherwise parameterized similarly to the sensor modules `accelerometer_features` and `gyroscope_features`. Within the function body, we perform some input validation, a call to `accelerometer_features` and `gyroscope_features`, the combining of their results into a single list object, and -- if gravity sensor data was provided -- the tagging of potential outlier windows. Activity modules allow us to extract features from all relevant sensors with a single function call and argument set.
 
 ## Advanced sensor functionality
 
@@ -253,7 +253,7 @@ error_df <- dplyr::tibble(error = "Detrend Error")
 knitr::kable(error_df)
 ```
 
-For example, if we are sequentially applying the functions in `transform` to `sensor_data` within `sensor_features` and something goes wrong while detrending the data, `detrend` will throw an exception, which gets passed to `mutate_detrend`, our dataframe-level function. `mutate_detrend` will catch the exception and return a dataframe with an error column containing the string "Detrend Error". If the next function applied is `transformation_window`, or `mutate_bandpass`, or any other transform function, that function should first check the input for errors (using the function `has_error`) and, upon finding one, immediately return its input. When the error dataframe is eventually returned to `sensor_features`, it will be stored in a list with the same names you would expect from a non-errored process and returned all the way to the original caller -- whether that be a sensor or assay module. This is especially important when batch processing large amounts of sensor data, where data processing errors are practically inevitable. Rather than crashing your workflow, mhealthtools will return something that can be handled upstream by the batch script.
+For example, if we are sequentially applying the functions in `transform` to `sensor_data` within `sensor_features` and something goes wrong while detrending the data, `detrend` will throw an exception, which gets passed to `mutate_detrend`, our dataframe-level function. `mutate_detrend` will catch the exception and return a dataframe with an error column containing the string "Detrend Error". If the next function applied is `transformation_window`, or `mutate_bandpass`, or any other transform function, that function should first check the input for errors (using the function `has_error`) and, upon finding one, immediately return its input. When the error dataframe is eventually returned to `sensor_features`, it will be stored in a list with the same names you would expect from a non-errored process and returned all the way to the original caller -- whether that be a sensor or activity module. This is especially important when batch processing large amounts of sensor data, where data processing errors are practically inevitable. Rather than crashing your workflow, mhealthtools will return something that can be handled upstream by the batch script.
 
 ## In summary
 
@@ -264,9 +264,9 @@ We use the following feature extraction paradigm:
 - Extract: features by computing statistics upon individual columns, usually grouped on an index.
 - Return: statistics/features for each group.
 
-If you want to change the statistics computed by _Extract_, pass functions to the `funs` parameter of a sensor or assay level module or the `extract` parameter of `sensor_features`. If you want to get rid of the default behavior of _Extract_ entirely, pass one or more functions to the `models` parameter of a sensor or assay level module.
+If you want to change the statistics computed by _Extract_, pass functions to the `funs` parameter of a sensor or activity level module or the `extract` parameter of `sensor_features`. If you want to get rid of the default behavior of _Extract_ entirely, pass one or more functions to the `models` parameter of a sensor or activity level module.
 
-If you want to change the behavior of _Transform_, either make use of the preexisting parameters and functions within the sensor and assay level modules, or pass a list of functions to the `transform` parameter of `sensor features`.
+If you want to change the behavior of _Transform_, either make use of the preexisting parameters and functions within the sensor and activity level modules, or pass a list of functions to the `transform` parameter of `sensor features`.
 
 If you pass a list of functions to the `transform` parameter of `sensor_features`, each function should generally follow a few rules to make it as flexible and reusable as possible:
 

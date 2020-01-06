@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_balance_features.R
 \name{get_balance_features}
 \alias{get_balance_features}
-\title{Preprocess and extract interpretable features from balance assay.}
+\title{Preprocess and extract interpretable features from balance activity.}
 \usage{
 get_balance_features(
   accelerometer_data = NULL,
@@ -35,12 +35,12 @@ total number of measurements, \code{t} is the timestamp of each measurement, and
 total number of measurements, \code{t} is the timestamp of each measurement, and
 \code{x}, \code{y} and \code{z} are linear gravity measurements.}
 
-\item{time_filter}{A length 2 numeric vector specifying the time range 
+\item{time_filter}{A length 2 numeric vector specifying the time range
 of measurements to use during preprocessing and feature extraction after
-normalizing the first timestamp to 0. A \code{NULL} value means do not 
+normalizing the first timestamp to 0. A \code{NULL} value means do not
 filter any measurements.}
 
-\item{detrend}{A logical value indicating whether to detrend the signal. 
+\item{detrend}{A logical value indicating whether to detrend the signal.
 By default the value is FALSE.}
 
 \item{frequency_filter}{A length 2 numeric vector specifying the frequency range
@@ -51,8 +51,8 @@ A \code{NULL} value means do not filter frequencies.}
 transformation. The default value of 1 means do not apply EMD to the signal.}
 
 \item{window_length}{A numerical value representing the length (in number of samples)
-of the sliding window used during the windowing transformation. Both 
-\code{window_length} and \code{window_overlap} must be set for the windowing 
+of the sliding window used during the windowing transformation. Both
+\code{window_length} and \code{window_overlap} must be set for the windowing
 transformation to be applied.}
 
 \item{window_overlap}{Fraction in the interval [0, 1) specifying the amount of
@@ -83,16 +83,16 @@ which compute individual features using multiple input variables.}
 \value{
 A list. The outputs from \code{funs} will
 be stored under \code{$extracted_features} and the outputs from \code{models}
-will be stored under \code{$model_features}. If there is an error 
+will be stored under \code{$model_features}. If there is an error
 during the transform process, an error dataframe will be stored under
-\code{$error}. If gravity_data is passed and window_length and 
+\code{$error}. If gravity_data is passed and window_length and
 window_overlap are set, phone rotation information will be stored
 under \code{$outlier_windows}.
 }
 \description{
 A convenience wrapper for extracting interpretable features from the
-balance assay measured using smartphone raw accelerometer and gyroscope
-sensors. The balance assay entails participants standing still for 30 seconds
+balance activity measured using smartphone raw accelerometer and gyroscope
+sensors. The balance activity entails participants standing still for 30 seconds
 with the mobile device in their pocket or in a bag.
 }
 \examples{
@@ -112,7 +112,7 @@ balance_features <- get_balance_features(
   accelerometer_data,
   gyroscope_data,
   funs = list(time_domain_summary))
-  
+
 }
 \seealso{
 \code{\link{balance_data}}

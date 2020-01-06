@@ -22,7 +22,7 @@ window overlap.}
 
 \item{method}{The algorithm used to calculate the heartrate, current methods
 include ('acf','psd') which stand for autocorrelation function, and power
-spectral density respectively. We will be adding support for peak picking 
+spectral density respectively. We will be adding support for peak picking
 algorithms, and wavelet methods later.}
 }
 \value{
@@ -35,13 +35,13 @@ band from average pixel value per frame of video (processed hr) captured
 using smartphone cameras.
 }
 \details{
-The heartrate assay entails participants placing their finger over the 
+The heartrate activity entails participants placing their finger over the
 camera for a period of time with the flash on.
 }
 \examples{
 heartrate_data = heartrate_data[,c('t', 'red', 'green', 'blue')]
 heartrate_ftrs = get_heartrate(heartrate_data)
- 
+
 }
 \seealso{
 \code{\link{heartrate_data}}
