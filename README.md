@@ -1,4 +1,4 @@
-[![Travis-CI Build Status](https://travis-ci.org/Sage-Bionetworks/mhealthtools.svg?branch=master)](https://travis-ci.org/Sage-Bionetworks/mhealthtools)
+[![Travis-CI Build Status](https://travis-ci.org/Sage-Bionetworks/mhealthtools.svg?branch=master)](https://travis-ci.org/Sage-Bionetworks/mhealthtools) [![codecov](https://codecov.io/gh/philerooski/mHealthTools/branch/codecov-test/graph/badge.svg)](https://codecov.io/gh/philerooski/mHealthTools)
 
 ## mhealthtools
 An R package for extracting features from mobile and wearable sensor data.
