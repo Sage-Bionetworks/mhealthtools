@@ -8,13 +8,17 @@ before_install:
 addons:
   apt:
     update: true
-    packages: 
+    packages:
       - libfftw3-3
       - libfftw3-dev
       - libsndfile1
       - libsndfile1-dev
+r_packages:
+  - covr
 cache:
   packages: true
 env:
   global:
   - R_REMOTES_NO_ERRORS_FROM_WARNINGS=true
+after_success:
+  - Rscript -e 'library(covr); codecov()'
