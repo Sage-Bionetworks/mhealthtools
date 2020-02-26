@@ -89,8 +89,20 @@ At the moment, only accelerometer and gyroscope sensors have this powerful proce
 
 For more information on how to augment mhealthtools with your own functionality — including not just your own feature extraction functions, but also your own preprocessing/data-cleaning steps — we highly recommend reading the vignettes.
 
-### Contributing
-To contribute, [fork](http://help.github.com/fork-a-repo/) the [main repo](https://github.com/Sage-Bionetworks/mHealthTools), branch off a [feature branch](https://www.google.com/search?q=git+feature+branches) from `develop`, [commit](http://git-scm.com/docs/git-commit) and [push](http://git-scm.com/docs/git-push) your changes to your fork and submit a [pull request](http://help.github.com/send-pull-requests/) for `Sage-Bionetworks/mhealthtools:develop`.
+### Getting Help
+
+If you have questions about using this package, there are a number of readily available resources. Vignettes are provided which demonstrate typical package use, how to extend the functionality of the provided functions, and feature definitions. Follow the installation instructions about installing the package with vignettes above and access the vignettes from within an R session:
+
+```
+browseVignettes("mhealthtools")
+```
+
+If you have questions about package usage that are not covered in the function docstrings or the vignettes, we encourage you to file an issue. If your question is not appropriate to be posted as a public issue, you may privately contact the package authors (`[aut]`) listed below.
+
+### Contributing and Reporting Issues
+To report an issue, please file a GitHub issue with the [main repo](https://github.com/Sage-Bionetworks/mHealthTools).
+
+If you would like to contribute to mhealthtools, please file an issue so that we can establish a statement of need, avoid redundant work, and track progress on your contribution. Once an issue has been filed and we've identified how to best orient your contribution with package development as a whole, [fork](http://help.github.com/fork-a-repo/) the [main repo](https://github.com/Sage-Bionetworks/mHealthTools), branch off a [feature branch](https://www.google.com/search?q=git+feature+branches) from `develop`, [commit](http://git-scm.com/docs/git-commit) and [push](http://git-scm.com/docs/git-push) your changes to your fork and submit a [pull request](http://help.github.com/send-pull-requests/) for `Sage-Bionetworks/mhealthtools:develop`.
 
 ### Authors
 * Phil Snyder <phil.snyder@sagebase.org> [aut, cre]
