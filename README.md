@@ -8,7 +8,7 @@ mhealthtools processes raw data from various mobile and wearable sensors — suc
 
 ### Installing
 
-Install the `mhealthtools` package using `devtools`:
+Install the `mhealthtools` package using [`devtools`](https://cran.r-project.org/web/packages/devtools/index.html):
 
 ```
 devtools::install_github("Sage-Bionetworks/mhealthtools")
@@ -16,13 +16,13 @@ devtools::install_github("Sage-Bionetworks/mhealthtools")
 
 Install the package with the vignettes:
 ```
-devtools::install_github("Sage-Bionetworks/mhealthtools", build_vignettes = TRUE)
+devtools::install_github("Sage-Bionetworks/mhealthtools", build_vignettes = TRUE, dependencies = TRUE)
 ```
 
 Alternatively, you can use [this Docker image](https://cloud.docker.com/repository/docker/philsnyder/mhealthtools) — based on `rocker/tidyverse:latest` — which comes with `mhealthtools` preinstalled.
 
 ### Known Installation Issues
-A common issue on Linux systems when installing the `seewave` dependency is to be missing the system dependencies `libfftw3` and ` libsndfile1`. In a shell, run:
+A common issue on Debian-based systems when installing the `seewave` dependency is to be missing the system dependencies `libfftw3` and ` libsndfile1`. In a shell, run:
 
 ```
 $ apt install libfftw3-3 libfftw3-dev libsndfile1 libsndfile1-dev
@@ -35,6 +35,8 @@ If you are still having issues installing `seewave`, it may be necessary to also
 ```
 $ apt install r-cran-rgl
 ```
+
+If not using a Debian-based system, please [check for equivalent dependencies in your distro's package repository](https://pkgs.org/).
 
 See the `seewave` [installation page](http://rug.mnhn.fr/seewave/inst.html) for more info.
 
