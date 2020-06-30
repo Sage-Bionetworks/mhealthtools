@@ -356,8 +356,7 @@ kinematic_sensor_argument_validator <- function(
                                     length(time_filter) == 2,
                                     time_filter[1] >= 0,
                                     time_filter[2] > 0,
-                                    time_filter[2] > time_filter[1],
-                                    all(time_filter <= 50))) {
+                                    time_filter[2] > time_filter[1])) {
     stop(paste("If time_filter is set to a non-NULL value, it must be numeric,",
                "have length two, the first value must be greater or equal to 0,",
                "and the second value must be strictly greater than the first,"))
@@ -665,3 +664,4 @@ transformation_imf_window <- function(window_length, window_overlap, max_imf) {
     window_overlap = window_overlap,
     max_imf = max_imf)
 }
+
