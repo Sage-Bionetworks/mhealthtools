@@ -33,7 +33,7 @@ Imports:
     statcomp
 Remotes: cran/statcomp,
   cran/fractal
-URL: https://github.com/Sage-Bionetworks/mHealthTools
+URL: https://github.com/Sage-Bionetworks/mhealthtools
 RoxygenNote: 7.1.0
 Encoding: UTF-8
 Suggests:
@@ -42,3 +42,4 @@ Suggests:
     rmarkdown,
     ggplot2
 VignetteBuilder: knitr
+BugReports: https://github.com/Sage-Bionetworks/mhealthtools/issues
