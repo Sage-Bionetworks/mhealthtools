@@ -29,12 +29,10 @@ Imports:
     pracma,
     rlang,
     magrittr,
-    keras,
-    fractal,
     statcomp
-Remotes: cran/statcomp
-URL: https://github.com/Sage-Bionetworks/mHealthTools
-RoxygenNote: 7.0.2
+Remotes: cran/statcomp,
+URL: https://github.com/Sage-Bionetworks/mhealthtools
+RoxygenNote: 7.1.0
 Encoding: UTF-8
 Suggests:
     testthat,
@@ -42,3 +40,4 @@ Suggests:
     rmarkdown,
     ggplot2
 VignetteBuilder: knitr
+BugReports: https://github.com/Sage-Bionetworks/mhealthtools/issues
