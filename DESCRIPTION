@@ -29,13 +29,8 @@ Imports:
     pracma,
     rlang,
     magrittr,
-    fractal,
     statcomp
 Remotes: cran/statcomp,
-  cran/fractal,
-  cran/wmtsa,
-  cran/sapa,
-  cran/ifultools
 URL: https://github.com/Sage-Bionetworks/mhealthtools
 RoxygenNote: 7.1.0
 Encoding: UTF-8
