@@ -4,10 +4,12 @@
 \name{gyroscope_data}
 \alias{gyroscope_data}
 \title{Gyroscope sensor measurements}
-\format{An 990 x 4 data frame with column names \code{t}, \code{x},
+\format{
+An 990 x 4 data frame with column names \code{t}, \code{x},
 \code{y}, \code{z} containing accelerometer measurements. \code{t} is
 the timestamp of each measurement, and \code{x}, \code{y} and \code{z}
-are linear velocity measurements along the respective axis.}
+are linear velocity measurements along the respective axis.
+}
 \usage{
 gyroscope_data
 }

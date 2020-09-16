@@ -4,7 +4,8 @@
 \name{tap_data}
 \alias{tap_data}
 \title{Sample tapping data from the tapping activity on a smartphone}
-\format{A data frame with 181 rows (observations) and 4 variables:
+\format{
+A data frame with 181 rows (observations) and 4 variables:
 \describe{
   \item{t}{time, in seconds}
   \item{x}{the x location of the tap on the phone screen}
@@ -12,7 +13,8 @@
   \item{buttonid}{a string from 'TappedButonLeft', 'TappedButtonRight' or
   'TappedButtonNone' indicating that at that time the left, right or No
   button was tapped respectively}
-}}
+}
+}
 \usage{
 tap_data
 }
