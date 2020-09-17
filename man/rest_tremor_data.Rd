@@ -4,7 +4,8 @@
 \name{rest_tremor_data}
 \alias{rest_tremor_data}
 \title{Device-Motion data from a performed resting tremor activity}
-\format{A 3002 x 6 data frame with column names \code{attitude},
+\format{
+A 3002 x 6 data frame with column names \code{attitude},
 \code{timestamp}, \code{rotationRate}, \code{userAcceleration},
 \code{gravity}, and \code{magneticField}. The column names correspond
 to the measurements returned by a
@@ -14,7 +15,8 @@ object as described in Apple's developer documentation. \code{rotationRate},
 \code{x}, \code{y}, \code{z} containing axial measurements for their respective sensor.
 \code{magneticField} has an additional column \code{accuracy} specifying
 the calibration accuracy of the magnetic field estimate. \code{attitude}
-columns are quaternion coefficients.}
+columns are quaternion coefficients.
+}
 \usage{
 rest_tremor_data
 }
